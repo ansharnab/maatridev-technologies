@@ -1,0 +1,147 @@
+/* Wix / Elementor-style light theme for Puck editor */
+.puck-editor-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: #f0f2f5;
+}
+
+.puck-editor-loading {
+  padding: 3rem;
+  text-align: center;
+  color: #5a6b7d;
+}
+
+.puck-editor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+.puck-editor-topbar strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #0a1628;
+}
+
+.puck-editor-topbar span {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.puck-editor-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.puck-editor-topbar__actions label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.puck-editor-topbar__actions select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.88rem;
+}
+
+.puck-saved {
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.puck-editor-canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.puck-editor-canvas-wrap > div {
+  height: 100% !important;
+}
+
+/* Puck core overrides — light professional UI */
+.puck-editor-shell [class*="Puck"] {
+  --puck-color-white: #ffffff;
+  --puck-color-black: #0a1628;
+  --puck-color-grey-01: #f8fafc;
+  --puck-color-grey-02: #f1f5f9;
+  --puck-color-grey-03: #e2e8f0;
+  --puck-color-grey-04: #94a3b8;
+  --puck-color-grey-05: #64748b;
+  --puck-color-grey-12: #0f172a;
+  --puck-color-azure-04: #007cc3;
+  --puck-color-azure-12: #003d5c;
+  --puck-color-rose-12: #dc2626;
+}
+
+.puck-editor-shell [class*="Puck-header"] {
+  background: #fff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.puck-editor-shell [class*="Puck-leftSideBar"],
+.puck-editor-shell [class*="Puck-rightSideBar"] {
+  background: #fff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.puck-editor-shell [class*="Puck-leftSideBar"] {
+  min-width: 280px !important;
+  max-width: 320px !important;
+}
+
+.puck-editor-shell [class*="Puck-rightSideBar"] {
+  min-width: 300px !important;
+}
+
+.puck-editor-shell [class*="ComponentList"] {
+  padding: 0.5rem !important;
+}
+
+.puck-editor-shell [class*="ComponentList-item"] {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  margin-bottom: 0.35rem !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+
+.puck-editor-shell [class*="ComponentList-item"]:hover {
+  border-color: #007cc3 !important;
+  box-shadow: 0 2px 8px rgba(0, 124, 195, 0.15) !important;
+}
+
+.puck-editor-shell [class*="Puck-canvas"] {
+  background: #e8ecf1 !important;
+  padding: 1.5rem !important;
+}
+
+.puck-editor-shell [class*="Puck-frame"] {
+  border-radius: 8px !important;
+  box-shadow: 0 8px 40px rgba(0, 40, 80, 0.12) !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+
+.puck-rendered-page {
+  min-height: 40vh;
+}
+
+.puck-rendered-page img {
+  max-width: 100%;
+}

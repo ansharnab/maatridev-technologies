@@ -1,0 +1,150 @@
+.detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.detail-list li {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-list i {
+  color: var(--accent);
+  margin-top: 0.2rem;
+}
+
+.team-card img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+
+.blog-card img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+}
+
+.blog-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.shop-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.shop-card__price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--infosys-blue);
+  font-size: 1.1rem;
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.cart-table th,
+.cart-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.faq-item summary {
+  padding: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-item p {
+  padding: 0 1.25rem 1.25rem;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.pricing-card {
+  text-align: center;
+}
+
+.pricing-card.featured {
+  border-color: var(--infosys-blue);
+  box-shadow: 0 0 0 2px var(--infosys-blue);
+  transform: scale(1.03);
+}
+
+.pricing-card__price {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--infosys-blue);
+  margin: 1rem 0;
+}
+
+.pricing-card ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.pricing-card li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.pricing-card li::before {
+  content: "✓ ";
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.error-page {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.blog-card--list {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.blog-card--list img {
+  height: 100%;
+  min-height: 180px;
+}
+
+@media (max-width: 768px) {
+  .blog-card--list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.error-page h1 {
+  font-size: 6rem;
+  font-family: var(--font-display);
+  color: var(--infosys-blue);
+  margin: 0;
+}

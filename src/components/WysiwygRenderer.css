@@ -1,0 +1,12 @@
+.wysiwyg-page {
+  min-height: 40vh;
+}
+
+.wysiwyg-page img {
+  max-width: 100%;
+  height: auto;
+}
+
+.wysiwyg-page a {
+  color: var(--infosys-blue, #007cc3);
+}
