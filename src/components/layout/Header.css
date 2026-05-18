@@ -102,6 +102,17 @@
   align-items: center;
   gap: 0.75rem;
   z-index: 2;
+  flex-shrink: 0;
+  max-width: min(320px, 48vw);
+}
+
+.site-header__brand--full-logo {
+  gap: 0;
+  max-width: none;
+}
+
+.site-header__brand-text {
+  min-width: 0;
 }
 
 .site-header__brand strong {
@@ -175,11 +186,35 @@
   background: rgba(0, 124, 195, 0.1);
 }
 
-.site-header__logo-img {
+.site-header__logo-img,
+.animated-logo--video:not(.animated-logo--full-brand) .animated-logo__video {
   height: 42px;
   width: auto;
   max-width: 120px;
   object-fit: contain;
+}
+
+.animated-logo--video.animated-logo--md:not(.animated-logo--full-brand) {
+  width: auto;
+  height: 42px;
+}
+
+.site-header__brand--full-logo {
+  --logo-full-height: 64px;
+}
+
+.site-header--scrolled .site-header__brand--full-logo {
+  --logo-full-height: 52px;
+}
+
+.site-header__brand--full-logo .animated-logo--full-brand .animated-logo__img,
+.site-header__brand--full-logo .animated-logo--full-brand .animated-logo__video {
+  filter: none;
+}
+
+.site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__img,
+.site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__video {
+  transform: scale(calc(var(--logo-scale, 1) * 1.03));
 }
 
 .site-header__logo {
@@ -197,7 +232,8 @@
   transition: transform 0.3s ease;
 }
 
-.site-header__brand:hover .site-header__logo {
+.site-header__brand:not(.site-header__brand--full-logo):hover .site-header__logo,
+.site-header__brand:not(.site-header__brand--full-logo):hover .animated-logo__svg {
   transform: scale(1.06) rotate(-3deg);
 }
 
@@ -452,9 +488,26 @@
   }
 }
 
+@media (max-width: 768px) {
+  .site-header__brand--full-logo {
+    --logo-full-height: 40px;
+    max-width: min(220px, 58vw);
+  }
+
+  .site-header__brand--full-logo .animated-logo--full-brand .animated-logo__img,
+  .site-header__brand--full-logo .animated-logo--full-brand .animated-logo__video {
+    max-width: min(220px, 58vw);
+  }
+}
+
 @media (max-width: 480px) {
-  .site-header__brand small {
+  .site-header__brand-text small {
     display: none;
+  }
+
+  .site-header__brand--full-logo {
+    --logo-full-height: 36px;
+    max-width: min(190px, 62vw);
   }
 
   .site-header__cta {

@@ -100,6 +100,24 @@
   font: inherit;
 }
 
+.scp-field input[type="range"] {
+  width: 100%;
+  margin: 0.35rem 0;
+}
+
+.scp-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.scp-row-2 input[type="color"] {
+  width: 100%;
+  height: 40px;
+  padding: 2px;
+  cursor: pointer;
+}
+
 .scp-card {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -150,9 +168,53 @@
 
 .scp-brand-preview {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0;
+}
+
+.scp-brand-preview__label {
+  margin: 0;
+  padding: 0.5rem 1rem 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.scp-brand-preview__header {
+  display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem;
+  min-height: 76px;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #0a1628 0%, #0f2844 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scp-brand-preview__header .animated-logo--full-brand {
+  --logo-full-height: 56px;
+}
+
+.scp-brand-preview__meta {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.scp-brand-preview__meta p {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.scp-alert {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
 }
 
 .scp-brand-preview__img {
@@ -226,11 +288,34 @@
   margin-bottom: 0.5rem;
 }
 
-.image-field__preview img {
+.image-field__preview--logo {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #0a1628, #0f2844);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-field__preview--logo img,
+.image-field__preview--logo video {
+  height: 52px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  transform: scale(1.6);
+  transform-origin: left center;
+}
+
+.image-field__preview img,
+.image-field__preview video {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: 8px;
+}
+
+.image-field__actions .ve-btn--primary {
+  font-weight: 600;
 }
 
 .image-field__actions {
@@ -269,7 +354,8 @@
   border-color: #007cc3;
 }
 
-.image-field__thumb img {
+.image-field__thumb img,
+.image-field__thumb video {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;

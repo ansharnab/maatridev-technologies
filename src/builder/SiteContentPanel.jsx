@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent } from "../utils/mergeSiteData";
+import AnimatedLogo from "../components/AnimatedLogo";
 import ImageField from "./ImageField";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
 import "./site-content-panel.css";
@@ -26,56 +27,78 @@ function Field({ label, children }) {
   );
 }
 
-export default function SiteContentPanel({ initialTab = "brand" }) {
+function normalizeContent(data) {
+  const defaults = getDefaultSiteContent();
+  return {
+    pages: data?.pages || {},
+    settings: { ...defaults.settings, ...(data?.settings || {}) },
+    site: {
+      founders: data?.site?.founders?.length ? data.site.founders : defaults.site.founders,
+      services: defaultServices.map((s) => {
+        const saved = data?.site?.services?.find((x) => x.id === s.id);
+        return {
+          id: s.id,
+          title: saved?.title ?? s.title,
+          summary: saved?.summary ?? s.summary,
+          icon: saved?.icon ?? s.icon,
+          image: saved?.image ?? "",
+          hidden: saved?.hidden === true,
+        };
+      }),
+    },
+  };
+}
+
+export default function SiteContentPanel({
+  initialTab = "brand",
+  content: controlledContent,
+  setContent: setControlledContent,
+  onSaved,
+}) {
   const [tab, setTab] = useState(initialTab);
+  const [localContent, setLocalContent] = useState({ pages: {}, settings: {}, site: {} });
+  const [status, setStatus] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const isControlled = Boolean(setControlledContent);
+  const content = isControlled ? controlledContent : localContent;
+  const setContent = isControlled ? setControlledContent : setLocalContent;
 
   useEffect(() => {
     setTab(initialTab);
   }, [initialTab]);
-  const [content, setContent] = useState({ pages: {}, settings: {}, site: {} });
-  const [status, setStatus] = useState("");
-  const [saving, setSaving] = useState(false);
 
   const load = () => {
     axios.get("/api/content").then((r) => {
-      const data = r.data || {};
-      const defaults = getDefaultSiteContent();
-      setContent({
-        pages: data.pages || {},
-        settings: { ...defaults.settings, ...(data.settings || {}) },
-        site: {
-          founders: data.site?.founders?.length
-            ? data.site.founders
-            : defaults.site.founders,
-          services: defaultServices.map((s) => {
-            const saved = data.site?.services?.find((x) => x.id === s.id);
-            return {
-              id: s.id,
-              title: saved?.title ?? s.title,
-              summary: saved?.summary ?? s.summary,
-              icon: saved?.icon ?? s.icon,
-              image: saved?.image ?? "",
-              hidden: saved?.hidden === true,
-            };
-          }),
-        },
-      });
+      const normalized = normalizeContent(r.data);
+      if (isControlled && onSaved) onSaved(normalized);
+      else setLocalContent(normalized);
     });
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    if (!isControlled) load();
+  }, [isControlled]);
 
   const save = async () => {
     setSaving(true);
     setStatus("");
     const next = { ...content };
     try {
-      await axios.put("/api/content", next, { headers: authHeaders() });
-      setStatus("Saved — refresh the live site to see updates.");
+      const res = await axios.put("/api/content", next, { headers: authHeaders() });
+      const saved = res.data?.content ? normalizeContent(res.data.content) : next;
+      setContent(saved);
+      onSaved?.(saved);
+      const logo = saved.settings?.logoImage;
+      if (logo && /\.(mp4|webm)/i.test(logo)) {
+        setStatus(`Saved. Logo video: ${logo} — open that URL in a new tab to confirm it plays, then hard-refresh the homepage.`);
+      } else if (logo) {
+        setStatus(`Saved. Logo: ${logo} — hard-refresh the live site (Ctrl+F5).`);
+      } else {
+        setStatus("Saved — refresh the live site to see updates.");
+      }
     } catch {
-      setStatus("Save failed. Run npm run dev so the API is on port 3001.");
+      setStatus("Save failed. On localhost run START-LOCAL.bat. On live server ensure the API (port 3001) is running.");
     } finally {
       setSaving(false);
     }
@@ -145,12 +168,69 @@ export default function SiteContentPanel({ initialTab = "brand" }) {
                   onChange={(e) => setSettings({ logoLetter: e.target.value })}
                 />
               </Field>
+              <Field label="Logo animation">
+                <select
+                  value={settings.logoAnimation || "gradient"}
+                  onChange={(e) => setSettings({ logoAnimation: e.target.value })}
+                >
+                  <option value="gradient">Gradient shift</option>
+                  <option value="pulse">Pulse</option>
+                  <option value="glow">Glow</option>
+                  <option value="orbit">Orbit ring</option>
+                  <option value="none">Static (no motion)</option>
+                </select>
+              </Field>
+              <div className="scp-row-2">
+                <Field label="Primary color">
+                  <input
+                    type="color"
+                    value={settings.logoColorPrimary || "#007cc3"}
+                    onChange={(e) => setSettings({ logoColorPrimary: e.target.value })}
+                  />
+                </Field>
+                <Field label="Accent color">
+                  <input
+                    type="color"
+                    value={settings.logoColorAccent || "#00b8a9"}
+                    onChange={(e) => setSettings({ logoColorAccent: e.target.value })}
+                  />
+                </Field>
+              </div>
               <ImageField
-                label="Logo image (optional)"
-                hint="Upload your logo PNG/SVG. Replaces the letter icon in the header."
+                allowVideo
+                label="Logo image or video (optional)"
+                hint="Use your full SVG/PNG lockup (icon + MaatriDev Technologies). If the file has extra padding, raise Logo zoom below."
                 value={settings.logoImage || ""}
                 onChange={(url) => setSettings({ logoImage: url })}
               />
+              {settings.logoImage && (
+                <>
+                  <Field label={`Logo zoom (${settings.logoScale ?? 1}×)`}>
+                    <input
+                      type="range"
+                      min={1}
+                      max={3}
+                      step={0.1}
+                      value={Number(settings.logoScale) || 1}
+                      onChange={(e) => setSettings({ logoScale: Number(e.target.value) })}
+                    />
+                  </Field>
+                  <Field label={`Logo width crop (${settings.logoClipWidth ?? 220}px)`}>
+                    <input
+                      type="range"
+                      min={140}
+                      max={320}
+                      step={5}
+                      value={Number(settings.logoClipWidth) || 220}
+                      onChange={(e) => setSettings({ logoClipWidth: Number(e.target.value) })}
+                    />
+                  </Field>
+                  <p className="scp-alert">
+                    Seeing cut-off text or “TECHNOLOGIES” floating on the right? That is inside your SVG file — narrow the
+                    crop width or re-export a tight transparent PNG/SVG.
+                  </p>
+                </>
+              )}
               <Field label="Tagline">
                 <input value={settings.tagline || ""} onChange={(e) => setSettings({ tagline: e.target.value })} />
               </Field>
@@ -259,14 +339,28 @@ export default function SiteContentPanel({ initialTab = "brand" }) {
             )}
             {tab === "brand" && (
               <div className="scp-brand-preview">
-                {settings.logoImage ? (
-                  <img src={settings.logoImage} alt="" className="scp-brand-preview__img" />
-                ) : (
-                  <span className="site-header__logo">{settings.logoLetter || "M"}</span>
-                )}
-                <div>
-                  <strong>{settings.logoText}</strong>
-                  <small>TECHNOLOGIES</small>
+                <p className="scp-brand-preview__label">Header preview</p>
+                <div className="scp-brand-preview__header">
+                  <AnimatedLogo
+                  letter={settings.logoLetter}
+                  animation={settings.logoAnimation}
+                  colorPrimary={settings.logoColorPrimary}
+                  colorAccent={settings.logoColorAccent}
+                  imageUrl={settings.logoImage}
+                  alt={settings.logoText}
+                  fullBrand={Boolean(settings.logoImage)}
+                  scale={settings.logoScale}
+                  clipWidth={settings.logoClipWidth}
+                  size="lg"
+                />
+                </div>
+                <div className="scp-brand-preview__meta">
+                  {!settings.logoImage && (
+                    <>
+                      <strong>{settings.logoText}</strong>
+                      <small>TECHNOLOGIES</small>
+                    </>
+                  )}
                   <p>{settings.tagline}</p>
                 </div>
               </div>

@@ -43,9 +43,17 @@ export default function AdminDashboard({ onLogout }) {
     <div className="admin-app">
       <aside className="admin-sidebar">
         <div className="admin-sidebar__brand">
-          <span>M</span>
+          {content?.settings?.logoImage ? (
+            <img
+              src={content.settings.logoImage}
+              alt={content.settings.logoText || "MaatriDev"}
+              className="admin-sidebar__logo-img"
+            />
+          ) : (
+            <span>M</span>
+          )}
           <div>
-            <strong>MaatriDev</strong>
+            <strong>{content.settings?.logoText || "MaatriDev"}</strong>
             <small>Website Builder</small>
           </div>
         </div>

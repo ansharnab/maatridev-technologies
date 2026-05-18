@@ -104,9 +104,26 @@ app.get("/api/content", (_, res) => {
   res.json(readJson(CONTENT_FILE, { pages: {}, settings: {} }));
 });
 
+function mergeContent(existing, incoming) {
+  const base = existing && typeof existing === "object" ? existing : { pages: {}, settings: {}, site: {} };
+  const body = incoming && typeof incoming === "object" ? incoming : {};
+  return {
+    pages: body.pages ? { ...base.pages, ...body.pages } : base.pages,
+    settings: body.settings ? { ...base.settings, ...body.settings } : base.settings,
+    site: body.site
+      ? {
+          founders: body.site.founders ?? base.site?.founders,
+          services: body.site.services ?? base.site?.services,
+        }
+      : base.site,
+  };
+}
+
 app.put("/api/content", requireAuth, (req, res) => {
-  writeJson(CONTENT_FILE, req.body);
-  res.json({ ok: true });
+  const existing = readJson(CONTENT_FILE, { pages: {}, settings: {}, site: {} });
+  const merged = mergeContent(existing, req.body);
+  writeJson(CONTENT_FILE, merged);
+  res.json({ ok: true, content: merged });
 });
 
 app.get("/api/media", (_, res) => {
@@ -161,7 +178,17 @@ app.get("/api/contact", requireAuth, (_, res) => {
   res.json(readJson(CONTACT_FILE, []));
 });
 
+const DIST_DIR = path.join(__dirname, "..", "dist");
+if (fs.existsSync(DIST_DIR)) {
+  app.use(express.static(DIST_DIR));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) return next();
+    res.sendFile(path.join(DIST_DIR, "index.html"));
+  });
+}
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`MaatriDev API running on http://localhost:${PORT}`);
+  if (fs.existsSync(DIST_DIR)) console.log("Serving production build from /dist");
 });

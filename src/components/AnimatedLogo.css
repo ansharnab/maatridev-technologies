@@ -1,0 +1,198 @@
+.animated-logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  --logo-c1: #007cc3;
+  --logo-c2: #00b8a9;
+}
+
+.animated-logo--sm .animated-logo__svg,
+.animated-logo--sm.animated-logo--image {
+  width: 36px;
+  height: 36px;
+}
+
+.animated-logo--md .animated-logo__svg,
+.animated-logo--md.animated-logo--image:not(.animated-logo--full-brand) {
+  width: 42px;
+  height: 42px;
+}
+
+/* Full lockup (SVG/PNG with icon + wordmark) — clip padded / wide canvases */
+.animated-logo--full-brand {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--logo-clip-width, 220px);
+  max-width: min(var(--logo-clip-width, 220px), 54vw);
+  height: var(--logo-full-height, 64px);
+  overflow: hidden;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.animated-logo--full-brand .animated-logo__img,
+.animated-logo--full-brand .animated-logo__video {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: none;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: left center;
+  border-radius: 0;
+  transform: scale(var(--logo-scale, 1));
+  transform-origin: left center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__img,
+.site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__video {
+  filter: brightness(1.06);
+}
+
+.animated-logo--lg .animated-logo__svg,
+.animated-logo--lg.animated-logo--image:not(.animated-logo--full-brand) {
+  width: 56px;
+  height: 56px;
+}
+
+.animated-logo--lg.animated-logo--full-brand .animated-logo__img,
+.animated-logo--lg.animated-logo--full-brand .animated-logo__video {
+  height: 64px;
+  max-width: 300px;
+}
+
+.animated-logo__svg {
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 124, 195, 0.35);
+}
+
+.animated-logo__letter {
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.animated-logo__img,
+.animated-logo__video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+  background: transparent;
+}
+
+.animated-logo--video .animated-logo__video {
+  object-fit: cover;
+}
+
+/* Gradient shift */
+.animated-logo--gradient .animated-logo__bg {
+  animation: logoGradient 6s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes logoGradient {
+  0%,
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+.animated-logo--gradient {
+  animation: logoFloat 5s ease-in-out infinite;
+}
+
+/* Pulse */
+.animated-logo--pulse .animated-logo__svg {
+  animation: logoPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 8px 24px rgba(0, 124, 195, 0.35);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 12px 32px rgba(0, 184, 169, 0.45);
+  }
+}
+
+/* Glow */
+.animated-logo--glow .animated-logo__svg {
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px var(--logo-c1));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px var(--logo-c2));
+  }
+}
+
+/* Orbit ring */
+.animated-logo--orbit .animated-logo__orbit-ring {
+  stroke: var(--logo-c2);
+  stroke-width: 2;
+  stroke-dasharray: 8 40;
+  opacity: 0.85;
+  transform-origin: 24px 24px;
+  animation: logoOrbit 4s linear infinite;
+}
+
+@keyframes logoOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animated-logo--orbit .animated-logo__svg {
+  animation: logoFloat 5s ease-in-out infinite;
+}
+
+/* Subtle float (shared) */
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animated-logo--static .animated-logo__svg {
+  animation: none;
+}
+
+/* Uploaded image — gentle pulse optional (not full lockup) */
+.animated-logo--image.animated-logo--gradient:not(.animated-logo--full-brand),
+.animated-logo--image.animated-logo--pulse:not(.animated-logo--full-brand) {
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-logo--gradient,
+  .animated-logo--pulse,
+  .animated-logo--glow,
+  .animated-logo--orbit,
+  .animated-logo--image {
+    animation: none !important;
+  }
+
+  .animated-logo--gradient .animated-logo__bg,
+  .animated-logo--pulse .animated-logo__svg,
+  .animated-logo--glow .animated-logo__svg,
+  .animated-logo--orbit .animated-logo__orbit-ring {
+    animation: none !important;
+  }
+}

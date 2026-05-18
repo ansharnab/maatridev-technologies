@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import AnimatedLogo from "../AnimatedLogo";
+import { hasCustomLogo } from "../../utils/mediaType";
 import "./Header.css";
 
 const nav = [
@@ -41,6 +43,7 @@ export default function Header({ settings = {} }) {
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
   const logo = settings.logoText || "MaatriDev";
+  const fullLogo = hasCustomLogo(settings.logoImage);
   const onHero = isHeroRoute(pathname);
   const onPageHero = isPageHeroRoute(pathname);
   const lightNav = onHero || onPageHero;
@@ -95,16 +98,28 @@ export default function Header({ settings = {} }) {
     <header className={headerClass}>
       <div className="site-header__glass" aria-hidden="true" />
       <div className="container site-header__inner">
-        <Link to="/" className="site-header__brand">
-          {settings.logoImage ? (
-            <img src={settings.logoImage} alt={logo} className="site-header__logo-img" />
-          ) : (
-            <span className="site-header__logo">{settings.logoLetter || "M"}</span>
+        <Link
+          to="/"
+          className={`site-header__brand${fullLogo ? " site-header__brand--full-logo" : ""}`}
+        >
+          <AnimatedLogo
+            letter={settings.logoLetter}
+            animation={settings.logoAnimation}
+            colorPrimary={settings.logoColorPrimary}
+            colorAccent={settings.logoColorAccent}
+            imageUrl={settings.logoImage}
+            alt={`${logo} Technologies`}
+            size="md"
+            fullBrand={fullLogo}
+            scale={fullLogo ? Number(settings.logoScale) || 1 : 1}
+            clipWidth={fullLogo ? Number(settings.logoClipWidth) || 220 : undefined}
+          />
+          {!fullLogo && (
+            <span className="site-header__brand-text">
+              <strong>{logo}</strong>
+              <small>Technologies</small>
+            </span>
           )}
-          <span>
-            <strong>{logo}</strong>
-            <small>Technologies</small>
-          </span>
         </Link>
 
         <button

@@ -163,12 +163,19 @@ export default function VisualEditor() {
   const persist = async (nextSections, nextEnabled) => {
     setSaving(true);
     setStatus("");
+    let base = content;
+    try {
+      const fresh = await axios.get("/api/content");
+      base = fresh.data || content;
+    } catch {
+      /* use in-memory content */
+    }
     const next = {
-      ...content,
+      ...base,
       pages: {
-        ...content.pages,
+        ...base.pages,
         [pageId]: cleanLegacyPage({
-          ...(content.pages[pageId] || {}),
+          ...(base.pages[pageId] || {}),
           sections: { enabled: nextEnabled, items: nextSections },
         }),
       },
@@ -304,7 +311,12 @@ export default function VisualEditor() {
     return (
       <div className="ve-root">
         {modeTabs}
-        <SiteContentPanel initialTab={siteTab} />
+        <SiteContentPanel
+          initialTab={siteTab}
+          content={content}
+          setContent={setContent}
+          onSaved={(saved) => setContent(saved)}
+        />
       </div>
     );
   }

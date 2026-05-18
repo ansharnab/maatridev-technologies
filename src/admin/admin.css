@@ -32,6 +32,17 @@
   place-items: center;
   font-weight: 800;
   color: #fff;
+  flex-shrink: 0;
+}
+
+.admin-sidebar__logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  object-position: left center;
+  flex-shrink: 0;
+  border-radius: 4px;
 }
 
 .admin-sidebar__brand strong {
