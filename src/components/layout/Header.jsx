@@ -41,9 +41,10 @@ function isPageHeroRoute(pathname) {
 export default function Header({ settings = {} }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoBroken, setLogoBroken] = useState(false);
   const { pathname } = useLocation();
   const logo = settings.logoText || "MaatriDev";
-  const fullLogo = hasCustomLogo(settings.logoImage);
+  const fullLogo = hasCustomLogo(settings.logoImage) && !logoBroken;
   const onHero = isHeroRoute(pathname);
   const onPageHero = isPageHeroRoute(pathname);
   const lightNav = onHero || onPageHero;
@@ -54,6 +55,10 @@ export default function Header({ settings = {} }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    setLogoBroken(false);
+  }, [settings.logoImage]);
 
   useEffect(() => {
     setOpen(false);
@@ -107,12 +112,13 @@ export default function Header({ settings = {} }) {
             animation={settings.logoAnimation}
             colorPrimary={settings.logoColorPrimary}
             colorAccent={settings.logoColorAccent}
-            imageUrl={settings.logoImage}
+            imageUrl={logoBroken ? "" : settings.logoImage}
             alt={`${logo} Technologies`}
             size="md"
             fullBrand={fullLogo}
             scale={fullLogo ? Number(settings.logoScale) || 1 : 1}
-            clipWidth={fullLogo ? Number(settings.logoClipWidth) || 220 : undefined}
+            clipWidth={fullLogo ? Number(settings.logoClipWidth) || 280 : undefined}
+            onMediaError={() => setLogoBroken(true)}
           />
           {!fullLogo && (
             <span className="site-header__brand-text">

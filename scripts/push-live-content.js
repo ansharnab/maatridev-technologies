@@ -20,7 +20,12 @@ const remote = await getRes.json();
 
 const merged = {
   pages: { ...remote.pages, ...local.pages },
-  settings: { ...remote.settings, ...local.settings },
+  settings: {
+    ...remote.settings,
+    ...local.settings,
+    logoScale: local.settings?.logoScale ?? 1,
+    logoClipWidth: local.settings?.logoClipWidth ?? 280,
+  },
   site: local.site ? { ...remote.site, ...local.site } : remote.site,
 };
 

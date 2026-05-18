@@ -11,7 +11,7 @@ const DEFAULT_SETTINGS = {
   logoLetter: "M",
   logoImage: "",
   logoScale: 1,
-  logoClipWidth: 220,
+  logoClipWidth: 280,
   logoAnimation: "gradient",
   logoColorPrimary: "#007cc3",
   logoColorAccent: "#00b8a9",

@@ -17,13 +17,15 @@
   height: 42px;
 }
 
-/* Full lockup (SVG/PNG with icon + wordmark) — clip padded / wide canvases */
+/* Full lockup (SVG/PNG with icon + wordmark) */
 .animated-logo--full-brand {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
-  width: var(--logo-clip-width, 220px);
-  max-width: min(var(--logo-clip-width, 220px), 54vw);
-  height: var(--logo-full-height, 64px);
+  width: auto;
+  max-width: min(var(--logo-clip-width, 280px), 58vw);
+  height: calc(var(--logo-full-height, 64px) * var(--logo-scale, 1));
+  max-height: 72px;
   overflow: hidden;
   line-height: 0;
   vertical-align: middle;
@@ -34,19 +36,18 @@
   display: block;
   width: auto;
   height: 100%;
-  max-width: none;
+  max-width: min(var(--logo-clip-width, 280px), 58vw);
   max-height: 100%;
   object-fit: contain;
   object-position: left center;
   border-radius: 0;
-  transform: scale(var(--logo-scale, 1));
-  transform-origin: left center;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transform: none;
+  transition: filter 0.2s ease;
 }
 
 .site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__img,
 .site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__video {
-  filter: brightness(1.06);
+  filter: brightness(1.08);
 }
 
 .animated-logo--lg .animated-logo__svg,

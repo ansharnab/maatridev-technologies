@@ -205,23 +205,23 @@ export default function SiteContentPanel({
               />
               {settings.logoImage && (
                 <>
-                  <Field label={`Logo zoom (${settings.logoScale ?? 1}×)`}>
+                  <Field label={`Logo size (${settings.logoScale ?? 1}×)`}>
                     <input
                       type="range"
-                      min={1}
-                      max={3}
+                      min={0.8}
+                      max={2}
                       step={0.1}
                       value={Number(settings.logoScale) || 1}
                       onChange={(e) => setSettings({ logoScale: Number(e.target.value) })}
                     />
                   </Field>
-                  <Field label={`Logo width crop (${settings.logoClipWidth ?? 220}px)`}>
+                  <Field label={`Logo max width (${settings.logoClipWidth ?? 280}px)`}>
                     <input
                       type="range"
-                      min={140}
-                      max={320}
-                      step={5}
-                      value={Number(settings.logoClipWidth) || 220}
+                      min={180}
+                      max={400}
+                      step={10}
+                      value={Number(settings.logoClipWidth) || 280}
                       onChange={(e) => setSettings({ logoClipWidth: Number(e.target.value) })}
                     />
                   </Field>

@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { hasCustomLogo, isVideoUrl } from "../utils/mediaType";
 import "./AnimatedLogo.css";
 
@@ -25,13 +25,17 @@ export default function AnimatedLogo({
   size = "md",
   fullBrand = false,
   scale = 1,
-  clipWidth = 220,
+  clipWidth = 280,
+  onMediaError,
 }) {
   const gradId = useId().replace(/:/g, "");
   const styleClass = STYLES[animation] || STYLES.gradient;
   const isFullBrand = fullBrand || hasCustomLogo(imageUrl);
+  const [mediaError, setMediaError] = useState(false);
+  const safeScale = Math.min(2, Math.max(0.8, Number(scale) || 1));
+  const safeClip = Math.min(400, Math.max(180, Number(clipWidth) || 280));
 
-  if (imageUrl) {
+  if (imageUrl && !mediaError) {
     const isVideo = isVideoUrl(imageUrl);
     return (
       <span
@@ -47,8 +51,8 @@ export default function AnimatedLogo({
         style={{
           "--logo-c1": colorPrimary,
           "--logo-c2": colorAccent,
-          "--logo-scale": isFullBrand ? Math.min(3, Math.max(1, Number(scale) || 1)) : 1,
-          "--logo-clip-width": isFullBrand ? `${Math.min(360, Math.max(140, Number(clipWidth) || 220))}px` : undefined,
+          "--logo-scale": isFullBrand ? safeScale : 1,
+          "--logo-clip-width": isFullBrand ? `${safeClip}px` : undefined,
         }}
       >
         {isVideo ? (
@@ -60,9 +64,22 @@ export default function AnimatedLogo({
             loop
             playsInline
             aria-label={alt}
+            onError={() => {
+              setMediaError(true);
+              onMediaError?.();
+            }}
           />
         ) : (
-          <img src={imageUrl} alt={alt} className="animated-logo__img" />
+          <img
+            src={imageUrl}
+            alt={alt}
+            className="animated-logo__img"
+            onError={() => {
+              setMediaError(true);
+              onMediaError?.();
+            }}
+            decoding="async"
+          />
         )}
       </span>
     );
