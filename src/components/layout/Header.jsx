@@ -171,8 +171,12 @@ export default function Header({ settings = {} }) {
               </NavLink>
             )
           )}
-          <Link to="/appointment" className="btn btn--primary site-header__cta" onClick={() => setOpen(false)}>
-            Book Appointment
+          <Link
+            to={settings.headerCtaLink || "/appointment"}
+            className="btn btn--primary site-header__cta"
+            onClick={() => setOpen(false)}
+          >
+            {settings.headerCtaLabel || "Book Appointment"}
           </Link>
         </nav>
       </div>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import ContactForm from "../../components/ContactForm";
 import { founders as defaultFounders, services as defaultServices, stats } from "../../data/siteData";
 import { useSiteDataOptional } from "../../context/SiteDataContext";
+import { VeEditable } from "../VeInlineEdit";
 
 /** Same look as the live site — used in editor preview and public pages */
 
@@ -14,10 +15,21 @@ export function PageHeroBlock({ title, description, breadcrumbLabel = "Page" }) 
       <div className="container">
         <nav className="breadcrumb">
           <Link to="/">Home</Link>
-          <span> / {breadcrumbLabel}</span>
+          <span>
+            {" / "}
+            <VeEditable field="breadcrumbLabel">{breadcrumbLabel}</VeEditable>
+          </span>
         </nav>
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
+        <h1>
+          <VeEditable field="title">{title}</VeEditable>
+        </h1>
+        {description && (
+          <p>
+            <VeEditable field="description" multiline>
+              {description}
+            </VeEditable>
+          </p>
+        )}
       </div>
     </section>
   );
@@ -41,9 +53,17 @@ export function HomeHeroBlock({
       </div>
       <div className="container hero__grid">
         <div className="hero__content">
-          <span className="eyebrow">{eyebrow}</span>
-          <h1>{title}</h1>
-          <p className="hero__subtitle">{subtitle}</p>
+          <span className="eyebrow">
+            <VeEditable field="eyebrow">{eyebrow}</VeEditable>
+          </span>
+          <h1>
+            <VeEditable field="title">{title}</VeEditable>
+          </h1>
+          <p className="hero__subtitle">
+            <VeEditable field="subtitle" multiline>
+              {subtitle}
+            </VeEditable>
+          </p>
           <div className="hero__actions">
             {primaryLabel && (
               <Link to={primaryLink || "/contact"} className="btn btn--primary">
@@ -78,10 +98,10 @@ export function HomeHeroBlock({
 
 export function StatsBlock({ stat1, label1, stat2, label2, stat3, label3, stat4, label4 }) {
   const items = [
-    { value: stat1, label: label1 },
-    { value: stat2, label: label2 },
-    { value: stat3, label: label3 },
-    { value: stat4, label: label4 },
+    { value: stat1, label: label1, valueKey: "stat1", labelKey: "label1" },
+    { value: stat2, label: label2, valueKey: "stat2", labelKey: "label2" },
+    { value: stat3, label: label3, valueKey: "stat3", labelKey: "label3" },
+    { value: stat4, label: label4, valueKey: "stat4", labelKey: "label4" },
   ];
   return (
     <section className="section section--dark about-strip">
@@ -89,8 +109,12 @@ export function StatsBlock({ stat1, label1, stat2, label2, stat3, label3, stat4,
         <div className="hero__stats" style={{ border: "none", paddingTop: 0 }}>
           {items.map((s) => (
             <div key={s.label} className="hero__stat">
-              <strong>{s.value}</strong>
-              <span>{s.label}</span>
+              <strong>
+                <VeEditable field={s.valueKey}>{s.value}</VeEditable>
+              </strong>
+              <span>
+                <VeEditable field={s.labelKey}>{s.label}</VeEditable>
+              </span>
             </div>
           ))}
         </div>
@@ -108,8 +132,18 @@ export function ServicesGridBlock({ showAll = true, title, subtitle, services: s
       <div className="container">
         {(title || subtitle) && (
           <div className="section-head" style={{ marginBottom: "2rem" }}>
-            {title && <h2 className="section-title">{title}</h2>}
-            {subtitle && <p className="section-sub">{subtitle}</p>}
+            {title && (
+              <h2 className="section-title">
+                <VeEditable field="title">{title}</VeEditable>
+              </h2>
+            )}
+            {subtitle && (
+              <p className="section-sub">
+                <VeEditable field="subtitle" multiline>
+                  {subtitle}
+                </VeEditable>
+              </p>
+            )}
           </div>
         )}
         <div className="grid-3">
@@ -135,12 +169,20 @@ export function FeatureStripBlock({ eyebrow, title, body, buttonLabel, buttonLin
     <section className="section section--dark about-strip">
       <div className="container about-strip__grid">
         <div>
-          <span className="eyebrow">{eyebrow}</span>
-          <h2 className="section-title">{title}</h2>
-          <p>{body}</p>
+          <span className="eyebrow">
+            <VeEditable field="eyebrow">{eyebrow}</VeEditable>
+          </span>
+          <h2 className="section-title">
+            <VeEditable field="title">{title}</VeEditable>
+          </h2>
+          <p>
+            <VeEditable field="body" multiline>
+              {body}
+            </VeEditable>
+          </p>
           {buttonLabel && (
             <Link to={buttonLink || "/about"} className="btn btn--primary">
-              {buttonLabel}
+              <VeEditable field="buttonLabel">{buttonLabel}</VeEditable>
             </Link>
           )}
         </div>
@@ -205,12 +247,18 @@ export function CTABlock({ title, text, buttonLabel, buttonLink }) {
     <section className="cta-banner">
       <div className="container cta-banner__inner">
         <div>
-          <h2>{title}</h2>
-          <p>{text}</p>
+          <h2>
+            <VeEditable field="title">{title}</VeEditable>
+          </h2>
+          <p>
+            <VeEditable field="text" multiline>
+              {text}
+            </VeEditable>
+          </p>
         </div>
         <div className="cta-banner__actions">
           <Link to={buttonLink || "/contact"} className="btn btn--primary">
-            {buttonLabel}
+            <VeEditable field="buttonLabel">{buttonLabel}</VeEditable>
           </Link>
         </div>
       </div>
@@ -225,8 +273,14 @@ export function TextContentBlock({ title, body, align = "left" }) {
         className="container"
         style={{ textAlign: align, maxWidth: 800, margin: align === "center" ? "0 auto" : undefined }}
       >
-        <h2 className="section-title">{title}</h2>
-        <p style={{ color: "var(--text-muted)", lineHeight: 1.7 }}>{body}</p>
+        <h2 className="section-title">
+          <VeEditable field="title">{title}</VeEditable>
+        </h2>
+        <p style={{ color: "var(--text-muted)", lineHeight: 1.7 }}>
+          <VeEditable field="body" multiline>
+            {body}
+          </VeEditable>
+        </p>
       </div>
     </section>
   );
@@ -237,10 +291,22 @@ export function ContactInfoBlock({ title, email, phone, note }) {
     <section className="section">
       <div className="container grid-2">
         <div>
-          <h2 className="section-title">{title}</h2>
-          <p><i className="fa-solid fa-envelope" /> {email}</p>
-          <p><i className="fa-solid fa-phone" /> {phone}</p>
-          <p style={{ color: "var(--text-muted)" }}>{note}</p>
+          <h2 className="section-title">
+            <VeEditable field="title">{title}</VeEditable>
+          </h2>
+          <p>
+            <i className="fa-solid fa-envelope" />{" "}
+            <VeEditable field="email">{email}</VeEditable>
+          </p>
+          <p>
+            <i className="fa-solid fa-phone" />{" "}
+            <VeEditable field="phone">{phone}</VeEditable>
+          </p>
+          <p style={{ color: "var(--text-muted)" }}>
+            <VeEditable field="note" multiline>
+              {note}
+            </VeEditable>
+          </p>
         </div>
         <div className="card">
           <div className="card__body">

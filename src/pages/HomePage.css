@@ -195,6 +195,7 @@
   height: clamp(48px, 8vw, 80px);
   background: var(--bg);
   clip-path: ellipse(75% 100% at 50% 100%);
+  pointer-events: none;
 }
 
 .section-head--row {

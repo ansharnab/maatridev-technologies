@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import axios from "axios";
 import {
@@ -7,23 +7,54 @@ import {
   getDefaultSections,
 } from "./sectionRegistry";
 import SiteContentPanel from "./SiteContentPanel";
+import PreviewChrome from "./PreviewChrome";
+import EditorToast from "./EditorToast";
+import SectionInspector from "./SectionInspector";
+import SiteHeaderInspector from "./SiteHeaderInspector";
+import StyledSectionWrap from "./StyledSectionWrap";
+import { VeEditScope } from "./VeInlineEdit";
+import { defaultStyleForType, normalizeSection } from "./editorTheme";
 import "../pages/HomePage.css";
 import "./visual-editor.css";
+import "./styled-section.css";
 
 const EDITOR_MODES = [
   { id: "pages", label: "Pages", icon: "fa-file-lines" },
   { id: "site", label: "Site Content", icon: "fa-sliders" },
 ];
 
-function SiteChrome() {
+const PREVIEW_DEVICES = [
+  { id: "desktop", label: "Desktop", icon: "fa-desktop", width: 1100 },
+  { id: "tablet", label: "Tablet", icon: "fa-tablet-screen-button", width: 768 },
+  { id: "mobile", label: "Mobile", icon: "fa-mobile-screen-button", width: 390 },
+];
+
+function PreviewDeviceBar({ previewDevice, setPreviewDevice, activeDevice, switching }) {
   return (
-    <div className="ve-site-chrome" aria-hidden="true">
-      <div className="ve-site-chrome__bar">
-        <span className="ve-site-chrome__logo">M</span>
-        <span>MaatriDev TECHNOLOGIES</span>
-        <span className="ve-site-chrome__nav">Home · About · Services · Contact</span>
-        <span className="ve-site-chrome__cta">Book Appointment</span>
+    <div
+      className={`ve-preview-strip${switching ? " ve-preview-strip--switching" : ""}`}
+      role="toolbar"
+      aria-label="Preview screen size"
+    >
+      <span className="ve-preview-strip__label">
+        <i className="fa-solid fa-display" aria-hidden="true" />
+        Screen size
+      </span>
+      <div className="ve-preview-strip__buttons">
+        {PREVIEW_DEVICES.map((device) => (
+          <button
+            key={device.id}
+            type="button"
+            className={previewDevice === device.id ? "is-active" : ""}
+            onClick={() => setPreviewDevice(device.id)}
+            title={`${device.label} (${device.width}px wide)`}
+          >
+            <i className={`fa-solid ${device.icon}`} aria-hidden="true" />
+            {device.label}
+          </button>
+        ))}
       </div>
+      <span className="ve-preview-strip__size">{activeDevice.width}px preview</span>
     </div>
   );
 }
@@ -38,79 +69,10 @@ function newId() {
 
 const PAGE_PATH = { home: "/", about: "/about", services: "/services", contact: "/contact" };
 
-function PropertiesPanel({ section, onChange, onOpenSiteContent }) {
-  const def = section ? SECTION_TYPES[section.type] : null;
-  if (!section || !def) {
-    return (
-      <div className="ve-props">
-        <p className="ve-empty-props">Click a section on the page to edit its text, links, and images.</p>
-      </div>
-    );
-  }
-
-  if (!def.fields?.length) {
-    return (
-      <div className="ve-props">
-        <h3>{def.label}</h3>
-        <p className="ve-empty-props">
-          Content comes from <strong>Site Content</strong> (logo, founders, service cards, phones, images).
-        </p>
-        <button
-          type="button"
-          className="ve-btn ve-btn--primary"
-          style={{ width: "100%", marginTop: "0.75rem" }}
-          onClick={() => onOpenSiteContent?.(section.type === "founders" ? "founders" : section.type === "servicesGrid" ? "services" : "brand")}
-        >
-          Edit in Site Content
-        </button>
-      </div>
-    );
-  }
-
-  const update = (key, value) => {
-    onChange({ ...section, props: { ...section.props, [key]: value } });
-  };
-
-  return (
-    <div className="ve-props">
-      <h3>{def.label}</h3>
-      {def.fields.map((field) => (
-        <div key={field.key} className="field">
-          <label htmlFor={`f-${field.key}`}>{field.label}</label>
-          {field.type === "textarea" ? (
-            <textarea
-              id={`f-${field.key}`}
-              value={section.props[field.key] ?? ""}
-              onChange={(e) => update(field.key, e.target.value)}
-            />
-          ) : field.type === "select" ? (
-            <select
-              id={`f-${field.key}`}
-              value={String(section.props[field.key] ?? field.options[0]?.value)}
-              onChange={(e) => {
-                const raw = e.target.value;
-                const opt = field.options.find((o) => String(o.value) === raw);
-                update(field.key, opt?.value);
-              }}
-            >
-              {field.options.map((o) => (
-                <option key={String(o.value)} value={String(o.value)}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              id={`f-${field.key}`}
-              type="text"
-              value={section.props[field.key] ?? ""}
-              onChange={(e) => update(field.key, e.target.value)}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
+function pickDefaultSectionId(list) {
+  if (!list?.length) return null;
+  const hero = list.find((s) => s.type === "pageHero" || s.type === "homeHero");
+  return hero?.id ?? list[0].id;
 }
 
 export default function VisualEditor() {
@@ -124,34 +86,82 @@ export default function VisualEditor() {
   const [status, setStatus] = useState("");
   const [addType, setAddType] = useState("pageHero");
   const [saving, setSaving] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState("desktop");
+  const [deviceSwitching, setDeviceSwitching] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [toast, setToast] = useState({ message: "", type: "success" });
+  const [newSectionId, setNewSectionId] = useState(null);
+  const [chromeSelected, setChromeSelected] = useState(false);
+  const [chromeFocus, setChromeFocus] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const deviceSwitchTimer = useRef(null);
+  const savedSnapshot = useRef("");
 
-  const loadPage = useCallback(
-    (id, allContent) => {
-      const page = allContent?.pages?.[id];
-      const saved = page?.sections;
-      if (saved?.items?.length) {
-        setSections(saved.items);
-        setEnabled(saved.enabled !== false);
-      } else {
-        setSections(getDefaultSections(id));
-        setEnabled(false);
-      }
+  const markDirty = useCallback(() => setDirty(true), []);
+
+  const loadPage = useCallback((id, allContent, opts = {}) => {
+    const { selectFirstSection = false } = opts;
+    const page = allContent?.pages?.[id];
+    const saved = page?.sections;
+    let nextSections;
+    let nextEnabled;
+    if (saved?.items?.length) {
+      nextSections = saved.items.map((s) => normalizeSection(s));
+      nextEnabled = saved.enabled !== false;
+    } else {
+      nextSections = getDefaultSections(id);
+      nextEnabled = false;
+    }
+    setSections(nextSections);
+    setEnabled(nextEnabled);
+    setChromeSelected(false);
+    setChromeFocus(null);
+    if (selectFirstSection) {
+      setSelectedId(pickDefaultSectionId(nextSections));
+    } else {
       setSelectedId(null);
-    },
-    []
-  );
+    }
+    setDirty(false);
+    savedSnapshot.current = JSON.stringify({ sections: nextSections, enabled: nextEnabled });
+  }, []);
 
   useEffect(() => {
     axios.get("/api/content").then((r) => {
       setContent(r.data);
-      loadPage(pageId, r.data);
+      loadPage(pageId, r.data, { selectFirstSection: true });
     });
-  }, [loadPage, pageId]);
+  }, [loadPage]);
 
-  const onPageChange = (id) => {
+  const onPageChange = (id, opts = {}) => {
+    const { selectFirstSection = false } = opts;
+    if (id === pageId) {
+      if (selectFirstSection) {
+        setChromeSelected(false);
+        setChromeFocus(null);
+        const sid = pickDefaultSectionId(sections);
+        if (sid) setSelectedId(sid);
+      }
+      return;
+    }
+    if (dirty && !window.confirm("You have unsaved changes on this page. Switch anyway?")) return;
     setPageId(id);
-    loadPage(id, content);
+    loadPage(id, content, { selectFirstSection });
   };
+
+  const changePreviewDevice = (id) => {
+    if (id === previewDevice) return;
+    setPreviewDevice(id);
+    setDeviceSwitching(true);
+    if (deviceSwitchTimer.current) clearTimeout(deviceSwitchTimer.current);
+    deviceSwitchTimer.current = setTimeout(() => setDeviceSwitching(false), 450);
+  };
+
+  useEffect(
+    () => () => {
+      if (deviceSwitchTimer.current) clearTimeout(deviceSwitchTimer.current);
+    },
+    []
+  );
 
   const cleanLegacyPage = (page = {}) => ({
     ...page,
@@ -172,10 +182,12 @@ export default function VisualEditor() {
     }
     const next = {
       ...base,
+      settings: { ...(base.settings || {}), ...(content.settings || {}) },
       pages: {
-        ...base.pages,
+        ...(base.pages || {}),
+        ...(content.pages || {}),
         [pageId]: cleanLegacyPage({
-          ...(base.pages[pageId] || {}),
+          ...(content.pages?.[pageId] || base.pages?.[pageId] || {}),
           sections: { enabled: nextEnabled, items: nextSections },
         }),
       },
@@ -183,9 +195,15 @@ export default function VisualEditor() {
     try {
       await axios.put("/api/content", next, { headers: authHeaders() });
       setContent(next);
-      setStatus(nextEnabled ? "Published — live site updated." : "Saved as draft.");
+      const msg = nextEnabled ? "Published — live site updated." : "Saved as draft.";
+      setStatus(msg);
+      setToast({ message: msg, type: "success" });
+      setDirty(false);
+      savedSnapshot.current = JSON.stringify({ sections: nextSections, enabled: nextEnabled });
     } catch {
-      setStatus("Save failed. Is the API running on port 3001?");
+      const msg = "Save failed. Is the API running on port 3001?";
+      setStatus(msg);
+      setToast({ message: msg, type: "error" });
     } finally {
       setSaving(false);
     }
@@ -202,6 +220,7 @@ export default function VisualEditor() {
     const defaults = getDefaultSections(pageId);
     setSections(defaults);
     setSelectedId(null);
+    markDirty();
   };
 
   const useBuiltInPages = async () => {
@@ -228,35 +247,88 @@ export default function VisualEditor() {
     }
   };
 
-  const handleCanvasClick = (e) => {
-    const link = e.target.closest("a");
-    if (link) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-
   const selected = sections.find((s) => s.id === selectedId);
 
   const updateSection = (updated) => {
-    setSections((list) => list.map((s) => (s.id === updated.id ? updated : s)));
+    setSections((list) => list.map((s) => (s.id === updated.id ? normalizeSection(updated) : s)));
+    markDirty();
   };
+
+  const patchSectionProp = (sectionId, key, value) => {
+    setSections((list) =>
+      list.map((s) =>
+        s.id === sectionId ? { ...s, props: { ...s.props, [key]: value } } : s
+      )
+    );
+    markDirty();
+  };
+
+  const updateSectionStyle = (sectionId, style) => {
+    setSections((list) =>
+      list.map((s) => (s.id === sectionId ? { ...s, style } : s))
+    );
+    markDirty();
+  };
+
+  const selectSection = (id) => {
+    setChromeSelected(false);
+    setSelectedId(id);
+  };
+
+  const selectChrome = (focus = null) => {
+    setSelectedId(null);
+    setChromeSelected(true);
+    setChromeFocus(focus);
+  };
+
+  const navigateFromHeader = (id) => {
+    onPageChange(id, { selectFirstSection: true });
+    const label = PAGE_OPTIONS.find((p) => p.id === id)?.label || id;
+    setToast({
+      message: `Editing ${label} — use the panel on the right for text & design`,
+      type: "success",
+    });
+  };
+
+  const updateSettings = (settings) => {
+    setContent((c) => ({ ...c, settings }));
+    markDirty();
+  };
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const el = document.querySelector(`[data-ve-section="${selectedId}"]`);
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [selectedId]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setSelectedId(null);
+        setChromeSelected(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const duplicateSection = (id) => {
     const src = sections.find((s) => s.id === id);
     if (!src) return;
-    const copy = { ...src, id: newId(), props: { ...src.props } };
+    const copy = { ...src, id: newId(), props: { ...src.props }, style: { ...src.style } };
     const idx = sections.findIndex((s) => s.id === id);
     const next = [...sections];
     next.splice(idx + 1, 0, copy);
     setSections(next);
     setSelectedId(copy.id);
+    markDirty();
   };
 
   const deleteSection = (id) => {
     if (!window.confirm("Remove this section?")) return;
     setSections((list) => list.filter((s) => s.id !== id));
     if (selectedId === id) setSelectedId(null);
+    markDirty();
   };
 
   const moveSection = (id, dir) => {
@@ -267,28 +339,56 @@ export default function VisualEditor() {
     const [item] = list.splice(idx, 1);
     list.splice(next, 0, item);
     setSections(list);
+    markDirty();
   };
 
+  const onDragStart = () => setIsDragging(true);
+
   const onDragEnd = (result) => {
-    if (!result.destination) return;
+    setIsDragging(false);
+    const { source, destination } = result;
+    if (!destination) return;
+    const from = source.droppableId;
+    const to = destination.droppableId;
+    if (from !== "sidebar" && from !== "canvas") return;
+    if (to !== "sidebar" && to !== "canvas") return;
+    if (source.index === destination.index && from === to) return;
+
     const list = [...sections];
-    const [item] = list.splice(result.source.index, 1);
-    list.splice(result.destination.index, 0, item);
+    const [item] = list.splice(source.index, 1);
+    list.splice(destination.index, 0, item);
     setSections(list);
+    markDirty();
   };
 
   const addSection = () => {
     const def = SECTION_TYPES[addType];
     if (!def) return;
-    const item = { id: newId(), type: addType, props: { ...def.defaultProps } };
+    const item = {
+      id: newId(),
+      type: addType,
+      props: { ...def.defaultProps },
+      style: defaultStyleForType(addType),
+    };
     setSections([...sections, item]);
     setSelectedId(item.id);
+    setNewSectionId(item.id);
+    markDirty();
+    window.setTimeout(() => setNewSectionId(null), 600);
   };
 
   const previewPath = PAGE_PATH[pageId] || "/";
+  const activeDevice = PREVIEW_DEVICES.find((d) => d.id === previewDevice) || PREVIEW_DEVICES[0];
 
   const openSiteContent = (tab = "brand") => {
-    setSiteTab(tab);
+    const sec = selected;
+    const t =
+      sec?.type === "founders"
+        ? "founders"
+        : sec?.type === "servicesGrid"
+          ? "services"
+          : tab;
+    setSiteTab(t);
     setEditorMode("site");
   };
 
@@ -323,20 +423,35 @@ export default function VisualEditor() {
 
   return (
     <div className="ve-root">
+      <EditorToast
+        message={toast.message}
+        type={toast.type}
+        onDone={() => setToast({ message: "", type: "success" })}
+      />
       {modeTabs}
       <header className="ve-toolbar">
         <div>
           <h1>Page Editor</h1>
-          <p>Same layout as the live site — blue header, service cards, buttons. Pick a section, edit on the right, then Publish.</p>
+          <p>Drag sections to reorder · click to edit · publish when ready.</p>
         </div>
         <div className="ve-toolbar__actions">
-          <select value={pageId} onChange={(e) => onPageChange(e.target.value)}>
+          <select
+            value={pageId}
+            onChange={(e) => onPageChange(e.target.value, { selectFirstSection: true })}
+          >
             {PAGE_OPTIONS.map((p) => (
               <option key={p.id} value={p.id}>{p.label}</option>
             ))}
           </select>
           <label>
-            <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(e) => {
+                setEnabled(e.target.checked);
+                markDirty();
+              }}
+            />
             Use custom page (publish)
           </label>
           <button type="button" className="ve-btn" onClick={resetTemplate}>Reset template</button>
@@ -346,33 +461,62 @@ export default function VisualEditor() {
           <button type="button" className="ve-btn ve-btn--primary" onClick={publish} disabled={saving}>
             Publish
           </button>
-          {status && <span className="ve-status">{status}</span>}
+          {dirty && <span className="ve-status ve-status--dirty">Unsaved changes</span>}
+          {status && !dirty && <span className="ve-status">{status}</span>}
         </div>
       </header>
 
+      <PreviewDeviceBar
+        previewDevice={previewDevice}
+        setPreviewDevice={changePreviewDevice}
+        activeDevice={activeDevice}
+        switching={deviceSwitching}
+      />
+
+      <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div className="ve-body">
         <aside className="ve-sidebar">
           <h3>Sections</h3>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="sections">
-              {(provided) => (
-                <div className="ve-section-list" ref={provided.innerRef} {...provided.droppableProps}>
+          <p className="ve-sidebar__hint">
+            <i className="fa-solid fa-grip-vertical" aria-hidden="true" /> Drag to reorder (sidebar or preview)
+          </p>
+            <Droppable droppableId="sidebar">
+              {(provided, snapshot) => (
+                <div
+                  className={`ve-section-list${snapshot.isDraggingOver ? " ve-section-list--over" : ""}`}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
                   {sections.map((s, index) => {
                     const def = SECTION_TYPES[s.type];
                     return (
-                      <Draggable key={s.id} draggableId={s.id} index={index}>
-                        {(drag) => (
-                          <button
-                            type="button"
+                      <Draggable key={s.id} draggableId={`sidebar-${s.id}`} index={index}>
+                        {(drag, dragSnapshot) => (
+                          <div
                             ref={drag.innerRef}
                             {...drag.draggableProps}
-                            className={`ve-section-item ${selectedId === s.id ? "is-selected" : ""}`}
-                            onClick={() => setSelectedId(s.id)}
+                            role="button"
+                            tabIndex={0}
+                            className={`ve-section-item${selectedId === s.id ? " is-selected" : ""}${dragSnapshot.isDragging ? " ve-section-item--dragging" : ""}`}
+                            onClick={() => selectSection(s.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                selectSection(s.id);
+                              }
+                            }}
                           >
-                            <span {...drag.dragHandleProps}><i className="fa-solid fa-grip-vertical fa-grip" /></span>
+                            <span
+                              className="ve-section-item__handle"
+                              {...drag.dragHandleProps}
+                              title="Drag to reorder"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
+                            </span>
                             <i className={`fa-solid ${def?.icon || "fa-cube"}`} />
                             {def?.label || s.type}
-                          </button>
+                          </div>
                         )}
                       </Draggable>
                     );
@@ -381,7 +525,6 @@ export default function VisualEditor() {
                 </div>
               )}
             </Droppable>
-          </DragDropContext>
           <div className="ve-add-section">
             <select value={addType} onChange={(e) => setAddType(e.target.value)}>
               {Object.entries(SECTION_TYPES).map(([key, def]) => (
@@ -394,82 +537,124 @@ export default function VisualEditor() {
           </div>
         </aside>
 
-        <div className="ve-canvas-wrap">
+        <div
+          className={`ve-canvas-wrap${isDragging ? " ve-canvas-wrap--dragging" : ""}`}
+        >
           <div
-            className="ve-canvas"
-            onClick={handleCanvasClick}
-            onKeyDown={() => {}}
-            role="presentation"
+            className={`ve-canvas${previewDevice !== "desktop" ? ` ve-canvas--${previewDevice}` : ""}${deviceSwitching ? " ve-canvas--switching" : ""}${isDragging ? " ve-canvas--dragging" : ""}`}
+            style={previewDevice !== "desktop" ? { maxWidth: activeDevice.width } : undefined}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelectedId(null);
+                setChromeSelected(false);
+              }
+            }}
           >
             <p className="ve-canvas-hint">
-              Preview matches your live site · Click a section · Edit on the right · Publish when ready
+              <i className="fa-solid fa-hand-pointer" aria-hidden="true" />
+              {activeDevice.label} ({activeDevice.width}px)
+              {previewDevice === "mobile" || previewDevice === "tablet"
+                ? " — tap ☰ for pages · drag ⠿ to reorder sections"
+                : " — drag ⠿ to reorder · click to edit"}
             </p>
-            <SiteChrome />
+            <PreviewChrome
+              device={previewDevice}
+              settings={content.settings || {}}
+              currentPageId={pageId}
+              isSelected={chromeSelected}
+              onSelect={selectChrome}
+              onNavigatePage={navigateFromHeader}
+            />
             {sections.length === 0 ? (
               <div className="ve-empty-canvas">No sections — add one from the left panel.</div>
             ) : (
-              sections.map((section) => {
-                const def = SECTION_TYPES[section.type];
-                const Component = def?.component;
-                if (!Component) return null;
-                const isSel = selectedId === section.id;
-                return (
+              <Droppable droppableId="canvas">
+                {(provided, snapshot) => (
                   <div
-                    key={section.id}
-                    className={`ve-block ${isSel ? "is-selected" : ""}`}
-                    onClick={() => setSelectedId(section.id)}
-                    onKeyDown={() => {}}
-                    role="button"
-                    tabIndex={0}
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`ve-canvas-sections${snapshot.isDraggingOver ? " ve-canvas-sections--over" : ""}`}
                   >
-                    <div className="ve-block__bar">
-                      <span className="ve-block__label">{def.label}</span>
-                      <button
-                        type="button"
-                        title="Move up"
-                        onClick={(e) => { e.stopPropagation(); moveSection(section.id, -1); }}
-                      >
-                        <i className="fa-solid fa-arrow-up" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Move down"
-                        onClick={(e) => { e.stopPropagation(); moveSection(section.id, 1); }}
-                      >
-                        <i className="fa-solid fa-arrow-down" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Duplicate"
-                        onClick={(e) => { e.stopPropagation(); duplicateSection(section.id); }}
-                      >
-                        <i className="fa-solid fa-copy" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Delete"
-                        onClick={(e) => { e.stopPropagation(); deleteSection(section.id); }}
-                      >
-                        <i className="fa-solid fa-trash" />
-                      </button>
-                    </div>
-                    <Component {...(section.props || {})} />
+                    {sections.map((section, index) => {
+                      const def = SECTION_TYPES[section.type];
+                      const Component = def?.component;
+                      if (!Component) return null;
+                      const isSel = selectedId === section.id;
+                      return (
+                        <Draggable key={section.id} draggableId={`canvas-${section.id}`} index={index}>
+                          {(drag, dragSnapshot) => (
+                            <div
+                              ref={drag.innerRef}
+                              {...drag.draggableProps}
+                              data-ve-section={section.id}
+                              className={`ve-block${isSel ? " is-selected" : ""}${newSectionId === section.id ? " ve-block--new" : ""}${dragSnapshot.isDragging ? " ve-block--dragging" : ""}`}
+                              onClick={(e) => {
+                                if (dragSnapshot.isDragging) return;
+                                if (e.target.closest(".ve-block__drag-handle")) return;
+                                if (e.target.closest(".ve-inline-edit")) return;
+                                selectSection(section.id);
+                              }}
+                            >
+                              <div className="ve-block__bar">
+                                <span
+                                  className="ve-block__drag-handle"
+                                  {...drag.dragHandleProps}
+                                  title="Drag to reorder"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <i className="fa-solid fa-grip-vertical" aria-hidden="true" />
+                                </span>
+                                <span className="ve-block__label">{def.label}</span>
+                              </div>
+                              <StyledSectionWrap sectionType={section.type} style={section.style}>
+                                <VeEditScope
+                                  isSelected={isSel}
+                                  fieldKeys={(def.fields || []).map((f) => f.key)}
+                                  onPatch={(key, value) => patchSectionProp(section.id, key, value)}
+                                >
+                                  <Component {...(section.props || {})} />
+                                </VeEditScope>
+                              </StyledSectionWrap>
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
                   </div>
-                );
-              })
+                )}
+              </Droppable>
             )}
           </div>
         </div>
 
-        <PropertiesPanel
-          section={selected}
-          onOpenSiteContent={openSiteContent}
-          onChange={(updated) => {
-            updateSection(updated);
-            setSelectedId(updated.id);
-          }}
-        />
+        {chromeSelected ? (
+          <SiteHeaderInspector
+            settings={content.settings || {}}
+            focusField={chromeFocus}
+            currentPageId={pageId}
+            onNavigatePage={navigateFromHeader}
+            onChange={updateSettings}
+            onOpenSiteContent={openSiteContent}
+          />
+        ) : (
+          <SectionInspector
+            key={selected?.id || "empty"}
+            section={selected}
+            pageLabel={PAGE_OPTIONS.find((p) => p.id === pageId)?.label}
+            onChange={(updated) => {
+              updateSection(updated);
+              setSelectedId(updated.id);
+            }}
+            onStyleChange={(style) => selected && updateSectionStyle(selected.id, style)}
+            onOpenSiteContent={openSiteContent}
+            onDuplicate={duplicateSection}
+            onDelete={deleteSection}
+            onMove={moveSection}
+          />
+        )}
       </div>
+      </DragDropContext>
     </div>
   );
 }

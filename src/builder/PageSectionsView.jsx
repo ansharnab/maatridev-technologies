@@ -1,4 +1,6 @@
 import { SECTION_TYPES } from "./sectionRegistry";
+import StyledSectionWrap from "./StyledSectionWrap";
+import "./styled-section.css";
 
 export default function PageSectionsView({ sections = [] }) {
   return (
@@ -7,7 +9,11 @@ export default function PageSectionsView({ sections = [] }) {
         const def = SECTION_TYPES[section.type];
         if (!def) return null;
         const Component = def.component;
-        return <Component key={section.id} {...(section.props || {})} />;
+        return (
+          <StyledSectionWrap key={section.id} sectionType={section.type} style={section.style}>
+            <Component {...(section.props || {})} />
+          </StyledSectionWrap>
+        );
       })}
     </>
   );

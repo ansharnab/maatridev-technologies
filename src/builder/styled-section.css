@@ -1,0 +1,42 @@
+/* Applied on live site and in the page builder preview */
+.ve-styled-section > section,
+.ve-styled-section > .hero {
+  background: var(--ve-sec-bg, inherit) !important;
+  color: var(--ve-sec-color, inherit);
+  padding-top: var(--ve-sec-py, inherit);
+  padding-bottom: var(--ve-sec-py, inherit);
+  text-align: var(--ve-sec-align, inherit);
+}
+
+.ve-styled-section h1,
+.ve-styled-section h2,
+.ve-styled-section h3,
+.ve-styled-section .section-title {
+  color: var(--ve-sec-heading, inherit) !important;
+}
+
+.ve-styled-section p,
+.ve-styled-section .section-sub,
+.ve-styled-section .hero__subtitle {
+  color: var(--ve-sec-color, inherit);
+}
+
+.ve-styled-section .btn--primary,
+.ve-styled-section .cta-banner__actions .btn--primary {
+  background: var(--ve-sec-accent, #007cc3) !important;
+  border-color: var(--ve-sec-accent, #007cc3) !important;
+}
+
+.ve-styled-section {
+  font-size: calc(1rem * var(--ve-sec-scale, 1));
+}
+
+/* Hero stats stay readable on dark hero backgrounds */
+.ve-styled-section--homeHero .hero__stat strong {
+  color: var(--ve-sec-accent, #00b8a9);
+}
+
+.ve-styled-section--homeHero .hero__stat span {
+  color: var(--ve-sec-color, rgba(255, 255, 255, 0.88));
+  opacity: 1;
+}

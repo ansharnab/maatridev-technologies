@@ -10,6 +10,7 @@ import {
   ContactInfoBlock,
   ContactFormBlock,
 } from "./sections/SectionParts";
+import { defaultStyleForType } from "./editorTheme";
 
 export const PAGE_OPTIONS = [
   { id: "home", label: "Home" },
@@ -217,5 +218,9 @@ export function getDefaultSections(pageId) {
       { id: "s3", type: "contactForm", props: {} },
     ],
   };
-  return JSON.parse(JSON.stringify(defaults[pageId] || defaults.home));
+  const items = JSON.parse(JSON.stringify(defaults[pageId] || defaults.home));
+  return items.map((s) => ({
+    ...s,
+    style: { ...defaultStyleForType(s.type), ...(s.style || {}) },
+  }));
 }

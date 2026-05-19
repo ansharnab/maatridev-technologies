@@ -1,5 +1,171 @@
 {
-  "pages": {},
+  "pages": {
+    "services": {
+      "sections": {
+        "enabled": false,
+        "items": [
+          {
+            "id": "s1",
+            "type": "pageHero",
+            "props": {
+              "title": "Our Services",
+              "description": "IT, AI, cloud, web, creative, blockchain, analytics, and enterprise consultancy.",
+              "breadcrumbLabel": "Services"
+            }
+          },
+          {
+            "id": "s2",
+            "type": "servicesGrid",
+            "props": {
+              "showAll": true,
+              "title": "",
+              "subtitle": ""
+            }
+          },
+          {
+            "id": "s3",
+            "type": "cta",
+            "props": {
+              "title": "Need a custom proposal?",
+              "text": "Tell us about your project.",
+              "buttonLabel": "Contact Us",
+              "buttonLink": "/contact"
+            }
+          }
+        ]
+      }
+    },
+    "home": {
+      "sections": {
+        "enabled": false,
+        "items": [
+          {
+            "id": "s1",
+            "type": "homeHero",
+            "props": {
+              "eyebrow": "Pure-Service Technology Partner",
+              "title": "Technology, creative & digital services — end to end",
+              "subtitle": "Software, web, CRM, cloud, creative, marketing, ITeS, events, and emerging tech — one accountable partnership.",
+              "primaryLabel": "Explore Our Services",
+              "primaryLink": "/services",
+              "secondaryLabel": "View Services",
+              "secondaryLink": "/services"
+            }
+          },
+          {
+            "id": "s2",
+            "type": "stats",
+            "props": {
+              "stat1": "120+",
+              "label1": "Projects Delivered",
+              "stat2": "40+",
+              "label2": "Enterprise Clients",
+              "stat3": "8",
+              "label3": "Core Service Lines",
+              "stat4": "24/7",
+              "label4": "Support Available"
+            }
+          },
+          {
+            "id": "s3",
+            "type": "servicesGrid",
+            "props": {
+              "showAll": false,
+              "title": "What we deliver",
+              "subtitle": "Eight service lines under one accountable partner."
+            }
+          },
+          {
+            "id": "s4",
+            "type": "featureStrip",
+            "props": {
+              "eyebrow": "About MaatriDev",
+              "title": "Pure-service technology partnership",
+              "body": "Led by founders Akshansh Arnab and Swetav Savarn. We deliver software, web, CRM, cloud, creative, marketing, and ITeS.",
+              "buttonLabel": "Our Story",
+              "buttonLink": "/about"
+            }
+          },
+          {
+            "id": "s5",
+            "type": "founders",
+            "props": {}
+          },
+          {
+            "id": "s6",
+            "type": "cta",
+            "props": {
+              "title": "Ready to navigate your next?",
+              "text": "Book an appointment or send us a message — we respond within 24 hours.",
+              "buttonLabel": "Contact Us",
+              "buttonLink": "/contact"
+            }
+          }
+        ]
+      }
+    },
+    "about": {
+      "sections": {
+        "enabled": false,
+        "items": [
+          {
+            "id": "s1",
+            "type": "pageHero",
+            "props": {
+              "title": "About MaatriDev Technologies",
+              "description": "Pure-service technology, creative, and digital partnership.",
+              "breadcrumbLabel": "About"
+            }
+          },
+          {
+            "id": "s2",
+            "type": "textContent",
+            "props": {
+              "title": "Our mission",
+              "body": "We deliver comprehensive technology and digital services in India and worldwide.",
+              "align": "left"
+            }
+          },
+          {
+            "id": "s3",
+            "type": "founders",
+            "props": {}
+          }
+        ]
+      }
+    },
+    "contact": {
+      "sections": {
+        "enabled": false,
+        "items": [
+          {
+            "id": "s1",
+            "type": "pageHero",
+            "props": {
+              "title": "Contact Us",
+              "description": "We respond within 24 hours.",
+              "breadcrumbLabel": "Contact"
+            }
+          },
+          {
+            "id": "s2",
+            "type": "contactInfo",
+            "props": {
+              "title": "Get in touch",
+              "email": "hello@maatridev.com",
+              "phone": "+91 98765 43210",
+              "note": "We respond within one business day."
+            }
+          },
+          {
+            "id": "s3",
+            "type": "contactForm",
+            "props": {}
+          }
+        ]
+      }
+    }
+  },
   "settings": {
     "siteName": "MaatriDev Technologies",
     "tagline": "Technology, creative & digital services — delivered end to end",
