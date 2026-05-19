@@ -26,8 +26,10 @@ npm run dev
 ```
 
 - **Website:** http://localhost:5173
-- **API:** http://localhost:3001
-- **Admin:** http://localhost:5173/admin (password: `maatridev2026` or set `ADMIN_PASSWORD`)
+- **API:** http://localhost:3001 (or `VITE_DEV_API_URL` in `.env`)
+- **Admin:** http://localhost:5173/admin — password from `ADMIN_PASSWORD` in `.env`
+
+Copy `.env.example` to `.env` before first run. Deploy keys, live URLs, and SSH settings also live in `.env`.
 
 ## Website Builder (WYSIWYG)
 
@@ -46,11 +48,14 @@ npm run dev
 ## Production
 
 ```bash
+cp .env.example .env   # set ADMIN_PASSWORD, LIVE_URL, DEPLOY_* etc.
 npm run build
-ADMIN_PASSWORD=your-secure-password npm start
+npm start
 ```
 
-Serve `dist` behind nginx or similar; proxy `/api` and `/uploads` to the Node server.
+**EC2 deploy (Mac/Linux):** `./deploy/ec2-push.sh` (reads `DEPLOY_SSH_*` from `.env`)
+
+Serve `dist` behind nginx; proxy `/api` and `/uploads` to the Node server (see `deploy/nginx-maatridev.conf`).
 
 ## Note on Images
 

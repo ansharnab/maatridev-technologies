@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const directApi = axios.create({ baseURL: "http://localhost:3001" });
+const devApiBase = import.meta.env.VITE_DEV_API_URL || "http://localhost:3001";
+const directApi = axios.create({ baseURL: devApiBase });
 
 export async function loginAdmin(password) {
   const body = { password: password.trim() };

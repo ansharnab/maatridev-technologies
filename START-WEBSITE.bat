@@ -26,7 +26,7 @@ if not exist "node_modules\@measured\puck\" (
 echo.
 echo Website:        http://localhost:5173/
 echo Website Builder: http://localhost:5173/admin
-echo Password:        maatridev2026  (change in .env)
+echo Admin password:  see ADMIN_PASSWORD in .env
 echo.
 echo Keep this window OPEN. Press Ctrl+C to stop.
 echo.

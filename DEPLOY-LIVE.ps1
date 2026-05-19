@@ -1,15 +1,45 @@
 # Deploy MaatriDev website to EC2 (run from this folder on your PC)
-# Usage: .\DEPLOY-LIVE.ps1 -ServerUser ubuntu -ServerHost 13.126.237.163 -RemotePath /home/ubuntu/maatridev
+# Reads DEPLOY_* and LIVE_URL from .env — see .env.example
 
 param(
-  [string]$ServerUser = "ubuntu",
-  [string]$ServerHost = "13.126.237.163",
-  [string]$RemotePath = "/home/ubuntu/maatridev",
+  [string]$ServerUser = "",
+  [string]$ServerHost = "",
+  [string]$RemotePath = "",
   [string]$KeyFile = ""
 )
 
 $ErrorActionPreference = "Stop"
 $Root = $PSScriptRoot
+$EnvFile = Join-Path $Root ".env"
+
+function Read-DotEnv($path) {
+  $vars = @{}
+  if (-not (Test-Path $path)) { return $vars }
+  Get-Content $path | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line -or $line.StartsWith("#")) { return }
+    $i = $line.IndexOf("=")
+    if ($i -lt 1) { return }
+    $k = $line.Substring(0, $i).Trim()
+    $v = $line.Substring($i + 1).Trim().Trim('"').Trim("'")
+    $vars[$k] = $v
+  }
+  $vars
+}
+
+$envVars = Read-DotEnv $EnvFile
+if (-not $ServerUser) { $ServerUser = $envVars["DEPLOY_SSH_USER"] }
+if (-not $ServerHost) { $ServerHost = $envVars["DEPLOY_SSH_HOST"] }
+if (-not $RemotePath) { $RemotePath = $envVars["DEPLOY_REMOTE_APP_PATH"] }
+if (-not $KeyFile) { $KeyFile = $envVars["DEPLOY_SSH_KEY"] }
+
+if (-not $ServerUser -or -not $ServerHost -or -not $RemotePath) {
+  throw "Set DEPLOY_SSH_USER, DEPLOY_SSH_HOST, DEPLOY_REMOTE_APP_PATH in .env (see .env.example)"
+}
+
+$liveUrl = $envVars["PUBLIC_URL"]
+if (-not $liveUrl) { $liveUrl = $envVars["LIVE_URL"] }
+if (-not $liveUrl) { $liveUrl = "http://$ServerHost" }
 
 Write-Host "Building production bundle..." -ForegroundColor Cyan
 Set-Location $Root
@@ -18,12 +48,14 @@ if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 
 $sshTarget = "${ServerUser}@${ServerHost}"
 $scpArgs = @()
-if ($KeyFile) { $scpArgs += "-i", $KeyFile }
+if ($KeyFile) {
+  $expandedKey = $KeyFile -replace '^~', $env:USERPROFILE
+  $scpArgs += "-i", $expandedKey
+}
 
-Write-Host "Uploading to $sshTarget:$RemotePath ..." -ForegroundColor Cyan
+Write-Host "Uploading to ${sshTarget}:${RemotePath} ..." -ForegroundColor Cyan
 Write-Host "(You will be prompted for SSH key/password if needed)" -ForegroundColor Yellow
 
-# Sync project (exclude node_modules — install on server)
 $tar = Join-Path $env:TEMP "maatridev-deploy.tgz"
 if (Test-Path $tar) { Remove-Item $tar -Force }
 
@@ -40,13 +72,15 @@ cd $RemotePath
 tar -xzf /tmp/maatridev-deploy.tgz
 npm install --omit=dev
 if command -v pm2 >/dev/null; then
-  pm2 restart maatridev 2>/dev/null || pm2 start server/index.js --name maatridev
+  pm2 restart maatridev-api 2>/dev/null || pm2 start server/index.js --name maatridev-api
 else
   echo 'Install pm2 or restart your Node service manually: node server/index.js'
 fi
-echo Done. Site: http://$ServerHost/
+echo Done.
 "@
 
 ssh @scpArgs $sshTarget $remote
 
-Write-Host "`nDeployed. Open http://$ServerHost/ and hard-refresh (Ctrl+F5)." -ForegroundColor Green
+$base = $liveUrl.TrimEnd("/")
+Write-Host "`nDeployed. Open $base/ and hard-refresh (Ctrl+F5)." -ForegroundColor Green
+Write-Host "Admin: $base/admin" -ForegroundColor Green

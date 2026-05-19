@@ -27,7 +27,6 @@ echo   pm2 restart all
 echo.
 echo Or run DEPLOY-LIVE.ps1 with your SSH key if you have OpenSSH.
 echo.
-echo Live site: http://13.126.237.163/
-echo Live admin: http://13.126.237.163/admin
+echo Live URLs: see LIVE_URL / PUBLIC_URL in .env (admin: /admin)
 echo.
 pause

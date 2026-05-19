@@ -33,7 +33,11 @@ function loadEnvFile() {
 
 loadEnvFile();
 
-const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "maatridev2026").trim();
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "").trim();
+if (!ADMIN_PASSWORD) {
+  console.error("ADMIN_PASSWORD is required. Copy .env.example to .env and set ADMIN_PASSWORD.");
+  process.exit(1);
+}
 
 [DATA_DIR, MEDIA_DIR, UPLOADS_DIR].forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

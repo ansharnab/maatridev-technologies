@@ -1,16 +1,19 @@
 /**
  * Push site settings (logo, etc.) to live API.
  * Run: node scripts/push-live-content.js
- * Set LIVE_URL and ADMIN_PASSWORD env vars or edit below.
+ * Requires LIVE_URL and ADMIN_PASSWORD in .env (see .env.example).
  */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { loadEnvFile, requireEnv, PROJECT_ROOT } from "./load-env.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LIVE_URL = (process.env.LIVE_URL || "http://13.126.237.163").replace(/\/$/, "");
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "maatridev2026";
-const CONTENT_FILE = path.join(__dirname, "..", "server", "data", "content.json");
+loadEnvFile();
+
+const LIVE_URL = requireEnv("LIVE_URL").replace(/\/$/, "");
+const ADMIN_PASSWORD = requireEnv("ADMIN_PASSWORD");
+const CONTENT_FILE = path.join(PROJECT_ROOT, "server", "data", "content.json");
 
 const local = JSON.parse(fs.readFileSync(CONTENT_FILE, "utf8"));
 
@@ -44,5 +47,5 @@ if (!putRes.ok) {
 }
 
 const out = await putRes.json();
-console.log("Live content updated.");
+console.log("Live content updated at", LIVE_URL);
 console.log("logoImage:", out.content?.settings?.logoImage ?? merged.settings?.logoImage);

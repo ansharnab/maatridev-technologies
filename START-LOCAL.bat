@@ -17,7 +17,7 @@ if not exist "node_modules\" (
 echo.
 echo  Local site:  http://localhost:5173/
 echo  Local admin: http://localhost:5173/admin
-echo  Password:    maatridev2026
+echo  Password:    see ADMIN_PASSWORD in .env
 echo.
 echo  Keep this window OPEN while you use the site.
 echo.

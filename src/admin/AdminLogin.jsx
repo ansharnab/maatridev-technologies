@@ -35,9 +35,7 @@ export default function AdminLogin({ onLogin }) {
           "Cannot reach the API on port 3001. Close this tab, run START-FULL.bat (or npm run dev), then try again."
         );
       } else if (status === 401) {
-        setError(
-          "Incorrect password. Use maatridev2026 by default, or the value in website/.env (ADMIN_PASSWORD)."
-        );
+        setError("Incorrect password. Use the value set in .env (ADMIN_PASSWORD).");
       } else if (status === 502 || status === 504) {
         setError(
           "API server is not running. Run START-FULL.bat or npm run dev (not dev:client only)."
@@ -102,8 +100,7 @@ export default function AdminLogin({ onLogin }) {
             </button>
           </div>
           <p className="admin-login__hint">
-            Default password: <code>maatridev2026</code> — change in <code>website/.env</code> →{" "}
-            <code>ADMIN_PASSWORD=yourpassword</code>
+            Password is set in <code>.env</code> → <code>ADMIN_PASSWORD=yourpassword</code>
           </p>
         </div>
 
