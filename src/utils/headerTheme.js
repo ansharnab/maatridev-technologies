@@ -780,8 +780,32 @@ export const HEADER_THEME_PRESETS = [
   { id: "md-mist", label: "Mist light", patch: () => applyHeaderDesignPreset("mistLight") },
 ];
 
+function darkenHex(hex, amount = 0.12) {
+  const h = String(hex).replace("#", "");
+  if (h.length !== 6) return hex;
+  const r = Math.max(0, Math.floor(parseInt(h.slice(0, 2), 16) * (1 - amount)));
+  const g = Math.max(0, Math.floor(parseInt(h.slice(2, 4), 16) * (1 - amount)));
+  const b = Math.max(0, Math.floor(parseInt(h.slice(4, 6), 16) * (1 - amount)));
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+/** Only appointment button colors — header bar unchanged */
+export function applyHeaderCtaPreset(designId) {
+  const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
+  const bg = d.ctaBg;
+  const hex = String(bg).match(/#[0-9A-Fa-f]{6}/i)?.[0];
+  return {
+    headerCtaPresetId: d.id,
+    headerCtaBg: bg,
+    headerCtaColor: d.ctaColor,
+    headerCtaBorderColor: hex || bg,
+    headerCtaHoverBg: hex ? darkenHex(hex) : "#006aa8",
+  };
+}
+
 export function applyHeaderDesignPreset(designId) {
   const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
+  const cta = applyHeaderCtaPreset(designId);
   return {
     headerDesign: d.id,
     headerBarBackground: d.barBackground,
@@ -789,8 +813,7 @@ export function applyHeaderDesignPreset(designId) {
     headerBarScrolled: d.barScrolled,
     headerNavOnDark: d.navOnDark,
     headerNavOnLight: d.navOnLight,
-    headerCtaBg: d.ctaBg,
-    headerCtaColor: d.ctaColor,
+    ...cta,
   };
 }
 

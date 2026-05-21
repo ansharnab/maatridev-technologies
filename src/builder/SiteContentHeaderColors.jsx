@@ -1,4 +1,6 @@
+import HeaderCtaColorGrid, { headerDesignCount } from "./HeaderDesignGrid";
 import { HEADER_BEAUTY_PALETTES, SITE_CONTENT_HEADER_COLOR_UI } from "../utils/headerTextPalettes";
+import { applyHeaderCtaPreset } from "../utils/headerTheme";
 import { colorPickerValue } from "../utils/headerColorFields";
 
 function ColorRow({ field, value, onChange }) {
@@ -38,7 +40,16 @@ export default function SiteContentHeaderColors({ settings = {}, onPatch }) {
         Change header link colors, brand title, and the appointment button. Pick a palette or fine-tune below.
       </p>
 
-      <p className="scp-sub-label">Beautiful palettes</p>
+      <p className="scp-sub-label">Appointment button only ({headerDesignCount()} colors)</p>
+      <p className="scp-header-themes__intro">
+        Click any swatch below to change <strong>only</strong> the header button — bar and menu stay as they are.
+      </p>
+      <HeaderCtaColorGrid
+        activeCtaId={settings.headerCtaPresetId || settings.headerDesign || ""}
+        onSelectCta={(id) => onPatch?.(applyHeaderCtaPreset(id))}
+      />
+
+      <p className="scp-sub-label">Beautiful palettes (menu + brand + button)</p>
       <div className="scp-palette-chips">
         {HEADER_BEAUTY_PALETTES.map((p) => (
           <button

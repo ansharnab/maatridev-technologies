@@ -7,6 +7,7 @@ import {
   HEADER_LIGHT_DESIGN_IDS,
   HEADER_SIZES,
   HEADER_THEME_PRESETS,
+  applyHeaderCtaPreset,
   applyHeaderDesignPreset,
   headerQuickPresets,
 } from "../utils/headerTheme";
@@ -182,8 +183,10 @@ export default function SiteHeaderInspector({
         </p>
         <div className="ve-header-design-grid-wrap">
           <HeaderDesignGrid
-            activeId={designId}
-            onSelect={(id) => patch(applyHeaderDesignPreset(id))}
+            activeBarId={designId}
+            activeCtaId={settings.headerCtaPresetId || designId}
+            onSelectBar={(id) => patch(applyHeaderDesignPreset(id))}
+            onSelectCta={(id) => patch(applyHeaderCtaPreset(id))}
             maxHeight={280}
           />
         </div>

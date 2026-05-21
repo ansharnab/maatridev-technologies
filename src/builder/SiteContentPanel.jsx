@@ -5,6 +5,7 @@ import {
   HEADER_DARK_QUICK_IDS,
   HEADER_DESIGNS,
   HEADER_LIGHT_DESIGN_IDS,
+  applyHeaderCtaPreset,
   applyHeaderDesignPreset,
   headerQuickPresets,
 } from "../utils/headerTheme";
@@ -349,15 +350,13 @@ export default function SiteContentPanel({
                 </div>
 
                 <p className="scp-sub-label">
-                  All bar + button designs ({headerDesignCount()} gradients &amp; colors)
-                </p>
-                <p className="scp-header-themes__intro">
-                  Top stripe = header bar. Small pill = <strong>Book Appointment</strong> button. Each design updates
-                  menu, bar, and button together.
+                  All designs ({headerDesignCount()} gradients &amp; colors)
                 </p>
                 <HeaderDesignGrid
-                  activeId={settings.headerDesign || "glass"}
-                  onSelect={(id) => setSettings(applyHeaderDesignPreset(id))}
+                  activeBarId={settings.headerDesign || "glass"}
+                  activeCtaId={settings.headerCtaPresetId || settings.headerDesign || ""}
+                  onSelectBar={(id) => setSettings(applyHeaderDesignPreset(id))}
+                  onSelectCta={(id) => setSettings(applyHeaderCtaPreset(id))}
                 />
               </section>
 

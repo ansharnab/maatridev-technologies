@@ -38,6 +38,7 @@ const DEFAULT_SETTINGS = {
   headerCtaColor: "#ffffff",
   headerCtaLabel: "Book Appointment",
   headerCtaLink: "/appointment",
+  headerCtaPresetId: "glass",
   homeHeroTheme: "it",
   homeHeroGradient: "",
 };
