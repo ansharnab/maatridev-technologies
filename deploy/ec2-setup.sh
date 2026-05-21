@@ -34,6 +34,14 @@ sudo chown -R nginx:nginx "$WEB_ROOT"
 echo "==> Configuring nginx..."
 sudo cp "${APP_DIR}/deploy/nginx-maatridev.conf" /etc/nginx/conf.d/maatridev.conf
 sudo rm -f /etc/nginx/conf.d/default.conf 2>/dev/null || true
+# Re-attach Let's Encrypt SSL if cert already exists (deploy overwrites HTTP-only config)
+if [[ -d /etc/letsencrypt/live/maatridev.com ]] && command -v certbot >/dev/null 2>&1; then
+  echo "==> Restoring HTTPS (certbot)..."
+  sudo certbot install --cert-name maatridev.com --nginx --redirect --non-interactive 2>/dev/null || \
+    sudo certbot --nginx --non-interactive --agree-tos --redirect \
+      --email "${SSL_EMAIL:-hello@maatridev.com}" \
+      --domains "maatridev.com,www.maatridev.com" 2>/dev/null || true
+fi
 sudo nginx -t
 sudo systemctl enable nginx
 sudo systemctl restart nginx
