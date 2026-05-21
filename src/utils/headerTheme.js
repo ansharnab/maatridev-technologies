@@ -1,3 +1,4 @@
+import { resolveHeaderLogoFilter } from "./logoImageFilters";
 import { resolveLogoUrls } from "./logoSettings";
 
 /** Header design presets + CSS variables for live site and page builder preview */
@@ -432,7 +433,55 @@ export const HEADER_DESIGNS = {
     ctaColor: "#ffffff",
     border: "rgba(0, 124, 195, 0.1)",
   },
+  cream: {
+    id: "cream",
+    label: "Cream white",
+    swatch: "#fffbeb",
+    barBackground: "linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#78350f",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(120, 53, 15, 0.12)",
+  },
+  linen: {
+    id: "linen",
+    label: "Linen off-white",
+    swatch: "#fafaf9",
+    barBackground: "rgba(250, 250, 249, 0.98)",
+    barScrolled: "#ffffff",
+    navOnDark: "#334155",
+    navOnLight: "#0f172a",
+    ctaBg: "#0ea5e9",
+    ctaColor: "#ffffff",
+    border: "rgba(15, 23, 42, 0.08)",
+  },
 };
+
+/** Light header bars — dark nav text, good for colored/dark logos */
+export const HEADER_LIGHT_DESIGN_IDS = [
+  "light",
+  "arctic",
+  "mistLight",
+  "cloudInner",
+  "cream",
+  "linen",
+];
+
+export const HEADER_DARK_QUICK_IDS = ["glass", "maatridevHome", "solid", "infosysTeal", "maatridevPage"];
+
+export function headerQuickPresets(ids) {
+  return ids.map((id) => {
+    const d = HEADER_DESIGNS[id];
+    return {
+      id,
+      label: d?.label || id,
+      swatch: d?.swatch,
+      patch: () => applyHeaderDesignPreset(id),
+    };
+  });
+}
 
 /** One-click combos matching live site screenshots */
 export const HEADER_THEME_PRESETS = [
@@ -601,7 +650,7 @@ export function resolveHeaderTheme(settings = {}, opts = {}) {
       "--header-toggle-bg": settings.headerToggleBg || "rgba(255, 255, 255, 0.1)",
       "--header-toggle-border": settings.headerToggleBorderColor || "rgba(255, 255, 255, 0.25)",
       "--header-toggle-icon": settings.headerToggleIconColor || "#ffffff",
-      "--header-logo-filter": settings.headerLogoWordmarkFilter || "none",
+      "--header-logo-filter": resolveHeaderLogoFilter(settings),
       "--header-logo-primary": settings.logoColorPrimary || "#007cc3",
       "--header-logo-accent": settings.logoColorAccent || "#00b8a9",
       "--logo-scale": settings.logoScale ?? 1,

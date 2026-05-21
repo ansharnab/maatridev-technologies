@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   logoAnimation: "gradient",
   logoColorPrimary: "#007cc3",
   logoColorAccent: "#00b8a9",
+  logoImageFilter: "none",
   tagline: "Technology, creative & digital services — delivered end to end",
   email: "hello@maatridev.com",
   phone: "+91 98765 43210",

@@ -47,6 +47,11 @@
   transition: filter 0.2s ease;
 }
 
+.animated-logo--image .animated-logo__img,
+.animated-logo--image .animated-logo__video {
+  filter: var(--header-logo-filter, none);
+}
+
 .site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__img,
 .site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__video {
   filter: brightness(1.08);

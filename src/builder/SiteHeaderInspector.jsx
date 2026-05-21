@@ -4,10 +4,15 @@ import { logoSettingsAfterUpload } from "../utils/logoSettings";
 import { PREVIEW_NAV } from "./previewNav";
 import {
   HEADER_DESIGNS,
+  HEADER_LIGHT_DESIGN_IDS,
   HEADER_SIZES,
   HEADER_THEME_PRESETS,
   applyHeaderDesignPreset,
+  headerQuickPresets,
 } from "../utils/headerTheme";
+import { LOGO_IMAGE_FILTER_PRESETS } from "../utils/logoImageFilters";
+import { isBuiltInLogo } from "../utils/logoSettings";
+import { hasCustomLogo } from "../utils/mediaType";
 import {
   HEADER_COLOR_GROUPS,
   HEADER_COLOR_SWATCHES,
@@ -33,6 +38,21 @@ const HERO_THEMES = [
 function ColorField({ field, value, onChange }) {
   const v = value ?? field.default;
   const type = field.type || "color";
+
+  if (type === "logoFilter") {
+    return (
+      <div className="field ve-header-color-field">
+        <label htmlFor={`hdr-${field.key}`}>{field.label}</label>
+        <select id={`hdr-${field.key}`} value={v || "none"} onChange={(e) => onChange(e.target.value)}>
+          {LOGO_IMAGE_FILTER_PRESETS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   if (type === "text") {
     return (
@@ -137,8 +157,23 @@ export default function SiteHeaderInspector({
           ))}
         </div>
 
+        <p className="ve-inspector__label">Light header bars ({HEADER_LIGHT_DESIGN_IDS.length})</p>
+        <div className="ve-header-design-grid ve-header-design-grid--compact">
+          {headerQuickPresets(HEADER_LIGHT_DESIGN_IDS).map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`ve-header-design-card${designId === p.id ? " is-active" : ""}`}
+              onClick={() => patch(p.patch())}
+            >
+              <span className="ve-header-design-card__swatch" style={{ background: p.swatch }} />
+              <span className="ve-header-design-card__label">{p.label}</span>
+            </button>
+          ))}
+        </div>
+
         <p className="ve-inspector__label">
-          Header design ({Object.keys(HEADER_DESIGNS).length} gradients &amp; colors)
+          All header designs ({Object.keys(HEADER_DESIGNS).length} gradients &amp; colors)
         </p>
         <div className="ve-header-design-grid">
           {Object.values(HEADER_DESIGNS).map((d) => (
@@ -349,6 +384,24 @@ export default function SiteHeaderInspector({
             onChange={(e) => patch({ logoClipWidth: Number(e.target.value) })}
           />
         </div>
+
+        {hasCustomLogo(settings.logoImage) && !isBuiltInLogo(settings.logoImage) && (
+          <>
+            <p className="ve-inspector__label">Uploaded logo tone (CSS filter)</p>
+            <div className="ve-inspector__chips">
+              {LOGO_IMAGE_FILTER_PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={(settings.logoImageFilter || "none") === p.id ? "is-active" : ""}
+                  onClick={() => patch({ logoImageFilter: p.id })}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         <p className="ve-inspector__label">Appointment button</p>
         <div className="field">

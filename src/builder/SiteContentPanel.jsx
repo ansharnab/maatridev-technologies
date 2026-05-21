@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
-import { logoSettingsAfterUpload, resolveLogoUrls } from "../utils/logoSettings";
+import {
+  HEADER_DARK_QUICK_IDS,
+  HEADER_LIGHT_DESIGN_IDS,
+  applyHeaderDesignPreset,
+  headerQuickPresets,
+  resolveHeaderTheme,
+} from "../utils/headerTheme";
+import { LOGO_IMAGE_FILTER_PRESETS } from "../utils/logoImageFilters";
+import { isBuiltInLogo, logoSettingsAfterUpload, resolveLogoUrls } from "../utils/logoSettings";
 import { hasCustomLogo } from "../utils/mediaType";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
@@ -159,6 +167,14 @@ export default function SiteContentPanel({
     headerPreviewLogo.display && headerPreviewLogo.display.includes("/uploads/") && settings.logoUpdatedAt
       ? `${headerPreviewLogo.display}?v=${settings.logoUpdatedAt}`
       : headerPreviewLogo.display;
+  const headerPreviewTheme = resolveHeaderTheme(settings, {
+    editorPreview: true,
+    previewContext: "home",
+  });
+  const lightHeaderPresets = headerQuickPresets(HEADER_LIGHT_DESIGN_IDS);
+  const darkHeaderPresets = headerQuickPresets(HEADER_DARK_QUICK_IDS);
+  const customUploadedLogo =
+    hasCustomLogo(settings.logoImage) && !isBuiltInLogo(settings.logoImage);
 
   return (
     <div className="scp-root">
@@ -301,7 +317,69 @@ export default function SiteContentPanel({
                 </div>
               </section>
 
-              {hasCustomLogo(settings.logoImage) && !String(settings.logoImage).includes("logo-maatridev") && (
+              <section className="scp-section-card scp-header-themes">
+                <h4>Header bar colors</h4>
+                <p className="scp-header-themes__intro">
+                  Light bars use dark menu text — pair with <strong>Original</strong> or <strong>Darker</strong> logo tone.
+                  Dark bars often need <strong>White</strong> or <strong>Brighter</strong> logo tone.
+                </p>
+                <p className="scp-sub-label">Light headers</p>
+                <div className="scp-theme-chips">
+                  {lightHeaderPresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="scp-sub-label">Dark headers</p>
+                <div className="scp-theme-chips">
+                  {darkHeaderPresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="scp-note">
+                  More bar, menu, and CTA colors: Page Builder → click the header → <strong>Site header &amp; colors</strong>.
+                </p>
+              </section>
+
+              {customUploadedLogo && (
+                <section className="scp-section-card">
+                  <h4>Uploaded logo tone</h4>
+                  <p className="scp-header-themes__intro">
+                    Adjust how your PNG/SVG looks on the header (does not edit the file). Animated M icon colors are below.
+                  </p>
+                  <div className="scp-logo-filter-chips">
+                    {LOGO_IMAGE_FILTER_PRESETS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`scp-logo-filter-chip${(settings.logoImageFilter || "none") === p.id ? " is-active" : ""}`}
+                        onClick={() => setSettings({ logoImageFilter: p.id })}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {customUploadedLogo && (
                 <>
                   <Field label={`Logo size (${settings.logoScale ?? 1}×)`}>
                     <input
@@ -438,7 +516,12 @@ export default function SiteContentPanel({
             {tab === "brand" && (
               <div className="scp-brand-preview">
                 <p className="scp-brand-preview__label">Header preview</p>
-                <div className="scp-brand-preview__header">
+                <div
+                  className="scp-brand-preview__header"
+                  style={{
+                    "--header-logo-filter": headerPreviewTheme.cssVars["--header-logo-filter"],
+                  }}
+                >
                   <AnimatedLogo
                     letter={settings.logoLetter}
                     animation={settings.logoAnimation}

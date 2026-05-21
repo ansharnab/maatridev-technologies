@@ -87,40 +87,41 @@ export const HEADER_COLOR_GROUPS = [
   },
   {
     id: "brand",
-    label: "Logo & brand (5)",
+    label: "Logo & brand (6)",
     fields: [
       { key: "headerBrandTextOnDark", label: "15. Brand title (dark bar)", default: "#ffffff" },
       { key: "headerBrandSubtextOnDark", label: "16. Brand subtitle (dark bar)", default: "rgba(255, 255, 255, 0.88)" },
       { key: "logoColorPrimary", label: "17. Logo icon primary", default: "#007cc3" },
       { key: "logoColorAccent", label: "18. Logo icon accent", default: "#00b8a9" },
-      { key: "headerLogoWordmarkFilter", label: "19. Logo on dark (CSS filter)", default: "none", type: "text" },
+      { key: "logoImageFilter", label: "19. Logo tone preset", default: "none", type: "logoFilter" },
+      { key: "headerLogoWordmarkFilter", label: "20. Logo custom CSS filter", default: "none", type: "text" },
     ],
   },
   {
     id: "cta",
     label: "CTA button (4)",
     fields: [
-      { key: "headerCtaBg", label: "20. Button background", default: "#007cc3" },
-      { key: "headerCtaColor", label: "21. Button text", default: "#ffffff" },
-      { key: "headerCtaHoverBg", label: "22. Button hover background", default: "#006aa8" },
-      { key: "headerCtaBorderColor", label: "23. Button border", default: "#007cc3" },
+      { key: "headerCtaBg", label: "21. Button background", default: "#007cc3" },
+      { key: "headerCtaColor", label: "22. Button text", default: "#ffffff" },
+      { key: "headerCtaHoverBg", label: "23. Button hover background", default: "#006aa8" },
+      { key: "headerCtaBorderColor", label: "24. Button border", default: "#007cc3" },
     ],
   },
   {
     id: "mobile",
     label: "Mobile menu (3)",
     fields: [
-      { key: "headerToggleBg", label: "24. Hamburger background", default: "rgba(255, 255, 255, 0.1)" },
-      { key: "headerToggleBorderColor", label: "25. Hamburger border", default: "rgba(255, 255, 255, 0.25)" },
-      { key: "headerToggleIconColor", label: "26. Hamburger icon lines", default: "#ffffff" },
+      { key: "headerToggleBg", label: "25. Hamburger background", default: "rgba(255, 255, 255, 0.1)" },
+      { key: "headerToggleBorderColor", label: "26. Hamburger border", default: "rgba(255, 255, 255, 0.25)" },
+      { key: "headerToggleIconColor", label: "27. Hamburger icon lines", default: "#ffffff" },
     ],
   },
   {
     id: "preview",
     label: "Builder preview backdrop (2)",
     fields: [
-      { key: "headerPreviewHomeBg", label: "27. Preview: home hero behind header", default: "linear-gradient(125deg, #0a1628, #003d5c, #004d73)", type: "gradient" },
-      { key: "headerPreviewPageBg", label: "28. Preview: page banner behind header", default: "linear-gradient(135deg, #007cc3, #003d5c)", type: "gradient" },
+      { key: "headerPreviewHomeBg", label: "28. Preview: home hero behind header", default: "linear-gradient(125deg, #0a1628, #003d5c, #004d73)", type: "gradient" },
+      { key: "headerPreviewPageBg", label: "29. Preview: page banner behind header", default: "linear-gradient(135deg, #007cc3, #003d5c)", type: "gradient" },
     ],
   },
 ];

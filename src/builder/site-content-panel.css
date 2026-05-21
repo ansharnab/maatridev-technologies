@@ -350,6 +350,77 @@
   color: #334155;
 }
 
+.scp-sub-label {
+  margin: 0.65rem 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.scp-header-themes__intro {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.scp-theme-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.45rem;
+}
+
+.scp-theme-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-align: left;
+  color: #334155;
+}
+
+.scp-theme-chip.is-active {
+  border-color: #007cc3;
+  box-shadow: 0 0 0 2px rgba(0, 124, 195, 0.2);
+}
+
+.scp-theme-chip__swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.scp-logo-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.scp-logo-filter-chip {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #334155;
+}
+
+.scp-logo-filter-chip.is-active {
+  background: #007cc3;
+  border-color: #007cc3;
+  color: #fff;
+}
+
 .image-field input[type="url"] {
   width: 100%;
   padding: 0.5rem;
