@@ -4,20 +4,14 @@ import AnimatedLogo from "../AnimatedLogo";
 import { hasCustomLogo } from "../../utils/mediaType";
 import { resolveHeaderTheme, previewContextFromPath } from "../../utils/headerTheme";
 import { resolveLogoUrls } from "../../utils/logoSettings";
-import { services as serviceCatalog } from "../../data/siteData";
 import "./Header.css";
 
+/** Home dropdown — agency / homepage variants only */
 const HOME_NAV_CHILDREN = [
   { to: "/", label: "IT Solutions (Default)" },
-  { to: "/home/it-solution", label: "IT Solutions" },
   { to: "/home/web-agency", label: "Web Agency" },
   { to: "/home/startup-agency", label: "Startup Agency" },
   { to: "/home/digital-agency", label: "Digital Agency" },
-];
-
-const SERVICE_NAV_CHILDREN = [
-  { to: "/services", label: "All Services" },
-  ...serviceCatalog.map((s) => ({ to: `/services/${s.id}`, label: s.title })),
 ];
 
 const nav = [
@@ -26,10 +20,7 @@ const nav = [
     children: HOME_NAV_CHILDREN,
   },
   { to: "/about", label: "About" },
-  {
-    label: "Services",
-    children: SERVICE_NAV_CHILDREN,
-  },
+  { to: "/services", label: "Services" },
   { to: "/projects", label: "Projects" },
   { to: "/team", label: "Team" },
   { to: "/blog", label: "Blog" },

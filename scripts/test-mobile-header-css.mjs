@@ -21,7 +21,8 @@ const requiredCss = [
 ];
 
 assert.ok(jsx.includes("HOME_NAV_CHILDREN"), "Header.jsx should list agency homepages");
-assert.ok(jsx.includes("SERVICE_NAV_CHILDREN"), "Header.jsx should list all service pages");
+assert.ok(jsx.includes('to: "/services", label: "Services"'), "Services should be a single nav link");
+assert.ok(!jsx.includes("SERVICE_NAV_CHILDREN"), "Services should not use a long submenu");
 
 for (const needle of requiredCss) {
   assert.ok(css.includes(needle), `Header.css missing: ${needle.slice(0, 60)}…`);
