@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
-import { logoSettingsAfterUpload } from "../utils/logoSettings";
+import { logoSettingsAfterUpload, resolveLogoUrls } from "../utils/logoSettings";
+import { hasCustomLogo } from "../utils/mediaType";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
 import AnimatedLogo from "../components/AnimatedLogo";
@@ -120,16 +121,21 @@ export default function SiteContentPanel({
 
   const setSettings = (patch) => setContent((c) => ({ ...c, settings: { ...c.settings, ...patch } }));
 
-  const persistLogoUpload = async (url) => {
-    if (!url.startsWith("/uploads/")) return;
-    const settingsPatch = logoSettingsAfterUpload(url, content.settings || {});
+  const applyLogoChange = async (url) => {
+    const base = content.settings || {};
+    const settingsPatch = !url
+      ? { logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg", logoUpdatedAt: undefined }
+      : url.startsWith("/uploads/")
+        ? logoSettingsAfterUpload(url, base)
+        : { logoImage: url, logoUpdatedAt: Date.now() };
     const next = {
       ...content,
-      settings: { ...(content.settings || {}), ...settingsPatch },
+      settings: { ...base, ...settingsPatch },
     };
     setContent(next);
-    await save(next);
+    if (!url || url.startsWith("/uploads/")) await save(next);
   };
+
   const setFounders = (founders) => setContent((c) => ({ ...c, site: { ...c.site, founders } }));
   const setServices = (services) => setContent((c) => ({ ...c, site: { ...c.site, services } }));
 
@@ -148,6 +154,11 @@ export default function SiteContentPanel({
   const founders = content.site?.founders || [];
   const services = content.site?.services || [];
   const settings = content.settings || {};
+  const headerPreviewLogo = resolveLogoUrls(settings, true);
+  const headerPreviewSrc =
+    headerPreviewLogo.display && headerPreviewLogo.display.includes("/uploads/") && settings.logoUpdatedAt
+      ? `${headerPreviewLogo.display}?v=${settings.logoUpdatedAt}`
+      : headerPreviewLogo.display;
 
   return (
     <div className="scp-root">
@@ -180,85 +191,117 @@ export default function SiteContentPanel({
           {tab === "brand" && (
             <>
               <h3>Brand & Logo</h3>
-              <Field label="Site name">
-                <input value={settings.siteName || ""} onChange={(e) => setSettings({ siteName: e.target.value })} />
-              </Field>
-              <Field label="Logo text (next to icon)">
-                <input value={settings.logoText || ""} onChange={(e) => setSettings({ logoText: e.target.value })} />
-              </Field>
-              <Field label="Logo letter (if no image)">
-                <input
-                  maxLength={2}
-                  value={settings.logoLetter || "M"}
-                  onChange={(e) => setSettings({ logoLetter: e.target.value })}
+
+              <section className="scp-logo-card">
+                <div className="scp-logo-card__head">
+                  <h4>Logo file</h4>
+                  <p>PNG, SVG, or MP4 on transparent background. Uploads save automatically.</p>
+                </div>
+                <ImageField
+                  allowVideo
+                  variant="logo"
+                  previewVersion={settings.logoUpdatedAt}
+                  label=""
+                  hint="Recommended: wide lockup (logo + name). On dark headers we use the same file unless you set a separate dark logo later."
+                  value={settings.logoImage || ""}
+                  onChange={(url) => {
+                    setStatus("");
+                    if (!url || url.startsWith("/uploads/")) {
+                      void applyLogoChange(url);
+                    } else {
+                      setSettings({ logoImage: url });
+                    }
+                  }}
+                  onError={(msg) => setStatus(msg)}
                 />
-              </Field>
-              <Field label="Logo animation">
-                <select
-                  value={settings.logoAnimation || "gradient"}
-                  onChange={(e) => setSettings({ logoAnimation: e.target.value })}
+                {settings.logoImage && (
+                  <p className="scp-logo-card__path">
+                    <span>Current:</span> <code>{settings.logoImage}</code>
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="ve-btn ve-btn--small scp-logo-card__reset"
+                  onClick={() => void applyLogoChange("")}
                 >
-                  <option value="gradient">Gradient shift</option>
-                  <option value="pulse">Pulse</option>
-                  <option value="glow">Glow</option>
-                  <option value="orbit">Orbit ring</option>
-                  <option value="none">Static (no motion)</option>
-                </select>
-              </Field>
-              <div className="scp-row-2">
-                <Field label="Primary color">
-                  <input
-                    type="color"
-                    value={settings.logoColorPrimary || "#007cc3"}
-                    onChange={(e) => setSettings({ logoColorPrimary: e.target.value })}
-                  />
-                </Field>
-                <Field label="Accent color">
-                  <input
-                    type="color"
-                    value={settings.logoColorAccent || "#00b8a9"}
-                    onChange={(e) => setSettings({ logoColorAccent: e.target.value })}
-                  />
-                </Field>
-              </div>
-              <p className="scp-note scp-note--warn">
-                Uploads save automatically. If you paste a URL manually, click <strong>Save site content</strong> above.
-              </p>
-              <ImageField
-                allowVideo
-                label="Logo image or video (optional)"
-                hint="Use a PNG or SVG with a transparent background (full lockup). Default: /logo-maatridev.svg. On dark heroes, /logo-maatridev-hero.svg is used automatically."
-                value={settings.logoImage || ""}
-                onChange={(url) => {
-                  if (!url) {
-                    setSettings({ logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg" });
-                    return;
-                  }
-                  const patch = url.startsWith("/uploads/")
-                    ? logoSettingsAfterUpload(url, settings)
-                    : { logoImage: url };
-                  setSettings(patch);
-                  if (url.startsWith("/uploads/")) void persistLogoUpload(url);
-                }}
-                onError={(msg) => setStatus(msg)}
-              />
-              <div className="scp-logo-quick">
+                  Remove custom logo (use default M)
+                </button>
                 <button
                   type="button"
                   className="ve-btn ve-btn--small"
-                  onClick={() =>
-                    setSettings({
-                      logoImage: "/logo-maatridev.svg",
-                      logoImageOnDark: "/logo-maatridev-hero.svg",
-                      logoText: "MaatriDev",
-                      siteName: "MaatriDev Technologies",
-                    })
-                  }
+                  onClick={() => {
+                    const next = {
+                      ...content,
+                      settings: {
+                        ...settings,
+                        logoImage: "/logo-maatridev.svg",
+                        logoImageOnDark: "/logo-maatridev-hero.svg",
+                        logoText: "MaatriDev",
+                        siteName: "MaatriDev Technologies",
+                        logoUpdatedAt: undefined,
+                      },
+                    };
+                    setContent(next);
+                    void save(next);
+                  }}
                 >
-                  Use default MaatriDev logo
+                  Restore built-in MaatriDev SVG
                 </button>
-              </div>
-              {settings.logoImage && (
+              </section>
+
+              <section className="scp-section-card">
+                <h4>Brand text</h4>
+                <Field label="Site name">
+                  <input value={settings.siteName || ""} onChange={(e) => setSettings({ siteName: e.target.value })} />
+                </Field>
+                <Field label="Logo text (shown when no image)">
+                  <input value={settings.logoText || ""} onChange={(e) => setSettings({ logoText: e.target.value })} />
+                </Field>
+                <Field label="Tagline">
+                  <input value={settings.tagline || ""} onChange={(e) => setSettings({ tagline: e.target.value })} />
+                </Field>
+              </section>
+
+              <section className="scp-section-card">
+                <h4>Animated M icon (fallback)</h4>
+                <Field label="Logo letter">
+                  <input
+                    maxLength={2}
+                    value={settings.logoLetter || "M"}
+                    onChange={(e) => setSettings({ logoLetter: e.target.value })}
+                  />
+                </Field>
+                <Field label="Animation">
+                  <select
+                    value={settings.logoAnimation || "gradient"}
+                    onChange={(e) => setSettings({ logoAnimation: e.target.value })}
+                  >
+                    <option value="gradient">Gradient shift</option>
+                    <option value="pulse">Pulse</option>
+                    <option value="glow">Glow</option>
+                    <option value="orbit">Orbit ring</option>
+                    <option value="none">Static</option>
+                  </select>
+                </Field>
+                <div className="scp-row-2">
+                  <Field label="Primary color">
+                    <input
+                      type="color"
+                      value={settings.logoColorPrimary || "#007cc3"}
+                      onChange={(e) => setSettings({ logoColorPrimary: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Accent color">
+                    <input
+                      type="color"
+                      value={settings.logoColorAccent || "#00b8a9"}
+                      onChange={(e) => setSettings({ logoColorAccent: e.target.value })}
+                    />
+                  </Field>
+                </div>
+              </section>
+
+              {hasCustomLogo(settings.logoImage) && !String(settings.logoImage).includes("logo-maatridev") && (
                 <>
                   <Field label={`Logo size (${settings.logoScale ?? 1}×)`}>
                     <input
@@ -286,9 +329,9 @@ export default function SiteContentPanel({
                   </p>
                 </>
               )}
-              <Field label="Tagline">
-                <input value={settings.tagline || ""} onChange={(e) => setSettings({ tagline: e.target.value })} />
-              </Field>
+              <p className="scp-note">
+                Pasted a custom URL? Click <strong>Save site content</strong> at the top.
+              </p>
             </>
           )}
 
@@ -397,20 +440,20 @@ export default function SiteContentPanel({
                 <p className="scp-brand-preview__label">Header preview</p>
                 <div className="scp-brand-preview__header">
                   <AnimatedLogo
-                  letter={settings.logoLetter}
-                  animation={settings.logoAnimation}
-                  colorPrimary={settings.logoColorPrimary}
-                  colorAccent={settings.logoColorAccent}
-                  imageUrl={settings.logoImage}
-                  alt={settings.logoText}
-                  fullBrand={Boolean(settings.logoImage)}
-                  scale={settings.logoScale}
-                  clipWidth={settings.logoClipWidth}
-                  size="lg"
-                />
+                    letter={settings.logoLetter}
+                    animation={settings.logoAnimation}
+                    colorPrimary={settings.logoColorPrimary}
+                    colorAccent={settings.logoColorAccent}
+                    imageUrl={headerPreviewSrc}
+                    alt={settings.logoText}
+                    fullBrand={headerPreviewLogo.hasUpload || hasCustomLogo(settings.logoImage)}
+                    scale={settings.logoScale}
+                    clipWidth={settings.logoClipWidth}
+                    size="lg"
+                  />
                 </div>
                 <div className="scp-brand-preview__meta">
-                  {!settings.logoImage && (
+                  {!headerPreviewLogo.hasUpload && (
                     <>
                       <strong>{settings.logoText}</strong>
                       <small>TECHNOLOGIES</small>

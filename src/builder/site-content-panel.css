@@ -291,8 +291,63 @@
   border-radius: 8px;
 }
 
-.scp-logo-quick {
-  margin: 0.5rem 0 1rem;
+.scp-logo-card {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+
+.scp-logo-card__head {
+  margin-bottom: 0.75rem;
+}
+
+.scp-logo-card__head h4 {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.scp-logo-card__head p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.scp-logo-card__path {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: #475569;
+  word-break: break-all;
+}
+
+.scp-logo-card__path code {
+  display: block;
+  margin-top: 0.2rem;
+  padding: 0.35rem 0.5rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.scp-logo-card__reset {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.scp-section-card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.scp-section-card h4 {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  color: #334155;
 }
 
 .image-field input[type="url"] {
@@ -310,22 +365,56 @@
   margin-bottom: 0.5rem;
 }
 
+.image-field--logo {
+  margin-bottom: 0;
+}
+
+.image-field--logo > label {
+  display: none;
+}
+
 .image-field__preview--logo {
-  padding: 0.75rem 1rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
   background: linear-gradient(135deg, #0a1628, #0f2844);
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .image-field__preview--logo img,
 .image-field__preview--logo video {
-  height: 52px;
+  display: block;
+  height: auto;
+  max-height: 64px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
   object-position: left center;
-  transform: scale(1.6);
-  transform-origin: left center;
+  transform: none;
+}
+
+.image-field__preview--logo .ve-btn {
+  align-self: flex-end;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.image-field--logo input[type="url"] {
+  margin-bottom: 0.65rem;
+}
+
+.image-field--logo .image-field__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.image-field--logo .image-field__actions .ve-btn--primary {
+  grid-column: 1 / -1;
 }
 
 .image-field__preview img,

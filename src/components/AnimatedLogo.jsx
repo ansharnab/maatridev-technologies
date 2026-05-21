@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { hasCustomLogo, isVideoUrl } from "../utils/mediaType";
 import "./AnimatedLogo.css";
 
@@ -32,6 +32,10 @@ export default function AnimatedLogo({
   const styleClass = STYLES[animation] || STYLES.gradient;
   const isFullBrand = fullBrand || hasCustomLogo(imageUrl);
   const [mediaError, setMediaError] = useState(false);
+
+  useEffect(() => {
+    setMediaError(false);
+  }, [imageUrl]);
   const safeScale = Math.min(2, Math.max(0.8, Number(scale) || 1));
   const safeClip = Math.min(400, Math.max(180, Number(clipWidth) || 280));
   const cacheBust =
