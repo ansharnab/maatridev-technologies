@@ -40,7 +40,7 @@ const nav = [
 const EDITOR_PAGE_ROUTES = {
   home: ["/", "/home/web-agency", "/home/startup-agency", "/home/digital-agency", "/home/it-solution"],
   about: ["/about", "/team", "/blog"],
-  services: ["/services", "/projects"],
+  services: ["/services"],
   contact: ["/contact", "/pricing", "/appointment", "/engagement"],
 };
 
