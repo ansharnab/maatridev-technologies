@@ -34,6 +34,10 @@ export default function AnimatedLogo({
   const [mediaError, setMediaError] = useState(false);
   const safeScale = Math.min(2, Math.max(0.8, Number(scale) || 1));
   const safeClip = Math.min(400, Math.max(180, Number(clipWidth) || 280));
+  const cacheBust =
+    imageUrl && imageUrl.includes("/uploads/")
+      ? `${imageUrl}${imageUrl.includes("?") ? "&" : "?"}t=${encodeURIComponent(imageUrl.split("/").pop() || "")}`
+      : imageUrl;
 
   if (imageUrl && !mediaError) {
     const isVideo = isVideoUrl(imageUrl);
@@ -57,7 +61,7 @@ export default function AnimatedLogo({
       >
         {isVideo ? (
           <video
-            src={imageUrl}
+            src={cacheBust}
             className="animated-logo__video"
             autoPlay
             muted
@@ -71,7 +75,7 @@ export default function AnimatedLogo({
           />
         ) : (
           <img
-            src={imageUrl}
+            src={cacheBust}
             alt={alt}
             className="animated-logo__img"
             onError={() => {

@@ -4,14 +4,17 @@ import {
   projects as defaultProjects,
   team as defaultTeam,
 } from "../data/siteData";
+import { getHeaderColorDefaults } from "./headerColorFields";
 
 const DEFAULT_SETTINGS = {
+  ...getHeaderColorDefaults(),
   siteName: "MaatriDev Technologies",
   logoText: "MaatriDev",
   logoLetter: "M",
-  logoImage: "",
+  logoImage: "/logo-maatridev.svg",
+  logoImageOnDark: "/logo-maatridev-hero.svg",
   logoScale: 1,
-  logoClipWidth: 280,
+  logoClipWidth: 300,
   logoAnimation: "gradient",
   logoColorPrimary: "#007cc3",
   logoColorAccent: "#00b8a9",
@@ -19,6 +22,23 @@ const DEFAULT_SETTINGS = {
   email: "hello@maatridev.com",
   phone: "+91 98765 43210",
   address: "India · Global Delivery",
+  headerDesign: "glass",
+  headerSize: "default",
+  headerBarBackground: "rgba(10, 22, 40, 0.55)",
+  headerBarOverHero: "rgba(10, 22, 40, 0.55)",
+  headerBarScrolled: "rgba(255, 255, 255, 0.92)",
+  headerNavOnDark: "#ffffff",
+  headerNavOnLight: "#1a2b3c",
+  headerNavActiveColor: "#ffffff",
+  headerNavActiveBg: "rgba(0, 184, 169, 0.35)",
+  headerNavHoverBg: "rgba(255, 255, 255, 0.12)",
+  headerBrandTextOnDark: "#ffffff",
+  headerCtaBg: "#007cc3",
+  headerCtaColor: "#ffffff",
+  headerCtaLabel: "Book Appointment",
+  headerCtaLink: "/appointment",
+  homeHeroTheme: "it",
+  homeHeroGradient: "",
 };
 
 const DEFAULT_FOUNDERS = defaultFounders.map((f) => ({
@@ -54,8 +74,32 @@ export function getDefaultSiteContent() {
   };
 }
 
+function normalizeBrandSettings(settings) {
+  const s = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+  const name = `${s.logoText || ""} ${s.siteName || ""}`.toLowerCase();
+  if (name.includes("saumya")) {
+    return {
+      ...s,
+      siteName: DEFAULT_SETTINGS.siteName,
+      logoText: DEFAULT_SETTINGS.logoText,
+      logoImage: DEFAULT_SETTINGS.logoImage,
+      logoImageOnDark: DEFAULT_SETTINGS.logoImageOnDark,
+      logoLetter: "M",
+    };
+  }
+  if (!s.logoImage?.trim()) {
+    s.logoImage = DEFAULT_SETTINGS.logoImage;
+    s.logoImageOnDark = DEFAULT_SETTINGS.logoImageOnDark;
+  }
+  const custom = s.logoImage?.trim() && !s.logoImage.includes("logo-maatridev");
+  if (custom && (!s.logoImageOnDark?.trim() || s.logoImageOnDark.includes("logo-maatridev-hero"))) {
+    s.logoImageOnDark = s.logoImage;
+  }
+  return s;
+}
+
 export function mergeSiteContent(content) {
-  const settings = { ...DEFAULT_SETTINGS, ...(content?.settings || {}) };
+  const settings = normalizeBrandSettings(content?.settings);
   const site = content?.site || {};
   const founders = mergeFounders(site.founders);
   const services = defaultServices

@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import axios from "axios";
+import { saveSiteContent } from "../admin/api";
 import {
   PAGE_OPTIONS,
   SECTION_TYPES,
   getDefaultSections,
 } from "./sectionRegistry";
 import SiteContentPanel from "./SiteContentPanel";
-import PreviewChrome from "./PreviewChrome";
+import EditorHeaderPreview from "./EditorHeaderPreview";
+import { homeAgencyLabel, sectionsWithHomeAgency } from "./homeAgencyNav";
+import { PREVIEW_PAGE_PATH } from "./previewNav";
 import EditorToast from "./EditorToast";
 import SectionInspector from "./SectionInspector";
 import SiteHeaderInspector from "./SiteHeaderInspector";
@@ -67,7 +70,12 @@ function newId() {
   return `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-const PAGE_PATH = { home: "/", about: "/about", services: "/services", contact: "/contact" };
+function scrollToFirstSection() {
+  requestAnimationFrame(() => {
+    const el = document.querySelector(".ve-canvas [data-ve-section]");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
 
 function pickDefaultSectionId(list) {
   if (!list?.length) return null;
@@ -93,6 +101,7 @@ export default function VisualEditor() {
   const [newSectionId, setNewSectionId] = useState(null);
   const [chromeSelected, setChromeSelected] = useState(false);
   const [chromeFocus, setChromeFocus] = useState(null);
+  const [headerPreviewPath, setHeaderPreviewPath] = useState(PREVIEW_PAGE_PATH.services);
   const [isDragging, setIsDragging] = useState(false);
   const deviceSwitchTimer = useRef(null);
   const savedSnapshot = useRef("");
@@ -100,7 +109,7 @@ export default function VisualEditor() {
   const markDirty = useCallback(() => setDirty(true), []);
 
   const loadPage = useCallback((id, allContent, opts = {}) => {
-    const { selectFirstSection = false } = opts;
+    const { selectFirstSection = false, previewPath: agencyPath } = opts;
     const page = allContent?.pages?.[id];
     const saved = page?.sections;
     let nextSections;
@@ -111,6 +120,9 @@ export default function VisualEditor() {
     } else {
       nextSections = getDefaultSections(id);
       nextEnabled = false;
+    }
+    if (id === "home" && agencyPath) {
+      nextSections = sectionsWithHomeAgency(nextSections, agencyPath);
     }
     setSections(nextSections);
     setEnabled(nextEnabled);
@@ -128,24 +140,45 @@ export default function VisualEditor() {
   useEffect(() => {
     axios.get("/api/content").then((r) => {
       setContent(r.data);
+      setHeaderPreviewPath(PREVIEW_PAGE_PATH[pageId] || "/services");
       loadPage(pageId, r.data, { selectFirstSection: true });
     });
   }, [loadPage]);
 
   const onPageChange = (id, opts = {}) => {
-    const { selectFirstSection = false } = opts;
+    const { selectFirstSection = false, previewPath: pathOverride, fromHeader = false } = opts;
+    const nextPath = pathOverride || PREVIEW_PAGE_PATH[id] || "/";
+    setHeaderPreviewPath(nextPath);
+
     if (id === pageId) {
+      setChromeSelected(false);
+      setChromeFocus(null);
+      if (id === "home" && pathOverride) {
+        const nextSections = sectionsWithHomeAgency(sections, pathOverride);
+        setSections(nextSections);
+        const sid = pickDefaultSectionId(nextSections);
+        if (sid) setSelectedId(sid);
+        markDirty();
+        scrollToFirstSection();
+        return;
+      }
       if (selectFirstSection) {
-        setChromeSelected(false);
-        setChromeFocus(null);
         const sid = pickDefaultSectionId(sections);
         if (sid) setSelectedId(sid);
+        scrollToFirstSection();
       }
       return;
     }
-    if (dirty && !window.confirm("You have unsaved changes on this page. Switch anyway?")) return;
+    if (
+      dirty &&
+      !fromHeader &&
+      !window.confirm("You have unsaved changes on this page. Switch anyway?")
+    ) {
+      return;
+    }
     setPageId(id);
-    loadPage(id, content, { selectFirstSection });
+    loadPage(id, content, { selectFirstSection, previewPath: pathOverride });
+    if (selectFirstSection) scrollToFirstSection();
   };
 
   const changePreviewDevice = (id) => {
@@ -281,11 +314,18 @@ export default function VisualEditor() {
     setChromeFocus(focus);
   };
 
-  const navigateFromHeader = (id) => {
-    onPageChange(id, { selectFirstSection: true });
+  const navigateFromHeader = (id, path) => {
+    onPageChange(id, {
+      selectFirstSection: true,
+      previewPath: path,
+      fromHeader: true,
+    });
     const label = PAGE_OPTIONS.find((p) => p.id === id)?.label || id;
+    const agency = id === "home" && path ? homeAgencyLabel(path) : null;
     setToast({
-      message: `Editing ${label} — use the panel on the right for text & design`,
+      message: agency
+        ? `Opened ${agency} homepage — hero updated below (matches live /home/… route)`
+        : `Opened ${label} — edit sections below the header`,
       type: "success",
     });
   };
@@ -293,6 +333,41 @@ export default function VisualEditor() {
   const updateSettings = (settings) => {
     setContent((c) => ({ ...c, settings }));
     markDirty();
+  };
+
+  const saveSiteSettings = async (settingsOverride) => {
+    setSaving(true);
+    setStatus("");
+    let base = content;
+    try {
+      const fresh = await axios.get("/api/content");
+      base = fresh.data || content;
+    } catch {
+      /* use in-memory */
+    }
+    const mergedSettings = {
+      ...(base.settings || {}),
+      ...(content.settings || {}),
+      ...(settingsOverride || {}),
+    };
+    const next = { ...base, settings: mergedSettings };
+    try {
+      const data = await saveSiteContent(next);
+      const saved = data?.content ? { ...next, ...data.content, settings: data.content.settings || next.settings } : next;
+      setContent(saved);
+      setToast({ message: "Header, logo & colors saved. Hard-refresh the live site (Ctrl+F5).", type: "success" });
+      setStatus("Site settings saved.");
+    } catch (err) {
+      const msg = !err?.response
+        ? "Save failed — API offline. Run DEV-WEBSITE.bat or npm run dev from the website folder."
+        : err.response?.status === 401
+          ? "Save denied — log in again at /admin."
+          : "Save failed — restart npm run dev (port 3001 must be free).";
+      setToast({ message: msg, type: "error" });
+      setStatus(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -377,7 +452,7 @@ export default function VisualEditor() {
     window.setTimeout(() => setNewSectionId(null), 600);
   };
 
-  const previewPath = PAGE_PATH[pageId] || "/";
+  const previewPath = headerPreviewPath || PREVIEW_PAGE_PATH[pageId] || "/";
   const activeDevice = PREVIEW_DEVICES.find((d) => d.id === previewDevice) || PREVIEW_DEVICES[0];
 
   const openSiteContent = (tab = "brand") => {
@@ -461,7 +536,11 @@ export default function VisualEditor() {
           <button type="button" className="ve-btn ve-btn--primary" onClick={publish} disabled={saving}>
             Publish
           </button>
-          {dirty && <span className="ve-status ve-status--dirty">Unsaved changes</span>}
+          {dirty && (
+            <span className="ve-status ve-status--dirty" title="Click Save draft or Publish to keep your work">
+              Unsaved — click Save draft
+            </span>
+          )}
           {status && !dirty && <span className="ve-status">{status}</span>}
         </div>
       </header>
@@ -550,21 +629,27 @@ export default function VisualEditor() {
               }
             }}
           >
+            <EditorHeaderPreview
+              device={previewDevice}
+              settings={content.settings || {}}
+              currentPageId={pageId}
+              previewPathname={headerPreviewPath}
+              isSelected={chromeSelected}
+              onSelect={selectChrome}
+              onNavigatePage={navigateFromHeader}
+            />
             <p className="ve-canvas-hint">
               <i className="fa-solid fa-hand-pointer" aria-hidden="true" />
               {activeDevice.label} ({activeDevice.width}px)
               {previewDevice === "mobile" || previewDevice === "tablet"
                 ? " — tap ☰ for pages · drag ⠿ to reorder sections"
-                : " — drag ⠿ to reorder · click to edit"}
+                : " — drag ⠿ to reorder · click header or sections to edit"}
             </p>
-            <PreviewChrome
-              device={previewDevice}
-              settings={content.settings || {}}
-              currentPageId={pageId}
-              isSelected={chromeSelected}
-              onSelect={selectChrome}
-              onNavigatePage={navigateFromHeader}
-            />
+            {sections.length > 1 && (
+              <p className="ve-canvas-scroll-hint">
+                <i className="fa-solid fa-arrows-up-down" /> Scroll to see all sections below the header
+              </p>
+            )}
             {sections.length === 0 ? (
               <div className="ve-empty-canvas">No sections — add one from the left panel.</div>
             ) : (
@@ -635,6 +720,8 @@ export default function VisualEditor() {
             currentPageId={pageId}
             onNavigatePage={navigateFromHeader}
             onChange={updateSettings}
+            onSaveSettings={saveSiteSettings}
+            saving={saving}
             onOpenSiteContent={openSiteContent}
           />
         ) : (

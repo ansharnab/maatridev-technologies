@@ -41,6 +41,8 @@
   object-fit: contain;
   object-position: left center;
   border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
   transform: none;
   transition: filter 0.2s ease;
 }

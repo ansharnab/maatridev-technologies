@@ -24,7 +24,9 @@ export default function PreviewChrome({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const logo = settings.logoText || "MaatriDev";
-  const fullLogo = hasCustomLogo(settings.logoImage);
+  const fullLogo = hasCustomLogo(settings.logoImage) || hasCustomLogo(settings.logoImageOnDark);
+  const previewLogo =
+    settings.logoImageOnDark || settings.logoImage || "/logo-maatridev-hero.svg";
   const ctaLabel = settings.headerCtaLabel || "Book Appointment";
   const useDrawer = device === "mobile" || device === "tablet";
 
@@ -80,7 +82,7 @@ export default function PreviewChrome({
               animation={settings.logoAnimation}
               colorPrimary={settings.logoColorPrimary}
               colorAccent={settings.logoColorAccent}
-              imageUrl={settings.logoImage}
+              imageUrl={previewLogo}
               alt={`${logo} Technologies`}
               size={device === "mobile" ? "sm" : useDrawer ? "sm" : "md"}
               fullBrand={fullLogo}

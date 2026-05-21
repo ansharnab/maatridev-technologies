@@ -19,6 +19,9 @@ echo  Local site:  http://localhost:5173/
 echo  Local admin: http://localhost:5173/admin
 echo  Password:    see ADMIN_PASSWORD in .env
 echo.
+echo  Freeing port 3001 if an old API is stuck...
+call npm run free-port
+echo.
 echo  Keep this window OPEN while you use the site.
 echo.
 

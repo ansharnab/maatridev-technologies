@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { fetchSiteContent, saveSiteContent } from "../admin/api";
+import { logoSettingsAfterUpload } from "../utils/logoSettings";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent } from "../utils/mergeSiteData";
 import AnimatedLogo from "../components/AnimatedLogo";
@@ -69,11 +71,13 @@ export default function SiteContentPanel({
   }, [initialTab]);
 
   const load = () => {
-    axios.get("/api/content").then((r) => {
-      const normalized = normalizeContent(r.data);
-      if (isControlled && onSaved) onSaved(normalized);
-      else setLocalContent(normalized);
-    });
+    fetchSiteContent()
+      .then((data) => {
+        const normalized = normalizeContent(data);
+        if (isControlled && onSaved) onSaved(normalized);
+        else setLocalContent(normalized);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -97,14 +101,29 @@ export default function SiteContentPanel({
       } else {
         setStatus("Saved — refresh the live site to see updates.");
       }
-    } catch {
-      setStatus("Save failed. On localhost run START-LOCAL.bat. On live server ensure the API (port 3001) is running.");
+    } catch (err) {
+      const token = localStorage.getItem("maatridev-admin-token");
+      if (!token) {
+        setStatus("Save failed — not signed in. Open /admin and log in again.");
+      } else if (!err?.response) {
+        setStatus("Save failed — API not reachable. Run: npm run dev (port 3001 + 5173).");
+      } else if (err.response.status === 401) {
+        setStatus("Save denied — session expired. Log out and log in again at /admin.");
+      } else {
+        setStatus(err.response.data?.error || `Save failed (error ${err.response.status}).`);
+      }
     } finally {
       setSaving(false);
     }
   };
 
   const setSettings = (patch) => setContent((c) => ({ ...c, settings: { ...c.settings, ...patch } }));
+
+  const saveLogoUrl = async (url) => {
+    if (!url.startsWith("/uploads/")) return;
+    const next = { ...content, settings: { ...content.settings, logoImage: url } };
+    await save(next);
+  };
   const setFounders = (founders) => setContent((c) => ({ ...c, site: { ...c.site, founders } }));
   const setServices = (services) => setContent((c) => ({ ...c, site: { ...c.site, services } }));
 
@@ -196,13 +215,36 @@ export default function SiteContentPanel({
                   />
                 </Field>
               </div>
+              <p className="scp-note scp-note--warn">
+                Uploads save automatically. If you paste a URL manually, click <strong>Save site content</strong> above.
+              </p>
               <ImageField
                 allowVideo
                 label="Logo image or video (optional)"
-                hint="Use your full SVG/PNG lockup (icon + MaatriDev Technologies). If the file has extra padding, raise Logo zoom below."
+                hint="Use a PNG or SVG with a transparent background (full lockup). Default: /logo-maatridev.svg. On dark heroes, /logo-maatridev-hero.svg is used automatically."
                 value={settings.logoImage || ""}
-                onChange={(url) => setSettings({ logoImage: url })}
+                onChange={(url) => {
+                  setSettings({ logoImage: url });
+                  if (url.startsWith("/uploads/")) void saveLogoUrl(url);
+                }}
+                onError={(msg) => setStatus(msg)}
               />
+              <div className="scp-logo-quick">
+                <button
+                  type="button"
+                  className="ve-btn ve-btn--small"
+                  onClick={() =>
+                    setSettings({
+                      logoImage: "/logo-maatridev.svg",
+                      logoImageOnDark: "/logo-maatridev-hero.svg",
+                      logoText: "MaatriDev",
+                      siteName: "MaatriDev Technologies",
+                    })
+                  }
+                >
+                  Use default MaatriDev logo
+                </button>
+              </div>
               {settings.logoImage && (
                 <>
                   <Field label={`Logo size (${settings.logoScale ?? 1}×)`}>

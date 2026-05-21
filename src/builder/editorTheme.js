@@ -2,6 +2,18 @@
 
 export const THEME_PRESETS = [
   {
+    id: "hero-banner",
+    label: "Blue page banner",
+    icon: "fa-image",
+    swatch: "linear-gradient(135deg, #007cc3, #004d73)",
+    style: {
+      background: "linear-gradient(135deg, var(--infosys-blue, #007cc3) 0%, var(--infosys-dark, #003d5c) 100%)",
+      textColor: "#e8f4fc",
+      headingColor: "#ffffff",
+      accentColor: "#00b8a9",
+    },
+  },
+  {
     id: "brand",
     label: "MaatriDev Brand",
     icon: "fa-palette",
@@ -93,7 +105,7 @@ export const DEFAULT_SECTION_STYLE = {
 };
 
 const TYPE_STYLE_HINTS = {
-  pageHero: { theme: "brand", padding: "default" },
+  pageHero: { theme: "hero-banner", padding: "default" },
   homeHero: { theme: "brand", padding: "spacious" },
   cta: { theme: "gradient", padding: "default", textAlign: "center" },
   featureStrip: { theme: "dark", padding: "default" },

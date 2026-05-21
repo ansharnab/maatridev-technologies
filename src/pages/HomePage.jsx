@@ -6,12 +6,18 @@ import Reveal from "../components/Reveal";
 import "./HomePage.css";
 
 export default function HomePage({ variant = 4 }) {
-  const { founders, services } = useSiteData();
+  const { founders, services, settings } = useSiteData();
   const v = homeVariants[variant] || homeVariants[4];
+  const heroTheme = settings.homeHeroTheme || v.theme;
+  const heroGradient = settings.homeHeroGradient?.trim();
+  const heroStyle = heroGradient ? { background: heroGradient, backgroundSize: "200% 200%" } : undefined;
 
   return (
     <>
-      <section className={`hero hero--${v.theme}`}>
+      <section
+        className={`hero hero--${heroGradient ? "custom" : heroTheme}`}
+        style={heroStyle}
+      >
         <div className="hero__bg" aria-hidden="true">
           <div className="hero__orb hero__orb--1" />
           <div className="hero__orb hero__orb--2" />

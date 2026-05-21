@@ -1,0 +1,37 @@
+/* Site shell — keeps header, main, and footer in the correct order */
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site-main {
+  flex: 1 0 auto;
+  display: block;
+  width: 100%;
+  min-height: 40vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Inner pages (no full-screen hero) sit below fixed header */
+.site-main:not(:has(> .hero)) {
+  padding-top: 76px;
+}
+
+/* Home hero includes its own top padding for the fixed header */
+.site-main:has(> .hero) {
+  padding-top: 0;
+}
+
+.site-footer {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+}
+
+.site-header {
+  flex-shrink: 0;
+}

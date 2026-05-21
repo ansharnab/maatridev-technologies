@@ -101,6 +101,12 @@ export default function SectionInspector({
 
       {tab === "design" && (
         <div className="ve-inspector__panel">
+          {section.type === "pageHero" && (
+            <p className="ve-inspector__hint ve-inspector__hint--callout">
+              This is the <strong>blue page banner</strong> (title area). Pick <strong>Blue page banner</strong> below
+              for the standard look. Header bar colors are edited by clicking the logo in the preview.
+            </p>
+          )}
           <p className="ve-inspector__label">Theme presets</p>
           <div className="ve-inspector__themes">
             {THEME_PRESETS.map((preset) => (
@@ -118,6 +124,30 @@ export default function SectionInspector({
           </div>
 
           <p className="ve-inspector__label">Colors</p>
+          {section.type === "pageHero" && (
+            <div className="ve-inspector__chips" style={{ marginBottom: "0.5rem" }}>
+              <button
+                type="button"
+                className={style.theme === "hero-banner" ? "is-active" : ""}
+                onClick={() => {
+                  const p = THEME_PRESETS.find((t) => t.id === "hero-banner");
+                  if (p) applyTheme(p);
+                }}
+              >
+                Blue banner
+              </button>
+              <button
+                type="button"
+                className={style.theme === "brand" ? "is-active" : ""}
+                onClick={() => {
+                  const p = THEME_PRESETS.find((t) => t.id === "brand");
+                  if (p) applyTheme(p);
+                }}
+              >
+                Dark navy
+              </button>
+            </div>
+          )}
           <ColorField label="Background" value={style.background} onChange={(v) => updateStyle({ background: v })} />
           <ColorField label="Text" value={style.textColor} onChange={(v) => updateStyle({ textColor: v })} />
           <ColorField label="Headings" value={style.headingColor} onChange={(v) => updateStyle({ headingColor: v })} />

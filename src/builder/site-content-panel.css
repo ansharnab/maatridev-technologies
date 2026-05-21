@@ -79,6 +79,14 @@
   line-height: 1.5;
 }
 
+.scp-note--warn {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+}
+
 .scp-field {
   margin-bottom: 0.85rem;
 }
@@ -271,6 +279,20 @@
   font-size: 0.75rem;
   color: #64748b;
   margin: 0 0 0.5rem;
+}
+
+.image-field__error {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.scp-logo-quick {
+  margin: 0.5rem 0 1rem;
 }
 
 .image-field input[type="url"] {

@@ -28,9 +28,41 @@
 }
 
 .hero--digital {
-  background: linear-gradient(125deg, var(--navy) 0%, #c62828 40%, var(--accent-warm) 100%);
+  /* Creative / marketing — purple → brand blue → teal (no harsh red) */
+  background: linear-gradient(125deg, #1a1040 0%, #4c1d95 42%, #007cc3 72%, #00b8a9 100%);
   background-size: 200% 200%;
   animation: gradientShift 14s ease infinite;
+}
+
+.hero--custom {
+  background-size: 200% 200%;
+  animation: gradientShift 14s ease infinite;
+}
+
+.hero--digital .hero__orb--1 {
+  background: rgba(124, 58, 237, 0.35);
+}
+
+.hero--digital .hero__orb--2 {
+  background: rgba(0, 184, 169, 0.35);
+}
+
+.hero--digital .hero__stat strong {
+  color: #7ee8dc;
+}
+
+.hero--digital .btn--outline.btn--outline-hero,
+.hero--digital .btn--outline-hero {
+  border-color: rgba(255, 255, 255, 0.65);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero--digital .btn--outline.btn--outline-hero:hover,
+.hero--digital .btn--outline-hero:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #fff;
+  color: #fff;
 }
 
 .hero__bg {

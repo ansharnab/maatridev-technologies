@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import { mergeSiteContent } from "../utils/mergeSiteData";
 
 export function useSiteContent() {
   const [content, setContent] = useState(null);
@@ -47,7 +48,18 @@ export function useSiteContent() {
     return w;
   };
 
-  const settings = content?.settings || {};
+  const merged = useMemo(() => mergeSiteContent(content), [content]);
+  const settings = merged.settings;
 
-  return { content, loading, settings, getPageBlocks, getPageSections, getPuckPage, getWysiwygPage, setContent };
+  return {
+    content,
+    loading,
+    settings,
+    merged,
+    getPageBlocks,
+    getPageSections,
+    getPuckPage,
+    getWysiwygPage,
+    setContent,
+  };
 }

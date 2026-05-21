@@ -44,9 +44,11 @@ export function HomeHeroBlock({
   secondaryLabel,
   secondaryLink,
   image = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&h=500&fit=crop",
+  heroTheme = "it",
 }) {
+  const themeClass = ["it", "web", "startup", "digital"].includes(heroTheme) ? heroTheme : "it";
   return (
-    <section className="hero hero--it">
+    <section className={`hero hero--${themeClass}`}>
       <div className="hero__bg" aria-hidden="true">
         <div className="hero__orb hero__orb--1" />
         <div className="hero__orb hero__orb--2" />

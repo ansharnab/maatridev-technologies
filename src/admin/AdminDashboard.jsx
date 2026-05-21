@@ -4,6 +4,7 @@ import axios from "axios";
 import MediaManager from "./MediaManager";
 import VisualEditor from "../builder/VisualEditor";
 import SettingsPanel from "./SettingsPanel";
+import AdminErrorBoundary from "./AdminErrorBoundary";
 import "./admin.css";
 
 const TABS = [
@@ -53,7 +54,7 @@ export default function AdminDashboard({ onLogout }) {
             <span>M</span>
           )}
           <div>
-            <strong>{content.settings?.logoText || "MaatriDev"}</strong>
+            <strong>MaatriDev</strong>
             <small>Website Builder</small>
           </div>
         </div>
@@ -75,7 +76,11 @@ export default function AdminDashboard({ onLogout }) {
         </div>
       </aside>
       <main className={`admin-main ${tab === "builder" ? "admin-main--editor" : ""}`}>
-        {tab === "builder" && <VisualEditor />}
+        {tab === "builder" && (
+          <AdminErrorBoundary>
+            <VisualEditor />
+          </AdminErrorBoundary>
+        )}
         {tab === "media" && <MediaManager />}
         {tab === "settings" && <SettingsPanel content={content} onUpdate={setContent} />}
         {tab === "contacts" && (

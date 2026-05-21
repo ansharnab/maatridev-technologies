@@ -25,6 +25,22 @@
 .ve-styled-section .cta-banner__actions .btn--primary {
   background: var(--ve-sec-accent, #007cc3) !important;
   border-color: var(--ve-sec-accent, #007cc3) !important;
+  color: #fff !important;
+}
+
+/* Keep ghost/outline buttons readable on dark hero backgrounds */
+.ve-styled-section .btn--outline-hero,
+.ve-styled-section .hero .btn--outline:not(.btn--primary) {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ve-styled-section .btn--outline-hero:hover,
+.ve-styled-section .hero .btn--outline:not(.btn--primary):hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: #fff !important;
+  color: #fff !important;
 }
 
 .ve-styled-section {
@@ -39,4 +55,9 @@
 .ve-styled-section--homeHero .hero__stat span {
   color: var(--ve-sec-color, rgba(255, 255, 255, 0.88));
   opacity: 1;
+}
+
+/* Page banner: keep top padding for fixed header on live site */
+.ve-styled-section--pageHero > .page-hero {
+  padding-top: calc(76px + 2rem);
 }

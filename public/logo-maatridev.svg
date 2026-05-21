@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 56" fill="none" role="img" aria-label="MaatriDev Technologies">
+  <defs>
+    <linearGradient id="mdev-m" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="45%" stop-color="#007cc3"/>
+      <stop offset="100%" stop-color="#00b8a9"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon: stylized M -->
+  <rect x="0" y="4" width="48" height="48" rx="12" fill="url(#mdev-m)"/>
+  <path fill="#fff" d="M14 36V20h5.2l6.8 11.2L32.8 20H38v16h-5.4V27.2L26.2 36h-2.4l-7.4-8.8V36H14z" opacity="0.98"/>
+  <!-- Wordmark -->
+  <text x="60" y="26" font-family="Outfit, system-ui, sans-serif" font-size="22" font-weight="700" fill="#0a1628">MaatriDev</text>
+  <text x="60" y="44" font-family="Outfit, system-ui, sans-serif" font-size="13" font-weight="500" fill="#5a6b7d" letter-spacing="0.02em">Technologies</text>
+</svg>

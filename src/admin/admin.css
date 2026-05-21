@@ -206,6 +206,23 @@
   font-size: 0.78rem;
 }
 
+.admin-login__use-default {
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--infosys-blue);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.admin-login__use-default:hover {
+  background: rgba(0, 124, 195, 0.06);
+  border-color: var(--infosys-blue);
+}
+
 .admin-login__submit {
   width: 100%;
   justify-content: center;

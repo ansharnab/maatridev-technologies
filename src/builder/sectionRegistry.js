@@ -33,6 +33,7 @@ export const SECTION_TYPES = {
       primaryLink: "/services",
       secondaryLabel: "View Services",
       secondaryLink: "/services",
+      heroTheme: "it",
     },
     fields: [
       { key: "eyebrow", label: "Eyebrow", type: "text" },
@@ -43,6 +44,17 @@ export const SECTION_TYPES = {
       { key: "secondaryLabel", label: "Secondary button", type: "text" },
       { key: "secondaryLink", label: "Secondary link", type: "text" },
       { key: "image", label: "Hero image URL", type: "text" },
+      {
+        key: "heroTheme",
+        label: "Agency style",
+        type: "select",
+        options: [
+          { value: "it", label: "IT Solutions (default)" },
+          { value: "web", label: "Web Agency" },
+          { value: "startup", label: "Startup Agency" },
+          { value: "digital", label: "Digital Agency" },
+        ],
+      },
     ],
   },
   pageHero: {

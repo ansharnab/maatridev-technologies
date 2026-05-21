@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkApiHealth, loginAdmin } from "./api";
+import { checkApiHealth, fetchAuthStatus, loginAdmin } from "./api";
+
+const DEFAULT_PASSWORD = "maatridev2026";
 import "./admin.css";
 
 export default function AdminLogin({ onLogin }) {
@@ -11,8 +13,13 @@ export default function AdminLogin({ onLogin }) {
   const [apiOnline, setApiOnline] = useState(null);
   const navigate = useNavigate();
 
+  const [authStatus, setAuthStatus] = useState(null);
+
   useEffect(() => {
-    checkApiHealth().then(setApiOnline);
+    (async () => {
+      setApiOnline(await checkApiHealth());
+      setAuthStatus(await fetchAuthStatus());
+    })();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -64,9 +71,16 @@ export default function AdminLogin({ onLogin }) {
             <code>npm run dev</code> in the website folder.
           </div>
         )}
-        {apiOnline === true && (
+        {apiOnline === true && authStatus?.ok && (
           <div className="alert alert--success admin-login__api-ok">
-            API connected — you can sign in.
+            API connected — password from {authStatus.passwordSource === "env-file" ? "website/.env" : "default"} (
+            {authStatus.passwordLength} characters).
+          </div>
+        )}
+        {apiOnline === true && !authStatus?.ok && (
+          <div className="alert alert--error">
+            <strong>Stale API on port 3001.</strong> An old server is running without the latest auth. Close all
+            terminals, run <code>npm run free-port</code> then <code>npm run dev</code> in the website folder.
           </div>
         )}
 
@@ -102,6 +116,16 @@ export default function AdminLogin({ onLogin }) {
           <p className="admin-login__hint">
             Password is set in <code>.env</code> → <code>ADMIN_PASSWORD=yourpassword</code>
           </p>
+          <button
+            type="button"
+            className="admin-login__use-default"
+            onClick={() => {
+              setPassword(DEFAULT_PASSWORD);
+              setError("");
+            }}
+          >
+            Use default password ({DEFAULT_PASSWORD})
+          </button>
         </div>
 
         <button type="submit" className="btn btn--primary admin-login__submit" disabled={loading}>

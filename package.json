@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "free-port": "node scripts/free-port.mjs 3001",
+    "predev": "node scripts/free-port.mjs 3001",
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "vite",
     "dev:server": "node server/index.js",
@@ -11,7 +13,8 @@
     "preview": "vite preview",
     "start": "node server/index.js",
     "production": "npm run build && node server/index.js",
-    "push-live-content": "node scripts/push-live-content.js"
+    "push-live-content": "node scripts/push-live-content.js",
+    "test:header": "node scripts/test-header-theme.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

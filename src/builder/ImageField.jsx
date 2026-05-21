@@ -1,35 +1,57 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { uploadMediaFile } from "../admin/api";
 import { isVideoUrl } from "../utils/mediaType";
 
-function authHeaders() {
-  return { Authorization: `Bearer ${localStorage.getItem("maatridev-admin-token")}` };
+function uploadErrorMessage(err) {
+  const msg = err?.message;
+  if (msg && !err?.response) return msg;
+  if (!err?.response) {
+    return "Upload failed — API not reachable. From the website folder run: npm run dev (ports 3001 + 5173), or double-click START-LOCAL.bat.";
+  }
+  if (err.response.status === 401) {
+    return "Upload denied — log out and sign in again at /admin.";
+  }
+  return err.response.data?.error || `Upload failed (error ${err.response.status}).`;
 }
 
-export default function ImageField({ label, value = "", onChange, hint, allowVideo = false }) {
+export default function ImageField({ label, value = "", onChange, hint, allowVideo = false, onError }) {
   const [media, setMedia] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [openLib, setOpenLib] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (openLib) {
-      axios.get("/api/media").then((r) =>
-        setMedia(r.data.filter((m) => m.type === "image" || (allowVideo && m.type === "video")))
-      );
+      axios
+        .get("/api/media")
+        .then((r) =>
+          setMedia(r.data.filter((m) => m.type === "image" || (allowVideo && m.type === "video")))
+        )
+        .catch(() => setMedia([]));
     }
   }, [openLib, allowVideo]);
 
+  const report = (msg) => {
+    setError(msg);
+    onError?.(msg);
+  };
+
   const uploadFile = async (file) => {
     if (!file) return;
-    const fd = new FormData();
-    fd.append("files", file);
     setUploading(true);
+    setError("");
     try {
-      const res = await axios.post("/api/media/upload", fd, {
-        headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },
-      });
-      const url = res.data?.items?.[0]?.url;
-      if (url) onChange(url);
+      const data = await uploadMediaFile(file);
+      const url = data?.items?.[0]?.url;
+      if (url) {
+        onChange(url);
+        setError("");
+      } else {
+        report("Upload returned no file URL.");
+      }
+    } catch (err) {
+      report(uploadErrorMessage(err));
     } finally {
       setUploading(false);
     }
@@ -45,12 +67,13 @@ export default function ImageField({ label, value = "", onChange, hint, allowVid
     <div className="image-field">
       <label>{label}</label>
       {hint && <p className="image-field__hint">{hint}</p>}
+      {error && <p className="image-field__error">{error}</p>}
       {value && (
         <div className={`image-field__preview${allowVideo && value ? " image-field__preview--logo" : ""}`}>
           {isVideoUrl(value) ? (
             <video src={value} muted loop playsInline autoPlay />
           ) : (
-            <img src={value} alt="" />
+            <img src={value} alt="" onError={() => report(`Cannot load image at ${value}. Check the path or upload again.`)} />
           )}
           <button type="button" className="ve-btn ve-btn--small" onClick={() => onChange("")}>
             Remove
@@ -61,7 +84,10 @@ export default function ImageField({ label, value = "", onChange, hint, allowVid
         type="url"
         placeholder={allowVideo ? "https://… or /uploads/logo.mp4" : "https://… or /uploads/your-file.jpg"}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          setError("");
+          onChange(e.target.value);
+        }}
       />
       <div className="image-field__actions">
         {allowVideo ? (
@@ -72,13 +98,13 @@ export default function ImageField({ label, value = "", onChange, hint, allowVid
             </label>
             <label className="ve-btn ve-btn--small">
               Upload image
-              <input type="file" accept="image/*" hidden onChange={upload} />
+              <input type="file" accept="image/*,.svg" hidden onChange={upload} />
             </label>
           </>
         ) : (
           <label className="ve-btn ve-btn--small">
             {uploading ? "Uploading…" : "Upload image"}
-            <input type="file" accept="image/*" hidden onChange={upload} />
+            <input type="file" accept="image/*,.svg" hidden onChange={upload} />
           </label>
         )}
         <button type="button" className="ve-btn ve-btn--small" onClick={() => setOpenLib(!openLib)}>
@@ -102,6 +128,7 @@ export default function ImageField({ label, value = "", onChange, hint, allowVid
                 onClick={() => {
                   onChange(m.url);
                   setOpenLib(false);
+                  setError("");
                 }}
               >
                 {m.type === "video" ? (

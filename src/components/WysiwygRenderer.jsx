@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { scopeCssToSelector } from "../utils/scopeCss";
 import "./WysiwygRenderer.css";
 
 export default function WysiwygRenderer({ html, css }) {
@@ -11,7 +12,7 @@ export default function WysiwygRenderer({ html, css }) {
       el.id = id;
       document.head.appendChild(el);
     }
-    el.textContent = css;
+    el.textContent = scopeCssToSelector(css, ".wysiwyg-page");
     return () => {
       if (el?.parentNode) el.parentNode.removeChild(el);
     };

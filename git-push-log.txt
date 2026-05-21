@@ -37,3 +37,42 @@ Untracked files:
 	src/builder/styled-section.css
 
 no changes added to commit (use "git add" and/or "git commit -a")
+warning: in the working copy of 'server/data/content.json', LF will be replaced by CRLF the next time Git touches it
+=== staged (check no .env) ===
+PUSH-TO-GITHUB.bat
+git-push-log.txt
+scripts/git-push.ps1
+server/data/content.json
+src/builder/EditorToast.jsx
+src/builder/PageSectionsView.jsx
+src/builder/PreviewChrome.jsx
+src/builder/SectionInspector.jsx
+src/builder/SiteHeaderInspector.jsx
+src/builder/StyledSectionWrap.jsx
+src/builder/VeInlineEdit.jsx
+src/builder/VisualEditor.jsx
+src/builder/editorTheme.js
+src/builder/sectionRegistry.js
+src/builder/sections/SectionParts.jsx
+src/builder/styled-section.css
+src/builder/visual-editor.css
+src/components/layout/Header.jsx
+src/pages/HomePage.css
+=== commit ===
+[main aa52a8b] Improve page builder: mobile preview, drag-drop, scroll, and save fixes.
+ 19 files changed, 2767 insertions(+), 318 deletions(-)
+ create mode 100644 git-push-log.txt
+ create mode 100644 scripts/git-push.ps1
+ create mode 100644 src/builder/EditorToast.jsx
+ create mode 100644 src/builder/PreviewChrome.jsx
+ create mode 100644 src/builder/SectionInspector.jsx
+ create mode 100644 src/builder/SiteHeaderInspector.jsx
+ create mode 100644 src/builder/StyledSectionWrap.jsx
+ create mode 100644 src/builder/VeInlineEdit.jsx
+ create mode 100644 src/builder/editorTheme.js
+ create mode 100644 src/builder/styled-section.css
+=== push ===
+branch 'main' set up to track 'origin/main'.
+To https://github.com/ansharnab/maatridev-technologies.git
+   b3ff9ff..aa52a8b  main -> main
+=== done exit 0 ===

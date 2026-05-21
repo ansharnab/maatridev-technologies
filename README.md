@@ -60,3 +60,19 @@ Serve `dist` behind nginx; proxy `/api` and `/uploads` to the Node server (see `
 ## Note on Images
 
 Placeholder images use Unsplash URLs. Replace with your own assets via the Media Library.
+
+## GitHub repository
+
+**Public repo:** [github.com/ansharnab/maatridev-technologies](https://github.com/ansharnab/maatridev-technologies)
+
+A **public** repository lets anyone **clone and read** the code. GitHub does **not** allow random users to **push** to your repo — that is intentional. To let someone push directly, add them as a **collaborator** (Write access). Everyone else should **fork** and open a **pull request**.
+
+See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for the full workflow.
+
+**Owner — grant push access:**
+
+```powershell
+powershell -File scripts\add-collaborator.ps1 -Username their-github-username
+```
+
+**Install GitHub CLI + check branch protection:** double-click `INSTALL-GH-AND-FIX-ACCESS.bat`
