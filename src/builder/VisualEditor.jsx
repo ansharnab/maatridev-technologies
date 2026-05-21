@@ -489,8 +489,22 @@ export default function VisualEditor() {
         <SiteContentPanel
           initialTab={siteTab}
           content={content}
-          setContent={setContent}
-          onSaved={(saved) => setContent(saved)}
+          setContent={(next) => {
+            if (typeof next === "function") {
+              setContent((c) => {
+                const merged = next(c);
+                markDirty();
+                return merged;
+              });
+            } else {
+              setContent(next);
+              markDirty();
+            }
+          }}
+          onSaved={(saved) => {
+            setContent(saved);
+            setDirty(false);
+          }}
         />
       </div>
     );

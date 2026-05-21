@@ -56,7 +56,7 @@ export const HEADER_DESIGNS = {
     barScrolled: "#ffffff",
     navOnDark: "#1e293b",
     navOnLight: "#0f172a",
-    ctaBg: "linear-gradient(135deg, #007cc3 0%, #0099cc 100%)",
+    ctaBg: "#007cc3",
     ctaColor: "#ffffff",
     border: "rgba(148, 163, 184, 0.25)",
   },
@@ -792,12 +792,13 @@ function darkenHex(hex, amount = 0.12) {
 /** Only appointment button colors — header bar unchanged */
 export function applyHeaderCtaPreset(designId) {
   const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
-  const bg = d.ctaBg;
-  const hex = String(bg).match(/#[0-9A-Fa-f]{6}/i)?.[0];
+  const raw = String(d.ctaBg || "").trim();
+  const hex = raw.match(/#[0-9A-Fa-f]{6}/i)?.[0];
+  const bg = hex || raw || "#007cc3";
   return {
     headerCtaPresetId: d.id,
     headerCtaBg: bg,
-    headerCtaColor: d.ctaColor,
+    headerCtaColor: d.ctaColor || "#ffffff",
     headerCtaBorderColor: hex || bg,
     headerCtaHoverBg: hex ? darkenHex(hex) : "#006aa8",
   };

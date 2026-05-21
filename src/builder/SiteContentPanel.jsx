@@ -16,6 +16,7 @@ import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
 import { SiteHeaderBar } from "../components/layout/Header";
 import ImageField from "./ImageField";
+import HeaderButtonColorPanel from "./HeaderButtonColorPanel";
 import HeaderDesignGrid, { headerDesignCount } from "./HeaderDesignGrid";
 import SiteContentHeaderColors from "./SiteContentHeaderColors";
 import { previewBgForHomePath } from "./homeAgencyNav";
@@ -131,7 +132,18 @@ export default function SiteContentPanel({
     }
   };
 
-  const setSettings = (patch) => setContent((c) => ({ ...c, settings: { ...c.settings, ...patch } }));
+  const patchSettings = (patch) => {
+    const next = {
+      ...content,
+      settings: { ...(content.settings || {}), ...patch },
+    };
+    setContent(next);
+    if (patch.headerCtaBg || patch.headerCtaPresetId || patch.headerCtaColor) {
+      setStatus(`Button updated (${patch.headerCtaBg || next.settings.headerCtaBg}) — click Save site content.`);
+    }
+  };
+
+  const setSettings = (patch) => patchSettings(patch);
 
   const applyLogoChange = async (url) => {
     const base = content.settings || {};
@@ -311,6 +323,8 @@ export default function SiteContentPanel({
                   </Field>
                 </div>
               </section>
+
+              <HeaderButtonColorPanel settings={settings} onPatch={patchSettings} />
 
               <section className="scp-section-card scp-header-themes">
                 <h4>Header bar colors</h4>
@@ -525,6 +539,7 @@ export default function SiteContentPanel({
                   style={{ background: previewBgForHomePath("/", settings) }}
                 >
                   <SiteHeaderBar
+                    key={`hdr-${settings.headerCtaPresetId}-${settings.headerCtaBg}-${settings.headerDesign}`}
                     settings={settings}
                     pathname="/"
                     editorPreview

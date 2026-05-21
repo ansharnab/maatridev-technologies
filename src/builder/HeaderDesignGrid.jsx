@@ -10,13 +10,17 @@ export default function HeaderDesignGrid({
   onSelectBar,
   onSelectCta,
   maxHeight = 340,
+  barSelectDisabled = false,
+  swatchStyle,
 }) {
   return (
     <div className="scp-header-design-grid-wrap">
-      <p className="scp-header-design-grid__hint">
-        <strong>Top stripe</strong> = change header bar (full theme).{" "}
-        <strong>Bottom pill</strong> = button color only.
-      </p>
+      {!barSelectDisabled && (
+        <p className="scp-header-design-grid__hint">
+          <strong>Top stripe</strong> = change header bar (full theme).{" "}
+          <strong>Bottom pill</strong> = button color only.
+        </p>
+      )}
       <div className="scp-header-design-grid" style={{ maxHeight }}>
         {designs.map((d) => {
           const barActive = activeBarId === d.id;
@@ -38,15 +42,24 @@ export default function HeaderDesignGrid({
                 style={{ background: d.swatch }}
                 title={`${d.label} — header bar + full theme`}
                 aria-label={`Header bar: ${d.label}`}
-                onClick={() => onSelectBar?.(d.id)}
+                disabled={barSelectDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!barSelectDisabled) onSelectBar?.(d.id);
+                }}
               />
               <button
                 type="button"
                 className="scp-header-design-card__cta-btn"
-                style={{ background: d.ctaBg, color: d.ctaColor }}
+                style={swatchStyle ? swatchStyle(d) : { background: d.ctaBg, color: d.ctaColor }}
                 title={`${d.label} — button color only`}
                 aria-label={`Button color: ${d.label}`}
-                onClick={() => onSelectCta?.(d.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSelectCta?.(d.id);
+                }}
               />
               <span className="scp-header-design-card__label">{d.label}</span>
             </div>
@@ -62,7 +75,12 @@ export function headerDesignCount() {
 }
 
 /** Compact row — button colors only */
-export function HeaderCtaColorGrid({ designs = Object.values(HEADER_DESIGNS), activeCtaId = "", onSelectCta }) {
+export function HeaderCtaColorGrid({
+  designs = Object.values(HEADER_DESIGNS),
+  activeCtaId = "",
+  onSelectCta,
+  swatchStyle,
+}) {
   return (
     <div className="scp-cta-color-grid" role="list">
       {designs.map((d) => (
@@ -71,10 +89,14 @@ export function HeaderCtaColorGrid({ designs = Object.values(HEADER_DESIGNS), ac
           type="button"
           role="listitem"
           className={`scp-cta-color-swatch${activeCtaId === d.id ? " is-active" : ""}`}
-          style={{ background: d.ctaBg, color: d.ctaColor }}
+          style={swatchStyle ? swatchStyle(d) : { background: d.ctaBg, color: d.ctaColor }}
           title={d.label}
           aria-label={`Button: ${d.label}`}
-          onClick={() => onSelectCta?.(d.id)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelectCta?.(d.id);
+          }}
         />
       ))}
     </div>

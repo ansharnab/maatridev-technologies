@@ -295,6 +295,7 @@
 
 .site-header__cta.btn--primary {
   background: var(--header-cta-bg, #0099ff) !important;
+  background-image: none;
   border-color: var(--header-cta-border, var(--header-cta-bg, #0099ff)) !important;
   color: var(--header-cta-color, #ffffff) !important;
   white-space: normal;
