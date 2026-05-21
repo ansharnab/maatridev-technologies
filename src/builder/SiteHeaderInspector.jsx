@@ -4,6 +4,7 @@ import ImageField from "./ImageField";
 import { logoSettingsAfterUpload } from "../utils/logoSettings";
 import { PREVIEW_NAV } from "./previewNav";
 import {
+  HEADER_FADE_LIGHT_TO_BLUE_IDS,
   HEADER_LIGHT_DESIGN_IDS,
   HEADER_SIZES,
   HEADER_THEME_PRESETS,
@@ -163,6 +164,21 @@ export default function SiteHeaderInspector({
         </p>
         <div className="ve-header-design-grid ve-header-design-grid--compact">
           {headerQuickPresets(HEADER_LIGHT_DESIGN_IDS).map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`ve-header-design-card${designId === p.id ? " is-active" : ""}`}
+              onClick={() => patch(p.patch())}
+            >
+              <span className="ve-header-design-card__swatch" style={{ background: p.swatch }} />
+              <span className="ve-header-design-card__label">{p.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className="ve-inspector__label">Light → blue fades ({HEADER_FADE_LIGHT_TO_BLUE_IDS.length})</p>
+        <div className="ve-header-design-grid ve-header-design-grid--compact">
+          {headerQuickPresets(HEADER_FADE_LIGHT_TO_BLUE_IDS).map((p) => (
             <button
               key={p.id}
               type="button"

@@ -366,6 +366,12 @@
   color: #64748b;
 }
 
+.scp-header-themes__intro--tight {
+  margin-top: -0.2rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.75rem;
+}
+
 .scp-theme-chips {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

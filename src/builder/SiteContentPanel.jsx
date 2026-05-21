@@ -4,6 +4,7 @@ import { fetchSiteContent, saveSiteContent } from "../admin/api";
 import {
   HEADER_DARK_QUICK_IDS,
   HEADER_DESIGNS,
+  HEADER_FADE_LIGHT_TO_BLUE_IDS,
   HEADER_LIGHT_DESIGN_IDS,
   applyHeaderCtaPreset,
   applyHeaderDesignPreset,
@@ -179,6 +180,7 @@ export default function SiteContentPanel({
   const services = content.site?.services || [];
   const settings = content.settings || {};
   const lightHeaderPresets = headerQuickPresets(HEADER_LIGHT_DESIGN_IDS);
+  const fadeLightBluePresets = headerQuickPresets(HEADER_FADE_LIGHT_TO_BLUE_IDS);
   const darkHeaderPresets = headerQuickPresets(HEADER_DARK_QUICK_IDS);
   const customUploadedLogo =
     hasCustomLogo(settings.logoImage) && !isBuiltInLogo(settings.logoImage);
@@ -347,6 +349,25 @@ export default function SiteContentPanel({
                     </button>
                   ))}
                 </div>
+                <p className="scp-sub-label">Light left → blue/dark right ({fadeLightBluePresets.length})</p>
+                <p className="scp-header-themes__intro scp-header-themes__intro--tight">
+                  Logo side stays light; menu links sit on the blue side (white text).
+                </p>
+                <div className="scp-theme-chips">
+                  {fadeLightBluePresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+
                 <p className="scp-sub-label">Dark headers</p>
                 <div className="scp-theme-chips">
                   {darkHeaderPresets.map((p) => (

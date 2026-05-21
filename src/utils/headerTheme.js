@@ -601,6 +601,172 @@ export const HEADER_DESIGNS = {
     ctaColor: "#ffffff",
     border: "rgba(20, 184, 166, 0.25)",
   },
+  /* Left light → right blue / navy (horizontal fades) */
+  fadeWhiteNavy: {
+    id: "fadeWhiteNavy",
+    label: "White → navy",
+    swatch: "linear-gradient(90deg, #ffffff 0%, #0a1628 100%)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f8fafc 12%, #cbd5e1 28%, #64748b 48%, #1e3a5c 68%, #0f2844 82%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.96)",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(255, 255, 255, 0.15)",
+    brandTextOnDark: "#0f172a",
+    brandSubOnDark: "rgba(15, 23, 42, 0.72)",
+  },
+  fadeMistBlue: {
+    id: "fadeMistBlue",
+    label: "Mist → Infosys blue",
+    swatch: "linear-gradient(90deg, #f4f7fb, #007cc3)",
+    barBackground:
+      "linear-gradient(90deg, #f8fafc 0%, #f1f5f9 15%, #e2e8f0 30%, #93c5fd 52%, #38bdf8 68%, #007cc3 82%, #006aa8 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#0f172a",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 124, 195, 0.2)",
+    brandTextOnDark: "#1e293b",
+    brandSubOnDark: "rgba(30, 41, 59, 0.75)",
+  },
+  fadePearlPacific: {
+    id: "fadePearlPacific",
+    label: "Pearl → pacific",
+    swatch: "linear-gradient(90deg, #f4f8fc, #003d5c)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f4f8fc 14%, #e0f2fe 32%, #7dd3fc 50%, #0284c7 70%, #004d73 88%, #003d5c 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.94)",
+    navOnDark: "#ffffff",
+    navOnLight: "#003d5c",
+    ctaBg: "#0099ff",
+    ctaColor: "#ffffff",
+    border: "rgba(56, 189, 248, 0.25)",
+    brandTextOnDark: "#0a1628",
+    brandSubOnDark: "rgba(10, 22, 40, 0.7)",
+  },
+  fadeIceCorporate: {
+    id: "fadeIceCorporate",
+    label: "Ice → corporate blue",
+    swatch: "linear-gradient(90deg, #f0f9ff, #003366)",
+    barBackground:
+      "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 18%, #bae6fd 36%, #60a5fa 54%, #2563eb 72%, #1e40af 86%, #003366 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(37, 99, 235, 0.22)",
+    brandTextOnDark: "#0c4a6e",
+    brandSubOnDark: "rgba(12, 74, 110, 0.75)",
+  },
+  fadeCloudDeep: {
+    id: "fadeCloudDeep",
+    label: "Cloud → deep blue",
+    swatch: "linear-gradient(90deg, #f8fafc, #1a3a5c)",
+    barBackground:
+      "linear-gradient(90deg, #fafafa 0%, #f8fafc 12%, #f1f5f9 24%, #94a3b8 42%, #3b82f6 58%, #1d4ed8 74%, #1e3a5c 90%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.95)",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#38bdf8",
+    ctaColor: "#0f172a",
+    border: "rgba(59, 130, 246, 0.28)",
+    brandTextOnDark: "#334155",
+    brandSubOnDark: "rgba(51, 65, 85, 0.72)",
+  },
+  fadeLinenIndigo: {
+    id: "fadeLinenIndigo",
+    label: "Linen → indigo",
+    swatch: "linear-gradient(90deg, #fafaf9, #1a3a5c)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #fafaf9 14%, #f5f5f4 28%, #a8a29e 44%, #6366f1 62%, #4338ca 78%, #312e81 92%, #1a3a5c 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#312e81",
+    ctaBg: "#6366f1",
+    ctaColor: "#ffffff",
+    border: "rgba(99, 102, 241, 0.25)",
+    brandTextOnDark: "#44403c",
+    brandSubOnDark: "rgba(68, 64, 60, 0.75)",
+  },
+  fadeSnowTeal: {
+    id: "fadeSnowTeal",
+    label: "Snow → teal navy",
+    swatch: "linear-gradient(90deg, #ffffff, #004d73)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f8fafc 10%, #ecfeff 26%, #67e8f9 44%, #06b6d4 58%, #007cc3 72%, #004d73 88%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.96)",
+    navOnDark: "#ffffff",
+    navOnLight: "#0a1628",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(6, 182, 212, 0.3)",
+    brandTextOnDark: "#0f172a",
+    brandSubOnDark: "rgba(15, 23, 42, 0.7)",
+  },
+  fadeCreamCorp: {
+    id: "fadeCreamCorp",
+    label: "Cream → corp navy",
+    swatch: "linear-gradient(90deg, #fffbeb, #003366)",
+    barBackground:
+      "linear-gradient(90deg, #fffbeb 0%, #fef3c7 14%, #fde68a 28%, #fcd34d 42%, #60a5fa 58%, #007cc3 74%, #003d5c 90%, #003366 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#003366",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 124, 195, 0.22)",
+    brandTextOnDark: "#78350f",
+    brandSubOnDark: "rgba(120, 53, 15, 0.72)",
+  },
+  fadeArcticMidnight: {
+    id: "fadeArcticMidnight",
+    label: "Arctic → midnight",
+    swatch: "linear-gradient(90deg, #e0f2fe, #0f172a)",
+    barBackground:
+      "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 16%, #bae6fd 32%, #38bdf8 48%, #0ea5e9 62%, #0369a1 76%, #1e3a8a 88%, #0f172a 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.94)",
+    navOnDark: "#ffffff",
+    navOnLight: "#0f172a",
+    ctaBg: "#0ea5e9",
+    ctaColor: "#ffffff",
+    border: "rgba(14, 165, 233, 0.28)",
+    brandTextOnDark: "#075985",
+    brandSubOnDark: "rgba(7, 89, 133, 0.75)",
+  },
+  fadeSoftSkyNavy: {
+    id: "fadeSoftSkyNavy",
+    label: "Soft sky → navy",
+    swatch: "linear-gradient(90deg, #eff6ff, #0a1628)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #eff6ff 14%, #dbeafe 30%, #93c5fd 48%, #3b82f6 64%, #1d4ed8 78%, #1e3a8a 90%, #0a1628 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#2563eb",
+    ctaColor: "#ffffff",
+    border: "rgba(59, 130, 246, 0.22)",
+    brandTextOnDark: "#1e40af",
+    brandSubOnDark: "rgba(30, 64, 175, 0.7)",
+  },
+  fadeMistTealDeep: {
+    id: "fadeMistTealDeep",
+    label: "Mist → teal deep",
+    swatch: "linear-gradient(90deg, #f4f7fb, #003d5c)",
+    barBackground:
+      "linear-gradient(90deg, #f8fafc 0%, #f4f7fb 12%, #e2e8f0 24%, #99f6e4 40%, #2dd4bf 56%, #00b8a9 70%, #007cc3 82%, #003d5c 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#003d5c",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 184, 169, 0.25)",
+    brandTextOnDark: "#1a2b3c",
+    brandSubOnDark: "rgba(26, 43, 60, 0.72)",
+  },
 };
 
 const LIGHT_BAR_BG_HINTS = [
@@ -694,6 +860,21 @@ export const HEADER_LIGHT_DESIGN_IDS = [
     .sort((a, b) => a.localeCompare(b)),
 ];
 
+/** Light left → blue/navy right (menu white on dark side; dark brand text on logo) */
+export const HEADER_FADE_LIGHT_TO_BLUE_IDS = [
+  "fadeWhiteNavy",
+  "fadeMistBlue",
+  "fadePearlPacific",
+  "fadeIceCorporate",
+  "fadeCloudDeep",
+  "fadeLinenIndigo",
+  "fadeSnowTeal",
+  "fadeCreamCorp",
+  "fadeArcticMidnight",
+  "fadeSoftSkyNavy",
+  "fadeMistTealDeep",
+];
+
 export const HEADER_DARK_QUICK_IDS = ["glass", "maatridevHome", "solid", "infosysTeal", "maatridevPage"];
 
 export function headerQuickPresets(ids) {
@@ -778,6 +959,10 @@ export const HEADER_THEME_PRESETS = [
   { id: "md-indigo", label: "Corporate indigo", patch: () => applyHeaderDesignPreset("indigoCorp") },
   { id: "md-spark", label: "Innovation spark", patch: () => applyHeaderDesignPreset("innovationSpark") },
   { id: "md-mist", label: "Mist light", patch: () => applyHeaderDesignPreset("mistLight") },
+  { id: "fade-mist-blue", label: "Fade mist → blue", patch: () => applyHeaderDesignPreset("fadeMistBlue") },
+  { id: "fade-white-navy", label: "Fade white → navy", patch: () => applyHeaderDesignPreset("fadeWhiteNavy") },
+  { id: "fade-pearl", label: "Fade pearl → pacific", patch: () => applyHeaderDesignPreset("fadePearlPacific") },
+  { id: "fade-arctic", label: "Fade arctic → midnight", patch: () => applyHeaderDesignPreset("fadeArcticMidnight") },
 ];
 
 function darkenHex(hex, amount = 0.12) {
@@ -807,7 +992,7 @@ export function applyHeaderCtaPreset(designId) {
 export function applyHeaderDesignPreset(designId) {
   const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
   const cta = applyHeaderCtaPreset(designId);
-  return {
+  const patch = {
     headerDesign: d.id,
     headerBarBackground: d.barBackground,
     headerBarOverHero: d.barBackground,
@@ -816,6 +1001,11 @@ export function applyHeaderDesignPreset(designId) {
     headerNavOnLight: d.navOnLight,
     ...cta,
   };
+  if (d.brandTextOnDark) {
+    patch.headerBrandTextOnDark = d.brandTextOnDark;
+    patch.headerBrandSubtextOnDark = d.brandSubOnDark || "rgba(255, 255, 255, 0.88)";
+  }
+  return patch;
 }
 
 export function previewContextFromPath(pathname = "/") {
