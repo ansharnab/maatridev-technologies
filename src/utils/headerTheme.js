@@ -457,16 +457,194 @@ export const HEADER_DESIGNS = {
     ctaColor: "#ffffff",
     border: "rgba(15, 23, 42, 0.08)",
   },
+  snow: {
+    id: "snow",
+    label: "Pure snow white",
+    swatch: "#ffffff",
+    barBackground: "#ffffff",
+    barScrolled: "#ffffff",
+    navOnDark: "#0f172a",
+    navOnLight: "#0f172a",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(15, 23, 42, 0.08)",
+  },
+  skyWash: {
+    id: "skyWash",
+    label: "Sky wash blue",
+    swatch: "#eff6ff",
+    barBackground: "linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#1e3a8a",
+    navOnLight: "#1e3a8a",
+    ctaBg: "#2563eb",
+    ctaColor: "#ffffff",
+    border: "rgba(37, 99, 235, 0.15)",
+  },
+  pearl: {
+    id: "pearl",
+    label: "Pearl (MD mist)",
+    swatch: "#f4f8fc",
+    barBackground: "rgba(244, 248, 252, 0.98)",
+    barScrolled: "#ffffff",
+    navOnDark: "#1a2b3c",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 124, 195, 0.1)",
+  },
+  sage: {
+    id: "sage",
+    label: "Sage mint",
+    swatch: "#ecfdf5",
+    barBackground: "linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#065f46",
+    navOnLight: "#065f46",
+    ctaBg: "#059669",
+    ctaColor: "#ffffff",
+    border: "rgba(5, 150, 105, 0.15)",
+  },
+  blush: {
+    id: "blush",
+    label: "Blush pink",
+    swatch: "#fdf2f8",
+    barBackground: "linear-gradient(90deg, #fdf2f8 0%, #fce7f3 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#9d174d",
+    navOnLight: "#9d174d",
+    ctaBg: "#db2777",
+    ctaColor: "#ffffff",
+    border: "rgba(219, 39, 119, 0.12)",
+  },
+  sand: {
+    id: "sand",
+    label: "Warm sand",
+    swatch: "#fef9c3",
+    barBackground: "linear-gradient(90deg, #fefce8 0%, #fef9c3 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#854d0e",
+    navOnLight: "#854d0e",
+    ctaBg: "#d97706",
+    ctaColor: "#ffffff",
+    border: "rgba(133, 77, 14, 0.12)",
+  },
+  mintFrost: {
+    id: "mintFrost",
+    label: "Mint frost",
+    swatch: "#f0fdfa",
+    barBackground: "linear-gradient(90deg, #f0fdfa 0%, #ccfbf1 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#115e59",
+    navOnLight: "#115e59",
+    ctaBg: "#0d9488",
+    ctaColor: "#ffffff",
+    border: "rgba(13, 148, 136, 0.15)",
+  },
+  roseMist: {
+    id: "roseMist",
+    label: "Rose mist",
+    swatch: "#fff1f2",
+    barBackground: "linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#9f1239",
+    navOnLight: "#9f1239",
+    ctaBg: "#e11d48",
+    ctaColor: "#ffffff",
+    border: "rgba(225, 29, 72, 0.12)",
+  },
+  warmIvory: {
+    id: "warmIvory",
+    label: "Warm ivory",
+    swatch: "#fff7ed",
+    barBackground: "linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#7c2d12",
+    navOnLight: "#7c2d12",
+    ctaBg: "#ea580c",
+    ctaColor: "#ffffff",
+    border: "rgba(124, 45, 18, 0.1)",
+  },
 };
 
-/** Light header bars — dark nav text, good for colored/dark logos */
-export const HEADER_LIGHT_DESIGN_IDS = [
-  "light",
-  "arctic",
-  "mistLight",
-  "cloudInner",
+const LIGHT_BAR_BG_HINTS = [
+  "#fff",
+  "ffffff",
+  "f8fafc",
+  "f4f7fb",
+  "f4f8fc",
+  "f0f9ff",
+  "eff6ff",
+  "fafaf9",
+  "fffbeb",
+  "fef3c7",
+  "e0f2fe",
+  "bae6fd",
+  "ecfdf5",
+  "fdf2f8",
+  "fef9c3",
+  "fefce8",
+  "f0fdfa",
+  "fff1f2",
+  "fff7ed",
+  "ffedd5",
+  "mist",
   "cream",
   "linen",
+  "snow",
+  "pearl",
+  "sage",
+  "blush",
+  "sand",
+  "arctic",
+  "cloud",
+];
+
+function navIsDarkOnLightBar(navOnDark = "") {
+  const n = String(navOnDark).trim().toLowerCase();
+  if (!n || n === "#ffffff" || n === "#fff" || n === "white") return false;
+  if (n.includes("255, 255, 255") || n.includes("244, 248, 252") || n.includes("248, 250, 252")) {
+    return false;
+  }
+  return true;
+}
+
+function barBackgroundIsLight(barBackground = "") {
+  const b = String(barBackground).toLowerCase();
+  return LIGHT_BAR_BG_HINTS.some((hint) => b.includes(hint));
+}
+
+/** Light bar = pale background + dark menu text (for colored logos) */
+export function isLightHeaderDesign(design) {
+  if (!design) return false;
+  return navIsDarkOnLightBar(design.navOnDark) && barBackgroundIsLight(design.barBackground);
+}
+
+const LIGHT_HEADER_DISPLAY_ORDER = [
+  "light",
+  "snow",
+  "mistLight",
+  "linen",
+  "cream",
+  "pearl",
+  "cloudInner",
+  "skyWash",
+  "arctic",
+  "sage",
+  "mintFrost",
+  "blush",
+  "roseMist",
+  "sand",
+  "warmIvory",
+];
+
+/** All light header designs in HEADER_DESIGNS (not a fixed count) */
+export const HEADER_LIGHT_DESIGN_IDS = [
+  ...LIGHT_HEADER_DISPLAY_ORDER.filter((id) => isLightHeaderDesign(HEADER_DESIGNS[id])),
+  ...Object.values(HEADER_DESIGNS)
+    .filter((d) => isLightHeaderDesign(d) && !LIGHT_HEADER_DISPLAY_ORDER.includes(d.id))
+    .map((d) => d.id)
+    .sort((a, b) => a.localeCompare(b)),
 ];
 
 export const HEADER_DARK_QUICK_IDS = ["glass", "maatridevHome", "solid", "infosysTeal", "maatridevPage"];
@@ -525,6 +703,11 @@ export const HEADER_THEME_PRESETS = [
   { id: "cyber-bar", label: "Cyber cyan", patch: () => applyHeaderDesignPreset("cyber") },
   { id: "rose-bar", label: "Rose wine", patch: () => applyHeaderDesignPreset("rose") },
   { id: "arctic-bar", label: "Arctic ice", patch: () => applyHeaderDesignPreset("arctic") },
+  { id: "light-bar", label: "Light white bar", patch: () => applyHeaderDesignPreset("light") },
+  { id: "snow-bar", label: "Snow white", patch: () => applyHeaderDesignPreset("snow") },
+  { id: "cloud-bar", label: "Cloud inner", patch: () => applyHeaderDesignPreset("cloudInner") },
+  { id: "sage-bar", label: "Sage mint", patch: () => applyHeaderDesignPreset("sage") },
+  { id: "pearl-bar", label: "Pearl mist", patch: () => applyHeaderDesignPreset("pearl") },
   { id: "copper-bar", label: "Copper bronze", patch: () => applyHeaderDesignPreset("copper") },
   { id: "slate-bar", label: "Slate pro", patch: () => applyHeaderDesignPreset("slate") },
   { id: "md-home", label: "★ Live IT hero", patch: () => applyHeaderDesignPreset("maatridevHome") },

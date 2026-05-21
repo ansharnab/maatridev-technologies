@@ -157,7 +157,9 @@ export default function SiteHeaderInspector({
           ))}
         </div>
 
-        <p className="ve-inspector__label">Light header bars ({HEADER_LIGHT_DESIGN_IDS.length})</p>
+        <p className="ve-inspector__label">
+          Light header bars ({HEADER_LIGHT_DESIGN_IDS.length}) — white &amp; pastel; dark nav text
+        </p>
         <div className="ve-header-design-grid ve-header-design-grid--compact">
           {headerQuickPresets(HEADER_LIGHT_DESIGN_IDS).map((p) => (
             <button

@@ -3,6 +3,7 @@ import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
 import {
   HEADER_DARK_QUICK_IDS,
+  HEADER_DESIGNS,
   HEADER_LIGHT_DESIGN_IDS,
   applyHeaderDesignPreset,
   headerQuickPresets,
@@ -323,7 +324,7 @@ export default function SiteContentPanel({
                   Light bars use dark menu text — pair with <strong>Original</strong> or <strong>Darker</strong> logo tone.
                   Dark bars often need <strong>White</strong> or <strong>Brighter</strong> logo tone.
                 </p>
-                <p className="scp-sub-label">Light headers</p>
+                <p className="scp-sub-label">Light headers ({lightHeaderPresets.length})</p>
                 <div className="scp-theme-chips">
                   {lightHeaderPresets.map((p) => (
                     <button
@@ -354,7 +355,8 @@ export default function SiteContentPanel({
                   ))}
                 </div>
                 <p className="scp-note">
-                  More bar, menu, and CTA colors: Page Builder → click the header → <strong>Site header &amp; colors</strong>.
+                  {lightHeaderPresets.length} light bars total (white, pastel, ice). More bar, menu, and CTA colors: Page Builder →
+                  click the header → <strong>Site header &amp; colors</strong> ({Object.keys(HEADER_DESIGNS).length} full designs).
                 </p>
               </section>
 
