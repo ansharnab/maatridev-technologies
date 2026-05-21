@@ -71,12 +71,12 @@ export default function AdminLogin({ onLogin }) {
             <code>npm run dev</code> in the website folder.
           </div>
         )}
-        {apiOnline === true && authStatus?.ok && (
+        {/* {apiOnline === true && authStatus?.ok && (
           <div className="alert alert--success admin-login__api-ok">
             API connected — password from {authStatus.passwordSource === "env-file" ? "website/.env" : "default"} (
             {authStatus.passwordLength} characters).
           </div>
-        )}
+        )} */}
         {apiOnline === true && !authStatus?.ok && (
           <div className="alert alert--error">
             <strong>Stale API on port 3001.</strong> An old server is running without the latest auth. Close all
@@ -113,9 +113,9 @@ export default function AdminLogin({ onLogin }) {
               <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
             </button>
           </div>
-          <p className="admin-login__hint">
+          {/* <p className="admin-login__hint">
             Password is set in <code>.env</code> → <code>ADMIN_PASSWORD=yourpassword</code>
-          </p>
+          </p> */}
           <button
             type="button"
             className="admin-login__use-default"
@@ -124,7 +124,7 @@ export default function AdminLogin({ onLogin }) {
               setError("");
             }}
           >
-            Use default password ({DEFAULT_PASSWORD})
+            {/* Use default password ({DEFAULT_PASSWORD}) */}
           </button>
         </div>
 

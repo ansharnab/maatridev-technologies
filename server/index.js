@@ -133,6 +133,17 @@ if (!ADMIN_PASSWORD) {
   process.exit(1);
 }
 
+function normalizePassword(input) {
+  return String(input ?? "").trim();
+}
+
+function passwordsMatch(candidate) {
+  const a = Buffer.from(normalizePassword(candidate));
+  const b = Buffer.from(ADMIN_PASSWORD);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 [DATA_DIR, MEDIA_DIR, UPLOADS_DIR].forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
@@ -307,9 +318,24 @@ if (fs.existsSync(DIST_DIR)) {
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
   const source = envFromFile.ADMIN_PASSWORD ? ".env file" : "default";
-  console.log(`MaatriDev API running on http://localhost:${PORT}`);
-  console.log(`Admin password loaded from ${source} (${ADMIN_PASSWORD.length} characters)`);
-  if (fs.existsSync(DIST_DIR)) console.log("Serving production build from /dist");
+  const base = `http://localhost:${PORT}`;
+  const hasDist = fs.existsSync(DIST_DIR);
+  console.log("");
+  console.log("  MaatriDev server is running (this terminal stays open — that is normal).");
+  console.log("");
+  console.log(`  API:    ${base}/api/health`);
+  if (hasDist) {
+    console.log(`  Site:   ${base}/`);
+    console.log(`  Admin:  ${base}/admin`);
+    console.log("  Mode:   production (serving /dist)");
+  } else {
+    console.log("  Mode:   API only — no /dist folder.");
+    console.log("  Dev:    run  npm run dev   then open http://localhost:5173/");
+  }
+  console.log(`  Admin password: ${source} (${ADMIN_PASSWORD.length} characters)`);
+  console.log("");
+  console.log("  Press Ctrl+C to stop.");
+  console.log("");
 });
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
