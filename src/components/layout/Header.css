@@ -483,8 +483,8 @@
   width: 100%;
 }
 
-.site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__menu--editor,
-.site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__menu--editor {
+.site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__dropdown.is-open .site-header__menu--editor,
+.site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__dropdown.is-open .site-header__menu--editor {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -493,6 +493,11 @@
   background: rgba(0, 0, 0, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
+}
+
+.site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu--editor,
+.site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu--editor {
+  display: none !important;
 }
 
 .site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__menu--editor button,
@@ -512,6 +517,9 @@
 
 .site-header--editor-mobile .site-header__inner,
 .site-header--editor-tablet .site-header__inner {
+  width: 100%;
+  max-width: 100%;
+  padding-inline: 0.65rem;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     "logo toggle"
@@ -530,6 +538,8 @@
   grid-area: toggle;
   justify-self: end;
   position: relative;
+  top: auto;
+  right: auto;
   z-index: 15;
 }
 
@@ -740,8 +750,8 @@
   z-index: 20;
 }
 
-/* Desktop: stable CSS hover — no JS mount/unmount flicker */
-@media (min-width: 1101px) {
+/* Desktop: stable CSS hover — no JS mount/unmount flicker (pointer devices only) */
+@media (min-width: 1101px) and (hover: hover) {
   .site-header__dropdown .site-header__menu {
     opacity: 0;
     visibility: hidden;
@@ -879,6 +889,10 @@
 
 @media (max-width: 1100px) {
   .site-header:not(.site-header--editor-preview) .site-header__inner {
+    width: 100%;
+    max-width: 100%;
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "logo toggle"
@@ -888,13 +902,19 @@
   .site-header:not(.site-header--editor-preview) .site-header__brand {
     grid-area: logo;
     justify-self: start;
+    max-width: min(220px, 72vw);
   }
 
   .site-header:not(.site-header--editor-preview) .site-header__toggle {
     display: flex;
     grid-area: toggle;
     justify-self: end;
-    margin-right: 0;
+    align-self: center;
+    position: fixed;
+    top: max(0.75rem, env(safe-area-inset-top, 0px));
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    margin: 0;
+    z-index: 1003;
   }
 
   /* Hidden when closed — avoids a full-screen fixed layer blocking scroll/touch */
@@ -1000,6 +1020,11 @@
 
   .site-header__nav.is-open .site-header__dropdown.is-open > .site-header__link i {
     transform: rotate(180deg);
+  }
+
+  /* Never show submenus until the row is tapped (.is-open) */
+  .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu {
+    display: none !important;
   }
 
   .site-header__nav.is-open .site-header__menu a {

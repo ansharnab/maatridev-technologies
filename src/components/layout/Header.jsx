@@ -114,6 +114,11 @@ export function SiteHeaderBar({
 
   const logoSrc = logoFallback ? theme.logoSrc : logoBroken ? "" : theme.logoSrc;
 
+  const closeMobileNav = () => {
+    setOpenDropdown(null);
+    setOpen(false);
+  };
+
   useEffect(() => {
     if (editorPreview) return undefined;
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -157,7 +162,7 @@ export function SiteHeaderBar({
     }
     document.body.style.overflow = "hidden";
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeMobileNav();
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -289,10 +294,7 @@ export function SiteHeaderBar({
                   key={child.to}
                   to={child.to}
                   role="menuitem"
-                  onClick={() => {
-                    setOpenDropdown(null);
-                    setOpen(false);
-                  }}
+                  onClick={closeMobileNav}
                 >
                   {child.label}
                 </NavLink>
@@ -323,7 +325,7 @@ export function SiteHeaderBar({
         key={item.to}
         to={item.to}
         className={({ isActive }) => `site-header__link ${isActive ? "active" : ""}`}
-        onClick={() => setOpen(false)}
+        onClick={closeMobileNav}
       >
         {item.label}
       </NavLink>
@@ -389,8 +391,7 @@ export function SiteHeaderBar({
           tabIndex={-1}
           onClick={(e) => {
             e.stopPropagation();
-            setOpen(false);
-            setOpenDropdown(null);
+            closeMobileNav();
           }}
         />
       )}
@@ -416,8 +417,12 @@ export function SiteHeaderBar({
           aria-expanded={open}
           onClick={(e) => {
             e.stopPropagation();
-            setOpenDropdown(null);
-            setOpen((wasOpen) => !wasOpen);
+            if (open) {
+              closeMobileNav();
+            } else {
+              setOpenDropdown(null);
+              setOpen(true);
+            }
           }}
         >
           <span />
@@ -435,7 +440,7 @@ export function SiteHeaderBar({
             <Link
               to={settings.headerCtaLink || "/appointment"}
               className="btn btn--primary site-header__cta"
-              onClick={() => setOpen(false)}
+              onClick={closeMobileNav}
             >
               {settings.headerCtaLabel || "Book Appointment"}
             </Link>

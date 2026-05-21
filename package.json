@@ -14,7 +14,8 @@
     "start": "node server/index.js",
     "production": "npm run build && npm start",
     "push-live-content": "node scripts/push-live-content.js",
-    "test:header": "node scripts/test-header-theme.mjs"
+    "test:header": "node scripts/test-header-theme.mjs",
+    "test:header:mobile": "node scripts/test-mobile-header-css.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
