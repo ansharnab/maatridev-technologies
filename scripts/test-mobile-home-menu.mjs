@@ -40,7 +40,10 @@ try {
 
   const homeHeading = page.locator(".site-header__home-heading");
   await assert.ok(await homeHeading.isVisible(), "Home heading visible in drawer");
-  await assert.equal(await homeHeading.textContent(), "Home");
+  await assert.ok((await homeHeading.textContent())?.includes("Home"), "Home label text");
+  const headingBox = await homeHeading.boundingBox();
+  const itBox = await page.locator(".site-header__home-links >> text=IT Solutions (Default)").boundingBox();
+  assert.ok(headingBox && itBox && itBox.y > headingBox.y, "Home label above agency links");
 
   const homeLinks = page.locator(".site-header__home-links");
   await assert.ok(await homeLinks.isVisible(), "Home agency links always visible");

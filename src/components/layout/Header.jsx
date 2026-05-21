@@ -225,7 +225,9 @@ export function SiteHeaderBar({
   /** Phone/tablet drawer — Home label + agency links always stacked below (no accordion scroll bugs) */
   const renderMobileHomeSection = () => (
     <div ref={homeBlockRef} className="site-header__home-block is-open">
-      <div className="site-header__home-heading">Home</div>
+      <div className="site-header__link site-header__home-heading" aria-hidden="false">
+        Home
+      </div>
       <div className="site-header__home-links">
         {HOME_NAV_CHILDREN.map((child) =>
           editorPreview ? (
