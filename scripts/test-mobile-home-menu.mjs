@@ -38,25 +38,20 @@ try {
   await page.goto(`${base}/home/digital-agency`, { waitUntil: "networkidle", timeout: 30000 });
   await page.locator(".site-header__toggle").click();
 
-  const homeHeading = page.locator(".site-header__home-heading");
-  await assert.ok(await homeHeading.isVisible(), "Home heading visible in drawer");
-  await assert.ok((await homeHeading.textContent())?.includes("Home"), "Home label text");
-  const headingBox = await homeHeading.boundingBox();
-  const itBox = await page.locator(".site-header__home-links >> text=IT Solutions (Default)").boundingBox();
-  assert.ok(headingBox && itBox && itBox.y > headingBox.y, "Home label above agency links");
+  const homeBtn = page.locator(".site-header__home-toggle");
+  await assert.ok(await homeBtn.isVisible(), "Home row visible");
+  await assert.equal(await page.locator(".site-header__home-links").count(), 0, "Links hidden before tap");
 
-  const homeLinks = page.locator(".site-header__home-links");
-  await assert.ok(await homeLinks.isVisible(), "Home agency links always visible");
-  await assert.ok(await page.locator(".site-header__home-links >> text=IT Solutions (Default)").isVisible());
-  await assert.ok(await page.locator(".site-header__home-links >> text=Web Agency").isVisible());
-  await assert.ok(await page.locator(".site-header__home-links >> text=Digital Agency").isVisible());
+  await homeBtn.click();
+  await assert.ok(await page.locator(".site-header__home-links").isVisible());
+  await assert.ok(await page.locator("text=IT Solutions (Default)").isVisible());
 
-  const boxHome = await homeHeading.boundingBox();
+  const boxHome = await homeBtn.boundingBox();
   const boxFirst = await page.locator(".site-header__home-links >> text=IT Solutions (Default)").boundingBox();
-  const boxAbout = await page.locator(".site-header__nav >> text=About").boundingBox();
-  assert.ok(boxHome && boxFirst && boxAbout, "bounding boxes");
-  assert.ok(boxFirst.y > boxHome.y, "Agency links below Home heading");
-  assert.ok(boxAbout.y > boxFirst.y, "About below Home section");
+  assert.ok(boxHome && boxFirst && boxFirst.y > boxHome.y, "Submenu opens downward");
+
+  await homeBtn.click();
+  await assert.equal(await page.locator(".site-header__home-links").count(), 0, "Tap again closes");
 
   await page.locator(".site-header__nav >> text=Services").click();
   await page.waitForURL(/\/services\/?$/);

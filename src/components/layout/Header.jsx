@@ -218,46 +218,67 @@ export function SiteHeaderBar({
     onEditorNavigate?.(targetPageId, path);
   };
 
-  const toggleDropdown = (label) => {
-    setOpenDropdown((current) => (current === label ? null : label));
+  const toggleHomeMenu = () => {
+    const willOpen = openDropdown !== "Home";
+    setOpenDropdown(willOpen ? "Home" : null);
+    if (!willOpen) return;
+    requestAnimationFrame(() => {
+      const nav = navRef.current;
+      const block = homeBlockRef.current;
+      if (!nav || !block) return;
+      nav.scrollTop = Math.max(0, block.offsetTop - 6);
+    });
   };
 
-  /** Phone/tablet drawer — Home label + agency links always stacked below (no accordion scroll bugs) */
-  const renderMobileHomeSection = () => (
-    <div ref={homeBlockRef} className="site-header__home-block is-open">
-      <div className="site-header__link site-header__home-heading" aria-hidden="false">
-        Home
-      </div>
-      <div className="site-header__home-links">
-        {HOME_NAV_CHILDREN.map((child) =>
-          editorPreview ? (
-            <button
-              key={child.to}
-              type="button"
-              className={pathMatchesNav(pathname, child.to) ? "active" : ""}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNavEditor(e, child.to);
-                setOpenDropdown(null);
-                setOpen(false);
-              }}
-            >
-              {child.label}
-            </button>
-          ) : (
-            <NavLink
-              key={child.to}
-              to={child.to}
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={closeMobileNav}
-            >
-              {child.label}
-            </NavLink>
-          ),
+  /** Phone/tablet drawer — tap Home → agency links open below (normal row, not stuck/active) */
+  const renderMobileHomeSection = () => {
+    const homeOpen = openDropdown === "Home";
+    return (
+      <div ref={homeBlockRef} className={`site-header__home-block${homeOpen ? " is-open" : ""}`}>
+        <button
+          type="button"
+          className="site-header__link site-header__home-toggle"
+          aria-expanded={homeOpen}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleHomeMenu();
+          }}
+        >
+          Home <i className="fa-solid fa-chevron-down" aria-hidden="true" />
+        </button>
+        {homeOpen && (
+          <div className="site-header__home-links">
+            {HOME_NAV_CHILDREN.map((child) =>
+              editorPreview ? (
+                <button
+                  key={child.to}
+                  type="button"
+                  className={pathMatchesNav(pathname, child.to) ? "active" : ""}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavEditor(e, child.to);
+                    setOpenDropdown(null);
+                    setOpen(false);
+                  }}
+                >
+                  {child.label}
+                </button>
+              ) : (
+                <NavLink
+                  key={child.to}
+                  to={child.to}
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                  onClick={closeMobileNav}
+                >
+                  {child.label}
+                </NavLink>
+              ),
+            )}
+          </div>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderNavItem = (item) => {
     if (item.children) {
