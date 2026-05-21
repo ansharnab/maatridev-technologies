@@ -208,15 +208,19 @@ export function SiteHeaderBar({
     onEditorNavigate?.(targetPageId, path);
   };
 
+  const toggleDropdown = (label) => {
+    setOpenDropdown((current) => (current === label ? null : label));
+  };
+
   const renderNavItem = (item) => {
     if (item.children) {
       const active = isNavItemActive(pathname, item);
-      const menuOpen = editorPreview && openDropdown === item.label;
+      const menuOpen = openDropdown === item.label;
       return (
         <div
           key={item.label}
           className={`site-header__dropdown${menuOpen ? " is-open" : ""}`}
-          onClick={(e) => editorPreview && e.stopPropagation()}
+          onClick={(e) => (editorPreview || menuOpen) && e.stopPropagation()}
         >
           {editorPreview ? (
             <div className={`site-header__link site-header__link--split${active ? " active" : ""}`}>
@@ -245,7 +249,16 @@ export function SiteHeaderBar({
               </button>
             </div>
           ) : (
-            <button type="button" className="site-header__link" aria-haspopup="true">
+            <button
+              type="button"
+              className="site-header__link"
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDropdown(item.label);
+              }}
+            >
               {item.label} <i className="fa-solid fa-chevron-down" aria-hidden="true" />
             </button>
           )}
@@ -272,7 +285,15 @@ export function SiteHeaderBar({
           ) : (
             <div className="site-header__menu" role="menu">
               {item.children.map((child) => (
-                <NavLink key={child.to} to={child.to} role="menuitem" onClick={() => setOpen(false)}>
+                <NavLink
+                  key={child.to}
+                  to={child.to}
+                  role="menuitem"
+                  onClick={() => {
+                    setOpenDropdown(null);
+                    setOpen(false);
+                  }}
+                >
                   {child.label}
                 </NavLink>
               ))}
