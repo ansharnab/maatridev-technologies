@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import AnimatedLogo from "../AnimatedLogo";
 import { hasCustomLogo } from "../../utils/mediaType";
@@ -40,7 +40,7 @@ const nav = [
 const EDITOR_PAGE_ROUTES = {
   home: ["/", "/home/web-agency", "/home/startup-agency", "/home/digital-agency", "/home/it-solution"],
   about: ["/about", "/team", "/blog"],
-  services: ["/services"],
+  services: ["/services", "/projects"],
   contact: ["/contact", "/pricing", "/appointment", "/engagement"],
 };
 
@@ -91,6 +91,8 @@ export function SiteHeaderBar({
 }) {
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const navRef = useRef(null);
+  const mobileDrawer = !editorPreview || previewDevice !== "desktop";
   const [scrolled, setScrolled] = useState(false);
   const [logoBroken, setLogoBroken] = useState(false);
   const [logoFallback, setLogoFallback] = useState(false);
@@ -159,7 +161,9 @@ export function SiteHeaderBar({
   }, [editorPreview, previewDevice, previewPageId]);
 
   useEffect(() => {
-    if (!open || editorPreview) return;
+    if (!open) return;
+    if (navRef.current) navRef.current.scrollTop = 0;
+    if (editorPreview) return;
     const activeSection = nav.find((item) => item.children?.length && isNavItemActive(pathname, item));
     setOpenDropdown(activeSection?.label ?? null);
   }, [open, pathname, editorPreview]);
@@ -239,7 +243,7 @@ export function SiteHeaderBar({
           className={`site-header__dropdown${menuOpen ? " is-open" : ""}`}
           onClick={(e) => (editorPreview || menuOpen) && e.stopPropagation()}
         >
-          {editorPreview ? (
+          {editorPreview && !mobileDrawer ? (
             <div className={`site-header__link site-header__link--split${active ? " active" : ""}`}>
               <button
                 type="button"
@@ -292,6 +296,7 @@ export function SiteHeaderBar({
                       e.stopPropagation();
                       handleNavEditor(e, child.to);
                       setOpenDropdown(null);
+                      if (mobileDrawer) setOpen(false);
                     }}
                   >
                     {child.label}
@@ -442,7 +447,7 @@ export function SiteHeaderBar({
           <span />
         </button>
 
-        <nav className={`site-header__nav ${open ? "is-open" : ""}`}>
+        <nav ref={navRef} className={`site-header__nav ${open ? "is-open" : ""}`}>
           {nav.map((item) => renderNavItem(item))}
           {editorPreview ? (
             <button type="button" className="btn btn--primary site-header__cta" onClick={handleCtaClick}>
