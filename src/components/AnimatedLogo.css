@@ -25,8 +25,8 @@
   width: auto;
   max-width: min(var(--logo-clip-width, 280px), 58vw);
   height: calc(var(--logo-full-height, 64px) * var(--logo-scale, 1));
-  max-height: 72px;
-  overflow: hidden;
+  max-height: calc(var(--logo-full-height, 64px) * var(--logo-scale, 1) + 8px);
+  overflow: visible;
   line-height: 0;
   vertical-align: middle;
 }
@@ -37,7 +37,7 @@
   width: auto;
   height: 100%;
   max-width: min(var(--logo-clip-width, 280px), 58vw);
-  max-height: 100%;
+  max-height: none;
   object-fit: contain;
   object-position: left center;
   border-radius: 0;

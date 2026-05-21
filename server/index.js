@@ -68,6 +68,9 @@ function sanitizePages(pages = {}) {
     if (w?.enabled && wText.length < 24) {
       delete next.wysiwyg;
     }
+    if (next.headerSettings && typeof next.headerSettings === "object" && Object.keys(next.headerSettings).length === 0) {
+      delete next.headerSettings;
+    }
     if (Object.keys(next).length > 0) out[pageId] = next;
   }
   return out;

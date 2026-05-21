@@ -46,7 +46,7 @@ export default function SiteContentHeaderColors({ settings = {}, onPatch }) {
             type="button"
             className="scp-palette-chip"
             title={p.label}
-            onClick={() => onPatch?.(p.patch)}
+            onClick={() => onPatch?.(p.patch, p.label)}
           >
             <span className="scp-palette-chip__swatch" style={{ background: p.swatch }} />
             <span>{p.label}</span>

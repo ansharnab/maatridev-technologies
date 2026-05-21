@@ -17,7 +17,8 @@
     "test:header": "node scripts/test-header-theme.mjs",
     "test:header:mobile": "node scripts/test-mobile-header-css.mjs",
     "test:nav": "node scripts/test-nav-structure.mjs",
-    "test:nav:browser": "node scripts/test-mobile-home-menu.mjs"
+    "test:nav:browser": "node scripts/test-mobile-home-menu.mjs",
+    "test:admin": "node scripts/test-admin-panel.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

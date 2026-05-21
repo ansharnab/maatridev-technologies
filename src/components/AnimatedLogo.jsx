@@ -36,8 +36,8 @@ export default function AnimatedLogo({
   useEffect(() => {
     setMediaError(false);
   }, [imageUrl]);
-  const safeScale = Math.min(2, Math.max(0.8, Number(scale) || 1));
-  const safeClip = Math.min(400, Math.max(180, Number(clipWidth) || 280));
+  const safeScale = Math.min(1.8, Math.max(0.5, Number(scale) || 1));
+  const safeClip = Math.min(480, Math.max(100, Number(clipWidth) || 280));
   const cacheBust =
     imageUrl && imageUrl.includes("/uploads/")
       ? `${imageUrl}${imageUrl.includes("?") ? "&" : "?"}t=${encodeURIComponent(imageUrl.split("/").pop() || "")}`

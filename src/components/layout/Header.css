@@ -125,7 +125,8 @@
 
 .site-header__brand--full-logo {
   gap: 0;
-  max-width: min(240px, 40vw);
+  max-width: min(var(--logo-clip-width, 280px), 48vw);
+  overflow: visible;
 }
 
 .site-header__brand-text {
@@ -355,7 +356,16 @@
   right: auto !important;
   width: 100%;
   border-radius: 0 0 4px 4px;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.site-header--editor-preview.site-header--editor-mobile,
+.site-header--editor-preview.site-header--editor-tablet {
+  overflow: visible;
+}
+
+.site-header--editor-preview.site-header--menu-open {
+  overflow: visible;
 }
 
 .site-header--editor-preview.site-header--editor-selected {
@@ -367,6 +377,11 @@
 .site-header--editor-preview .site-header__link,
 .site-header--editor-preview .site-header__cta {
   cursor: pointer;
+}
+
+.site-header__brand--editor {
+  position: relative;
+  overflow: visible;
 }
 
 .site-header--editor-light-nav .site-header__brand strong {
@@ -456,23 +471,36 @@
   width: 100%;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.08rem;
+  align-content: flex-start;
+  gap: 0.12rem;
   padding: 0.45rem 0.5rem 0.65rem;
   margin: 0;
   background: transparent;
   border-top: none;
   border-radius: 0;
-  z-index: 12;
+  z-index: 40;
   max-height: min(72vh, 480px);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  box-shadow: none;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.site-header--editor-mobile .site-header__nav.is-open .site-header__nav-body,
+.site-header--editor-tablet .site-header__nav.is-open .site-header__nav-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.12rem;
   overflow-x: hidden;
   overflow-y: auto;
   overflow-anchor: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  box-shadow: none;
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .site-header--editor-mobile .site-header__nav.is-open::before,
@@ -567,6 +595,35 @@
   border-radius: 6px;
 }
 
+.site-header--editor-mobile .site-header__nav.is-open > .site-header__home-block,
+.site-header--editor-tablet .site-header__nav.is-open > .site-header__home-block {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+.site-header--editor-mobile .site-header__nav.is-open .site-header__nav-body > button.site-header__link,
+.site-header--editor-tablet .site-header__nav.is-open .site-header__nav-body > button.site-header__link,
+.site-header--editor-mobile .site-header__nav.is-open .site-header__nav-body > .site-header__dropdown,
+.site-header--editor-tablet .site-header__nav.is-open .site-header__nav-body > .site-header__dropdown,
+.site-header--editor-mobile .site-header__nav.is-open .site-header__nav-body > .site-header__cta,
+.site-header--editor-tablet .site-header__nav.is-open .site-header__nav-body > .site-header__cta {
+  flex: 0 0 auto;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+.site-header--editor-mobile .site-header__nav.is-open .site-header__home-links.is-open,
+.site-header--editor-tablet .site-header__nav.is-open .site-header__home-links.is-open {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 0.75rem);
+}
+
 .site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__cta,
 .site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__cta {
   width: 100%;
@@ -601,7 +658,12 @@
   position: relative;
   top: auto;
   right: auto;
-  z-index: 15;
+  z-index: 45;
+}
+
+.site-header--editor-mobile.site-header--menu-open .site-header__toggle,
+.site-header--editor-tablet.site-header--menu-open .site-header__toggle {
+  z-index: 46;
 }
 
 .site-header--editor-preview .site-header__brand {
@@ -784,34 +846,109 @@
   width: 100%;
 }
 
+.site-header__nav.is-open .site-header__home-block {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 0;
+}
+
+.site-header__nav.is-open .site-header__home-block.is-open {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: visible;
+}
+
 .site-header__home-toggle {
   display: flex !important;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.52rem 0.7rem;
   border: none;
-  background: transparent;
+  border-radius: 8px;
+  background: #0f2844;
   cursor: pointer;
   font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.25;
   text-align: left;
+  color: #f4f8fc;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+  -webkit-user-drag: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 
-.site-header__home-block.is-open .site-header__home-toggle i {
+.site-header__home-toggle__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.site-header__home-toggle.is-open .site-header__home-toggle__icon {
   transform: rotate(180deg);
 }
 
-/* No stuck bar on Home — only child page gets .active */
-.site-header__nav.is-open .site-header__home-toggle.active {
-  background: transparent !important;
+.site-header__home-block.is-open .site-header__home-toggle {
+  position: relative;
+  top: auto;
+  z-index: 2;
+  flex-shrink: 0;
+  background: #0f2844;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.site-header__home-toggle:hover,
+.site-header__home-toggle:focus-visible {
+  background: rgba(0, 124, 195, 0.22);
+  color: #fff;
+  outline: none;
 }
 
 .site-header__home-links {
-  display: flex;
+  display: none;
   flex-direction: column;
-  gap: 0.05rem;
-  margin: 0.1rem 0 0.4rem 0.75rem;
-  padding: 0.15rem 0 0.15rem 0.5rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  gap: 0.12rem;
+  position: relative;
+  top: auto;
+  left: auto;
+  width: calc(100% - 0.75rem);
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 0.15rem 0.75rem;
+  padding: 0.15rem 0 0.2rem 0.55rem;
+  border-left: 2px solid rgba(0, 184, 169, 0.45);
+  flex: 0 0 auto;
+  z-index: 1;
+  align-self: stretch;
+}
+
+.site-header__home-links.is-open,
+.site-header__home-links[hidden="false"] {
+  display: flex;
+  margin-top: 0.1rem;
+  max-height: min(42vh, 240px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.site-header__home-links[hidden] {
+  display: none !important;
 }
 
 .site-header__home-links a,
@@ -825,11 +962,13 @@
   font: inherit;
   font-size: 0.84rem;
   font-weight: 500;
-  line-height: 1.3;
-  padding: 0.4rem 0.55rem;
+  line-height: 1.35;
+  padding: 0.45rem 0.55rem;
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
+  white-space: normal;
+  flex-shrink: 0;
 }
 
 .site-header__home-links a:hover,
@@ -844,12 +983,24 @@
 .site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__home-toggle,
 .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__home-toggle {
   color: #f4f8fc !important;
-  font-size: 0.92rem !important;
-  font-weight: 600 !important;
-  padding: 0.52rem 0.7rem !important;
 }
 
-.site-header__nav.is-open .site-header__home-toggle:hover {
+.site-header__nav.is-open .site-header__home-toggle:hover,
+.site-header__nav.is-open .site-header__home-toggle:focus-visible {
+  background: rgba(0, 124, 195, 0.22) !important;
+  color: #fff !important;
+}
+
+/* Drawer open: plain list — no “current page” teal block (step 2 Services highlight bug) */
+.site-header__nav.is-open .site-header__nav-body > .site-header__link.active,
+.site-header__nav.is-open .site-header__nav-body > button.site-header__link.active {
+  background: transparent !important;
+  color: #f4f8fc !important;
+  box-shadow: none !important;
+}
+
+.site-header__nav.is-open .site-header__nav-body > .site-header__link:hover,
+.site-header__nav.is-open .site-header__nav-body > button.site-header__link:hover {
   background: rgba(0, 124, 195, 0.22) !important;
   color: #fff !important;
 }
@@ -1078,18 +1229,55 @@
     -webkit-backdrop-filter: blur(24px);
     flex-direction: column;
     align-items: stretch;
-    gap: 0.08rem;
-    overflow-y: auto;
-    overflow-anchor: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    align-content: flex-start;
+    gap: 0.12rem;
+    overflow-y: hidden;
     z-index: 1001;
     animation: mobileNavIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__nav-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.12rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-anchor: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
   .site-header:not(.site-header--editor-preview) .site-header__home-block {
+    flex: 0 0 auto;
     flex-shrink: 0;
-    scroll-margin-top: 0.5rem;
+  }
+
+  /* Home stays pinned above scrollable main links */
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open > .site-header__home-block {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__nav-body > .site-header__link,
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__nav-body > .site-header__dropdown,
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__nav-body > .site-header__cta {
+    flex: 0 0 auto;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-header:not(.site-header--editor-preview) .site-header__nav.is-open .site-header__home-links.is-open {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 0.75rem);
   }
 
   .site-header:not(.site-header--editor-preview).site-header--menu-open .site-header__brand {

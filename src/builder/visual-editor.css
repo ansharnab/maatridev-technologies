@@ -8,6 +8,53 @@
   color: #1a2332;
 }
 
+.ve-history-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid #dde4ec;
+  flex-shrink: 0;
+}
+
+.ve-history-toolbar__history {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ve-history-toolbar__save {
+  margin-left: auto;
+}
+
+.ve-history-toolbar__dirty {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+}
+
+.ve-history-toolbar__status {
+  margin-left: 0.25rem;
+}
+
+.ve-btn--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ve-btn--icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .ve-toolbar {
   display: flex;
   align-items: center;
@@ -975,6 +1022,27 @@
   font-size: 0.8rem;
 }
 
+.ve-inspector__gradient-wrap .scp-gradient-btn__swatch {
+  height: 2rem;
+}
+
+.ve-inspector__gradient-wrap .scp-gradient-btn__label {
+  font-size: 0.68rem;
+}
+
+.ve-inspector__gradient-block .scp-section-card {
+  margin-bottom: 1rem;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+}
+
+.ve-inspector__chips--buttons button {
+  font-size: 0.65rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .ve-inspector__chips {
   display: flex;
   flex-wrap: wrap;
@@ -1151,7 +1219,25 @@
 
 .ve-chrome-block:has(.site-header--menu-open) {
   min-height: auto;
-  z-index: 20;
+  z-index: 35;
+}
+
+/* Keep header label clickable when mobile menu is open (closes drawer via EditorHeaderPreview) */
+.ve-chrome-block:has(.site-header--menu-open) .ve-chrome-block__bar {
+  display: flex;
+  position: relative;
+  z-index: 60;
+  pointer-events: auto;
+  opacity: 1;
+  margin: 0.2rem 0.35rem 0;
+  max-width: calc(100% - 0.7rem);
+}
+
+/* Section drag labels must not sit above the open mobile nav (was blocking Home taps) */
+.ve-canvas-wrap:has(.site-header--menu-open) .ve-block__bar {
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.35;
 }
 
 .ve-chrome-block--ctx-home {
@@ -1185,16 +1271,17 @@
   z-index: 14;
   opacity: 0;
   transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.ve-chrome-block__bar .ve-block__label {
   pointer-events: auto;
   cursor: pointer;
 }
 
+.ve-chrome-block:hover .ve-chrome-block__bar,
 .ve-chrome-block.is-selected .ve-chrome-block__bar {
   opacity: 1;
+}
+
+.ve-chrome-block:not(.is-selected) {
+  cursor: pointer;
 }
 
 .ve-preview-chrome--editing {
@@ -1503,6 +1590,9 @@
 /* Real header in builder: reset <button> styles (no white/gray boxes) */
 .ve-chrome-block .site-header--editor-preview button.site-header__brand,
 .ve-chrome-block .site-header--editor-preview button.site-header__link,
+.ve-chrome-block .site-header--editor-preview button.site-header__home-toggle,
+.ve-chrome-block .site-header--editor-preview .site-header__home-toggle,
+.ve-chrome-block .site-header--editor-preview .site-header__home-links button,
 .ve-chrome-block .site-header--editor-preview button.site-header__link-label,
 .ve-chrome-block .site-header--editor-preview button.site-header__link-chevron,
 .ve-chrome-block .site-header--editor-preview .site-header__menu--editor button,
@@ -1533,26 +1623,218 @@
 }
 
 .ve-chrome-block .site-header--editor-preview button.site-header__link,
+.ve-chrome-block .site-header--editor-preview button.site-header__home-toggle,
+.ve-chrome-block .site-header--editor-preview .site-header__home-toggle,
+.ve-chrome-block .site-header--editor-preview .site-header__home-links button,
 .ve-chrome-block .site-header--editor-preview .site-header__link-label,
 .ve-chrome-block .site-header--editor-preview .site-header__link-chevron {
   color: var(--header-nav-dark, #ffffff);
   font-family: var(--font-body, "DM Sans", system-ui, sans-serif);
   font-weight: 500;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .ve-chrome-block .site-header--editor-preview .site-header__link--split {
   color: var(--header-nav-dark, #ffffff);
 }
 
-.ve-chrome-block .site-header--editor-preview button.site-header__link:hover,
-.ve-chrome-block .site-header--editor-preview button.site-header__link.active {
+.ve-chrome-block .site-header--editor-preview button.site-header__link:hover {
   color: var(--header-nav-active, #ffffff);
-  background: var(--header-nav-active-bg, rgba(0, 184, 169, 0.35));
+  background: var(--header-nav-hover-bg, rgba(255, 255, 255, 0.12));
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__nav.is-open .site-header__nav-body > button.site-header__link.active {
+  color: #f4f8fc !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__nav.is-open .site-header__nav-body > button.site-header__link:hover {
+  color: #fff !important;
+  background: rgba(0, 124, 195, 0.22) !important;
 }
 
 .ve-chrome-block .site-header--editor-preview button.site-header__brand {
   padding: 0;
   text-align: left;
+  position: relative;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__brand--editor-active {
+  outline: 2px dashed rgba(0, 184, 169, 0.85);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.ve-logo-editor {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  min-width: 200px;
+  max-width: min(260px, 72vw);
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  background: rgba(10, 22, 40, 0.94);
+  border: 1px solid rgba(0, 184, 169, 0.45);
+  box-shadow: 0 10px 28px rgba(0, 30, 60, 0.35);
+  color: #e8f4fc;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  pointer-events: auto;
+}
+
+.ve-logo-editor--emphasized {
+  border-color: #00b8a9;
+  box-shadow: 0 0 0 2px rgba(0, 184, 169, 0.35), 0 12px 32px rgba(0, 30, 60, 0.4);
+}
+
+.ve-logo-editor__title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: #fff;
+}
+
+.ve-logo-editor__hint {
+  margin: 0;
+  color: rgba(232, 244, 252, 0.85);
+}
+
+.ve-logo-editor__row {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.35rem 0 0.15rem;
+}
+
+.ve-logo-editor__row span {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ve-logo-editor__row input[type="range"] {
+  width: 100%;
+  accent-color: #00b8a9;
+}
+
+.ve-logo-editor__stepper {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.ve-logo-editor__stepper button {
+  flex: 1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 184, 169, 0.5);
+  background: rgba(0, 124, 195, 0.25);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ve-logo-editor__stepper button:hover {
+  background: rgba(0, 184, 169, 0.35);
+}
+
+/* Page builder mobile/tablet — Home accordion (override button reset above) */
+.ve-chrome-block .site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open,
+.ve-chrome-block .site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open {
+  z-index: 25;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__nav.is-open .site-header__nav-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-block.is-open {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.35rem !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-toggle {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-height: 2.75rem !important;
+  margin: 0 !important;
+  padding: 0.52rem 0.7rem !important;
+  background: #0f2844 !important;
+  color: #f4f8fc !important;
+  position: relative !important;
+  top: auto !important;
+  z-index: 2 !important;
+  box-shadow: none !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-block.is-open .site-header__home-toggle {
+  position: relative !important;
+  top: auto !important;
+  z-index: 2 !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-links {
+  display: none !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-links.is-open {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 0 0 auto !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  align-self: stretch !important;
+  margin-top: 0.1rem !important;
+  width: calc(100% - 0.75rem) !important;
+  max-height: min(42vh, 240px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  margin: 0 0 0.2rem 0.75rem !important;
+  padding: 0.15rem 0 0.2rem 0.55rem !important;
+  border-left: 2px solid rgba(0, 184, 169, 0.45) !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+.ve-chrome-block .site-header--editor-preview .site-header__home-links button {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0.45rem 0.55rem !important;
+  text-align: left !important;
+  white-space: normal !important;
+  line-height: 1.35 !important;
+}
+
+.ve-chrome-block .site-header--editor-preview.site-header--editor-mobile,
+.ve-chrome-block .site-header--editor-preview.site-header--editor-tablet {
+  overflow: visible !important;
+}
+
+.ve-chrome-block .ve-header-preview-stage {
+  overflow: visible !important;
 }
 
 /* Single-row nav inside 1100px canvas (match live site) */
@@ -1562,8 +1844,12 @@
   }
 
   .site-header--editor-preview.site-header--editor-desktop .site-header__brand {
-    max-width: 190px;
-    overflow: hidden;
+    max-width: 280px;
+    overflow: visible;
+  }
+
+  .site-header--editor-preview.site-header--editor-desktop .site-header__brand--editor-active {
+    max-width: min(320px, 42%);
   }
 
   .site-header--editor-preview.site-header--editor-desktop .site-header__nav {
@@ -1817,4 +2103,52 @@
 .ve-header-color-group .ve-header-color-field:last-child,
 .ve-header-color-group .ve-inspector__color:last-child {
   margin-bottom: 0.65rem;
+}
+
+.ve-page-header-toggle {
+  margin: 0 1rem 0.5rem;
+  padding: 0.65rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.ve-page-header-toggle__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.ve-page-header-toggle__label input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.ve-page-header-toggle .ve-btn {
+  margin-top: 0.5rem;
+}
+
+.ve-page-header-toggle__hint {
+  margin: 0 0 0.5rem;
+}
+
+.ve-page-header-toggle__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ve-inspector--page-header .ve-inspector__site-colors-wrap .scp-section-card {
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.ve-inspector--page-header .ve-inspector__site-colors-wrap .scp-header-text-colors h4 {
+  font-size: 0.85rem;
 }

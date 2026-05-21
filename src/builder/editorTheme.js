@@ -1,6 +1,9 @@
 /** Theme presets & default section styles for the visual editor */
 
-export const THEME_PRESETS = [
+import { ARCTIC_FROST_GRADIENT_PRESETS } from "../utils/arcticFrostPresets";
+import { EXTRA_SECTION_THEME_PRESETS, toSectionThemePreset } from "../utils/gradientPresets";
+
+const BASE_THEME_PRESETS = [
   {
     id: "hero-banner",
     label: "Blue page banner",
@@ -86,6 +89,17 @@ export const THEME_PRESETS = [
     },
   },
 ];
+
+/** Original 7 + Arctic frost + all extra gradient presets for sections & heroes */
+const ARCTIC_THEME_PRESETS = ARCTIC_FROST_GRADIENT_PRESETS.map(toSectionThemePreset);
+
+export const THEME_PRESETS = [
+  ...BASE_THEME_PRESETS,
+  ...ARCTIC_THEME_PRESETS,
+  ...EXTRA_SECTION_THEME_PRESETS.filter((p) => !ARCTIC_FROST_GRADIENT_PRESETS.some((a) => a.id === p.id)),
+];
+
+export const LEGACY_THEME_PRESETS = BASE_THEME_PRESETS;
 
 export const PADDING_OPTIONS = [
   { id: "compact", label: "Compact", py: "2rem" },

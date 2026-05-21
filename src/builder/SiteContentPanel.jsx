@@ -1,4 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import EditorHistoryToolbar from "./EditorHistoryToolbar";
+import {
+  canRedoHistory,
+  canUndoHistory,
+  popRedo,
+  popUndo,
+  pushEditorHistory,
+} from "./editorHistory";
 import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
 import {
@@ -19,6 +27,7 @@ import { SiteHeaderBar } from "../components/layout/Header";
 import ImageField from "./ImageField";
 import HeaderButtonColorPanel from "./HeaderButtonColorPanel";
 import HeaderDesignGrid, { headerDesignCount } from "./HeaderDesignGrid";
+import GradientPresetPanel from "./GradientPresetPanel";
 import SiteContentHeaderColors from "./SiteContentHeaderColors";
 import { previewBgForHomePath } from "./homeAgencyNav";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
@@ -77,6 +86,11 @@ export default function SiteContentPanel({
   const [localContent, setLocalContent] = useState({ pages: {}, settings: {}, site: {} });
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const historyStacks = useRef({ past: [], future: [] });
+  const applyingHistory = useRef(false);
+  const [historyTick, setHistoryTick] = useState(0);
+  const [contentDirty, setContentDirty] = useState(false);
+  const [appliedFlash, setAppliedFlash] = useState(0);
 
   const isControlled = Boolean(setControlledContent);
   const content = isControlled ? controlledContent : localContent;
@@ -100,6 +114,52 @@ export default function SiteContentPanel({
     if (!isControlled) load();
   }, [isControlled]);
 
+  const getSnapshot = useCallback(
+    () => ({
+      pages: content.pages || {},
+      settings: { ...(content.settings || {}) },
+      site: {
+        founders: content.site?.founders || [],
+        services: content.site?.services || [],
+      },
+    }),
+    [content],
+  );
+
+  const applySnapshot = useCallback(
+    (snap) => {
+      applyingHistory.current = true;
+      setContent({
+        pages: snap.pages || {},
+        settings: { ...(snap.settings || {}) },
+        site: snap.site || { founders: [], services: [] },
+      });
+      applyingHistory.current = false;
+      setHistoryTick((t) => t + 1);
+    },
+    [setContent],
+  );
+
+  const recordHistory = useCallback(() => {
+    if (applyingHistory.current) return;
+    pushEditorHistory(historyStacks.current, getSnapshot);
+    setHistoryTick((t) => t + 1);
+  }, [getSnapshot]);
+
+  const undoContent = useCallback(() => {
+    const snap = popUndo(historyStacks.current, getSnapshot);
+    if (!snap) return;
+    applySnapshot(snap);
+    setStatus("Undone — click Save site content to keep changes on the live site.");
+  }, [getSnapshot, applySnapshot]);
+
+  const redoContent = useCallback(() => {
+    const snap = popRedo(historyStacks.current, getSnapshot);
+    if (!snap) return;
+    applySnapshot(snap);
+    setStatus("Redone — click Save site content to keep changes on the live site.");
+  }, [getSnapshot, applySnapshot]);
+
   const save = async (payload) => {
     setSaving(true);
     setStatus("");
@@ -109,6 +169,9 @@ export default function SiteContentPanel({
       const saved = res.data?.content ? normalizeContent(res.data.content) : next;
       setContent(saved);
       onSaved?.(saved);
+      historyStacks.current = { past: [], future: [] };
+      setHistoryTick((t) => t + 1);
+      setContentDirty(false);
       const logo = saved.settings?.logoImage;
       if (logo && /\.(mp4|webm)/i.test(logo)) {
         setStatus(`Saved. Logo video: ${logo} — open that URL in a new tab to confirm it plays, then hard-refresh the homepage.`);
@@ -133,20 +196,55 @@ export default function SiteContentPanel({
     }
   };
 
-  const patchSettings = (patch) => {
-    const next = {
-      ...content,
-      settings: { ...(content.settings || {}), ...patch },
+  useEffect(() => {
+    const onKey = (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const tag = e.target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select" || e.target?.isContentEditable) return;
+      if (e.key === "z" || e.key === "Z") {
+        e.preventDefault();
+        if (e.shiftKey) redoContent();
+        else undoContent();
+      } else if (e.key === "y" || e.key === "Y") {
+        e.preventDefault();
+        redoContent();
+      } else if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        if (!saving) save();
+      }
     };
-    setContent(next);
-    if (patch.headerCtaBg || patch.headerCtaPresetId || patch.headerCtaColor) {
-      setStatus(`Button updated (${patch.headerCtaBg || next.settings.headerCtaBg}) — click Save site content.`);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undoContent, redoContent, saving]);
+
+  const patchSettings = (patch, appliedLabel = "") => {
+    if (!patch || typeof patch !== "object") return;
+    recordHistory();
+    setContentDirty(true);
+    setContent((prev) => {
+      const base = prev || content || { pages: {}, settings: {}, site: {} };
+      return {
+        ...base,
+        settings: { ...(base.settings || {}), ...patch },
+      };
+    });
+    setAppliedFlash((n) => n + 1);
+    const label =
+      appliedLabel ||
+      (patch.headerDesign ? `Header: ${patch.headerDesign}` : "") ||
+      (patch.headerGradientPresetId ? `Gradient: ${patch.headerGradientPresetId}` : "");
+    if (label) {
+      setStatus(`Applied “${label}” — check preview on the right → then Save site content.`);
+    } else if (patch.headerCtaBg) {
+      setStatus(`Button color updated — Save site content at the top.`);
     }
   };
 
-  const setSettings = (patch) => patchSettings(patch);
+  const setSettings = (patch, label) => patchSettings(patch, label);
 
   const applyLogoChange = async (url) => {
+    recordHistory();
     const base = content.settings || {};
     const settingsPatch = !url
       ? { logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg", logoUpdatedAt: undefined }
@@ -161,16 +259,26 @@ export default function SiteContentPanel({
     if (!url || url.startsWith("/uploads/")) await save(next);
   };
 
-  const setFounders = (founders) => setContent((c) => ({ ...c, site: { ...c.site, founders } }));
-  const setServices = (services) => setContent((c) => ({ ...c, site: { ...c.site, services } }));
+  const setFounders = (founders) => {
+    recordHistory();
+    setContentDirty(true);
+    setContent((c) => ({ ...c, site: { ...c.site, founders } }));
+  };
+  const setServices = (services) => {
+    recordHistory();
+    setContentDirty(true);
+    setContent((c) => ({ ...c, site: { ...c.site, services } }));
+  };
 
   const updateFounder = (index, patch) => {
+    recordHistory();
     const next = [...(content.site?.founders || [])];
     next[index] = { ...next[index], ...patch };
     setFounders(next);
   };
 
   const updateService = (index, patch) => {
+    recordHistory();
     const next = [...(content.site?.services || [])];
     next[index] = { ...next[index], ...patch };
     setServices(next);
@@ -185,17 +293,28 @@ export default function SiteContentPanel({
   const customUploadedLogo =
     hasCustomLogo(settings.logoImage) && !isBuiltInLogo(settings.logoImage);
 
+  void historyTick;
+  const canUndo = canUndoHistory(historyStacks.current.past);
+  const canRedo = canRedoHistory(historyStacks.current.future);
+
   return (
     <div className="scp-root">
+      <EditorHistoryToolbar
+        saving={saving}
+        dirty={contentDirty}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onSave={() => save()}
+        onUndo={undoContent}
+        onRedo={redoContent}
+        saveLabel="Save site content"
+        status={status}
+      />
       <header className="scp-head">
         <div>
           <h2>Site Content</h2>
-          <p>Edit logo, founders, service cards, and contact details used across the whole website.</p>
+          <p>Edit logo, founders, service cards, and contact — Ctrl+Z undo · Ctrl+S save</p>
         </div>
-        <button type="button" className="ve-btn ve-btn--primary" onClick={() => save()} disabled={saving}>
-          {saving ? "Saving…" : "Save site content"}
-        </button>
-        {status && <span className="ve-status">{status}</span>}
       </header>
 
       <div className="scp-tabs">
@@ -216,6 +335,10 @@ export default function SiteContentPanel({
           {tab === "brand" && (
             <>
               <h3>Brand & Logo</h3>
+              <p className="scp-note scp-note--page-header">
+                <i className="fa-solid fa-file-lines" aria-hidden="true" /> Per-page header, button, and logo colors: open{" "}
+                <strong>Pages</strong> in the builder, click the header in the preview, pick a theme, then Save draft or Publish.
+              </p>
 
               <section className="scp-logo-card">
                 <div className="scp-logo-card__head">
@@ -326,6 +449,8 @@ export default function SiteContentPanel({
                 </div>
               </section>
 
+              <GradientPresetPanel settings={settings} onPatch={(patch, label) => patchSettings(patch, label)} />
+
               <HeaderButtonColorPanel settings={settings} onPatch={patchSettings} />
 
               <section className="scp-section-card scp-header-themes">
@@ -342,7 +467,7 @@ export default function SiteContentPanel({
                       type="button"
                       className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
                       title={p.label}
-                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
                     >
                       <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
                       <span>{p.label}</span>
@@ -360,7 +485,7 @@ export default function SiteContentPanel({
                       type="button"
                       className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
                       title={p.label}
-                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
                     >
                       <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
                       <span>{p.label}</span>
@@ -376,7 +501,7 @@ export default function SiteContentPanel({
                       type="button"
                       className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
                       title={p.label}
-                      onClick={() => setSettings(applyHeaderDesignPreset(p.id))}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
                     >
                       <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
                       <span>{p.label}</span>
@@ -390,12 +515,15 @@ export default function SiteContentPanel({
                 <HeaderDesignGrid
                   activeBarId={settings.headerDesign || "glass"}
                   activeCtaId={settings.headerCtaPresetId || settings.headerDesign || ""}
-                  onSelectBar={(id) => setSettings(applyHeaderDesignPreset(id))}
-                  onSelectCta={(id) => setSettings(applyHeaderCtaPreset(id))}
+                  onSelectBar={(id) => {
+                    const d = HEADER_DESIGNS[id];
+                    setSettings(applyHeaderDesignPreset(id), d?.label || id);
+                  }}
+                  onSelectCta={(id) => setSettings(applyHeaderCtaPreset(id), "Button color")}
                 />
               </section>
 
-              <SiteContentHeaderColors settings={settings} onPatch={(p) => setSettings(p)} />
+              <SiteContentHeaderColors settings={settings} onPatch={(p, label) => setSettings(p, label)} />
 
               {customUploadedLogo && (
                 <section className="scp-section-card">
@@ -556,11 +684,11 @@ export default function SiteContentPanel({
               <div className="scp-brand-preview scp-brand-preview--live">
                 <p className="scp-brand-preview__label">Live header preview</p>
                 <div
-                  className="scp-header-live-stage"
+                  className={`scp-header-live-stage${appliedFlash ? " scp-header-live-stage--flash" : ""}`}
                   style={{ background: previewBgForHomePath("/", settings) }}
                 >
                   <SiteHeaderBar
-                    key={`hdr-${settings.headerCtaPresetId}-${settings.headerCtaBg}-${settings.headerDesign}`}
+                    key={`hdr-${appliedFlash}-${settings.headerDesign}-${settings.headerCtaBg}-${settings.headerGradientPresetId}-${settings.homeHeroGradient || ""}`}
                     settings={settings}
                     pathname="/"
                     editorPreview

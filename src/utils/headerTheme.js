@@ -1,3 +1,4 @@
+import { arcticFrostThemeExtras } from "./arcticFrostPresets";
 import { resolveHeaderLogoFilter } from "./logoImageFilters";
 import { resolveLogoUrls } from "./logoSettings";
 
@@ -351,7 +352,7 @@ export const HEADER_DESIGNS = {
   },
   mobileMenu: {
     id: "mobileMenu",
-    label: "Mobile menu navy",
+    label: "Navy drawer menu",
     swatch: "linear-gradient(165deg, #0f2844, #0a1628)",
     barBackground: "linear-gradient(165deg, #0f2844 0%, #0a1628 55%, #0c2238 100%)",
     barScrolled: "rgba(255, 255, 255, 0.94)",
@@ -931,6 +932,57 @@ export const HEADER_THEME_PRESETS = [
   { id: "cyber-bar", label: "Cyber cyan", patch: () => applyHeaderDesignPreset("cyber") },
   { id: "rose-bar", label: "Rose wine", patch: () => applyHeaderDesignPreset("rose") },
   { id: "arctic-bar", label: "Arctic ice", patch: () => applyHeaderDesignPreset("arctic") },
+  {
+    id: "arctic-frost-hero",
+    label: "★ Arctic frost hero",
+    description: "Icy home hero + matching light header",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-arctic-frost"),
+    }),
+  },
+  {
+    id: "arctic-frost-light-hero",
+    label: "★ Arctic frost light",
+    description: "White ice hero — dark nav text on pale bar",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-arctic-frost-light"),
+    }),
+  },
+  {
+    id: "arctic-frost-deep-hero",
+    label: "★ Arctic frost deep",
+    description: "Deep navy ice hero + glacier accents",
+    patch: () => ({
+      ...applyHeaderDesignPreset("fadeArcticMidnight"),
+      ...arcticFrostThemeExtras("g-arctic-frost-deep"),
+    }),
+  },
+  {
+    id: "polar-glacier-hero",
+    label: "★ Polar glacier",
+    patch: () => ({
+      ...applyHeaderDesignPreset("fadeSnowTeal"),
+      ...arcticFrostThemeExtras("g-polar-glacier"),
+    }),
+  },
+  {
+    id: "icy-dawn-hero",
+    label: "★ Icy dawn",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-icy-dawn"),
+    }),
+  },
+  {
+    id: "silver-frost-hero",
+    label: "Silver frost",
+    patch: () => ({
+      ...applyHeaderDesignPreset("mistLight"),
+      ...arcticFrostThemeExtras("g-arctic-silver"),
+    }),
+  },
   { id: "light-bar", label: "Light white bar", patch: () => applyHeaderDesignPreset("light") },
   { id: "snow-bar", label: "Snow white", patch: () => applyHeaderDesignPreset("snow") },
   { id: "cloud-bar", label: "Cloud inner", patch: () => applyHeaderDesignPreset("cloudInner") },
@@ -952,7 +1004,7 @@ export const HEADER_THEME_PRESETS = [
   { id: "md-consult", label: "Consultancy", patch: () => applyHeaderDesignPreset("consultancy") },
   { id: "md-engage", label: "Engagement bar", patch: () => applyHeaderDesignPreset("engagementBar") },
   { id: "md-active", label: "Teal active nav", patch: () => applyHeaderDesignPreset("activeTeal") },
-  { id: "md-mobile", label: "Mobile menu navy", patch: () => applyHeaderDesignPreset("mobileMenu") },
+  { id: "md-mobile", label: "Navy drawer menu", patch: () => applyHeaderDesignPreset("mobileMenu") },
   { id: "md-cloud", label: "Inner cloud", patch: () => applyHeaderDesignPreset("cloudInner") },
   { id: "md-schedule", label: "Schedule blue", patch: () => applyHeaderDesignPreset("scheduleBlue") },
   { id: "md-soft", label: "Soft glass", patch: () => applyHeaderDesignPreset("softGlass") },

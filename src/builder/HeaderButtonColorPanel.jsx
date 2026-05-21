@@ -1,7 +1,9 @@
 import { useState } from "react";
 import HeaderDesignGrid, { HeaderCtaColorGrid, headerDesignCount } from "./HeaderDesignGrid";
+import { ButtonColorPresetGrid } from "./GradientPresetPanel";
 import { colorPickerValue } from "../utils/headerColorFields";
-import { applyHeaderCtaPreset } from "../utils/headerTheme";
+import { countButtonPresets } from "../utils/gradientPresets";
+import { applyHeaderCtaPreset, applyHeaderDesignPreset } from "../utils/headerTheme";
 
 function ctaSwatchStyle(design) {
   const bg = String(design.ctaBg || "");
@@ -9,18 +11,22 @@ function ctaSwatchStyle(design) {
   return { background: bg || design.swatch };
 }
 
-export default function HeaderButtonColorPanel({ settings = {}, onPatch }) {
+export default function HeaderButtonColorPanel({
+  settings = {},
+  onPatch,
+  saveHint = "Save site content at the top.",
+}) {
   const [picked, setPicked] = useState("");
 
   const applyCta = (designId, label) => {
     const patch = applyHeaderCtaPreset(designId);
-    onPatch?.(patch);
+    onPatch?.(patch, label || designId);
     setPicked(label || designId);
     window.setTimeout(() => setPicked(""), 2400);
   };
 
   const patchField = (key, val) => {
-    onPatch?.({ [key]: val, headerCtaPresetId: "" });
+    onPatch?.({ [key]: val, headerCtaPresetId: "" }, "Custom button color");
     setPicked("Custom color updated");
     window.setTimeout(() => setPicked(""), 2400);
   };
@@ -32,8 +38,7 @@ export default function HeaderButtonColorPanel({ settings = {}, onPatch }) {
     <section className="scp-section-card scp-header-btn-panel">
       <h4>Appointment button colors</h4>
       <p className="scp-header-themes__intro">
-        Pick a color below — only the header <strong>Book Appointment</strong> button changes. Then click{" "}
-        <strong>Save site content</strong> at the top.
+        Pick a color below — only the header <strong>Book Appointment</strong> button changes. Then {saveHint}
       </p>
 
       <div className="scp-cta-live-preview">
@@ -53,7 +58,26 @@ export default function HeaderButtonColorPanel({ settings = {}, onPatch }) {
 
       {picked && <p className="scp-cta-live-preview__status">{picked}</p>}
 
-      <p className="scp-sub-label">Quick pick ({headerDesignCount()} button colors)</p>
+      <p className="scp-sub-label">Button colors — click to apply ({countButtonPresets()} presets)</p>
+      <ButtonColorPresetGrid
+        activeBg={ctaBg}
+        onSelect={(p) => {
+          onPatch?.(
+            {
+              headerCtaBg: p.bg,
+              headerCtaColor: p.color,
+              headerCtaHoverBg: p.hover || p.bg,
+              headerCtaBorderColor: p.border || p.bg,
+              headerCtaPresetId: p.id,
+            },
+            p.label,
+          );
+          setPicked(`Button: ${p.label}`);
+          window.setTimeout(() => setPicked(""), 2400);
+        }}
+      />
+
+      <p className="scp-sub-label">From header themes ({headerDesignCount()} — bottom pill only)</p>
       <HeaderCtaColorGrid
         activeCtaId={settings.headerCtaPresetId || ""}
         onSelectCta={(id) => {
@@ -108,14 +132,17 @@ export default function HeaderButtonColorPanel({ settings = {}, onPatch }) {
         />
       </div>
 
-      <p className="scp-sub-label">Or from full theme cards (click bottom pill only)</p>
+      <p className="scp-sub-label">More button styles (click bottom pill on each card — top stripe changes full header)</p>
       <HeaderDesignGrid
         activeBarId={settings.headerDesign || "glass"}
         activeCtaId={settings.headerCtaPresetId || ""}
-        onSelectBar={() => {}}
+        onSelectBar={(id) => {
+          onPatch?.(applyHeaderDesignPreset(id));
+          setPicked(`Header bar: ${id}`);
+          window.setTimeout(() => setPicked(""), 2400);
+        }}
         onSelectCta={(id) => applyCta(id, `Button style: ${id}`)}
         maxHeight={220}
-        barSelectDisabled
       />
     </section>
   );

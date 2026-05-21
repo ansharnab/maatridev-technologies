@@ -6,6 +6,7 @@ import PageSectionsView from "../../builder/PageSectionsView";
 import PuckPageView from "../../builder/PuckPageView";
 import WysiwygRenderer from "../WysiwygRenderer";
 import { useSiteContent } from "../../hooks/useSiteContent";
+import { resolveSettingsForPath } from "../../utils/pageHeaderSettings";
 import "./layout.css";
 
 function hasRenderableSections(sections) {
@@ -30,9 +31,10 @@ const CMS_PAGE_ROUTES = {
 };
 
 export default function MainLayout() {
-  const { settings, loading, getPageSections, getPuckPage, getWysiwygPage } = useSiteContent();
+  const { content, settings, loading, getPageSections, getPuckPage, getWysiwygPage } = useSiteContent();
   const { pathname } = useLocation();
   const pageId = CMS_PAGE_ROUTES[pathname];
+  const headerSettings = resolveSettingsForPath(settings, content, pathname);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,7 +53,7 @@ export default function MainLayout() {
           <div className="preloader__spinner" />
         </div>
       )}
-      <Header settings={settings} />
+      <Header settings={headerSettings} />
       <main className="site-main">
         {customSections ? (
           <PageSectionsView sections={customSections} />

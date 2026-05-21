@@ -132,6 +132,11 @@ export function countHeaderColorFields() {
   return HEADER_COLOR_GROUPS.reduce((n, g) => n + g.fields.length, 0);
 }
 
+/** Keys editable per CMS page (header bar, nav, logo, CTA, mobile). */
+export function getPageHeaderColorKeys() {
+  return HEADER_COLOR_GROUPS.flatMap((g) => g.fields.map((f) => f.key));
+}
+
 export function getHeaderColorDefaults() {
   const out = {};
   for (const group of HEADER_COLOR_GROUPS) {
