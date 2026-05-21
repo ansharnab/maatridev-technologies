@@ -421,6 +421,110 @@
   color: #fff;
 }
 
+.scp-header-text-colors {
+  border-color: #c7d2fe;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.scp-palette-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.scp-palette-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.scp-palette-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.15);
+}
+
+.scp-palette-chip__swatch {
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.scp-header-color-group {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.scp-color-field {
+  margin-bottom: 0.55rem;
+}
+
+.scp-color-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.scp-color-field input[type="text"] {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.scp-color-field__row {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.scp-color-field__row input[type="color"] {
+  width: 44px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.scp-color-field__row input[type="text"] {
+  flex: 1;
+}
+
+.scp-brand-preview--live .scp-header-live-stage {
+  overflow: hidden;
+  border-radius: 0 0 8px 8px;
+  min-height: 88px;
+}
+
+.scp-brand-preview--live .site-header {
+  position: relative;
+}
+
+.scp-brand-preview__tagline {
+  margin: 0;
+  padding: 0.75rem 1rem 1rem;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
 .image-field input[type="url"] {
   width: 100%;
   padding: 0.5rem;

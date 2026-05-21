@@ -7,15 +7,16 @@ import {
   HEADER_LIGHT_DESIGN_IDS,
   applyHeaderDesignPreset,
   headerQuickPresets,
-  resolveHeaderTheme,
 } from "../utils/headerTheme";
 import { LOGO_IMAGE_FILTER_PRESETS } from "../utils/logoImageFilters";
-import { isBuiltInLogo, logoSettingsAfterUpload, resolveLogoUrls } from "../utils/logoSettings";
+import { isBuiltInLogo, logoSettingsAfterUpload } from "../utils/logoSettings";
 import { hasCustomLogo } from "../utils/mediaType";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
-import AnimatedLogo from "../components/AnimatedLogo";
+import { SiteHeaderBar } from "../components/layout/Header";
 import ImageField from "./ImageField";
+import SiteContentHeaderColors from "./SiteContentHeaderColors";
+import { previewBgForHomePath } from "./homeAgencyNav";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
 import "./site-content-panel.css";
 
@@ -163,15 +164,6 @@ export default function SiteContentPanel({
   const founders = content.site?.founders || [];
   const services = content.site?.services || [];
   const settings = content.settings || {};
-  const headerPreviewLogo = resolveLogoUrls(settings, true);
-  const headerPreviewSrc =
-    headerPreviewLogo.display && headerPreviewLogo.display.includes("/uploads/") && settings.logoUpdatedAt
-      ? `${headerPreviewLogo.display}?v=${settings.logoUpdatedAt}`
-      : headerPreviewLogo.display;
-  const headerPreviewTheme = resolveHeaderTheme(settings, {
-    editorPreview: true,
-    previewContext: "home",
-  });
   const lightHeaderPresets = headerQuickPresets(HEADER_LIGHT_DESIGN_IDS);
   const darkHeaderPresets = headerQuickPresets(HEADER_DARK_QUICK_IDS);
   const customUploadedLogo =
@@ -354,11 +346,9 @@ export default function SiteContentPanel({
                     </button>
                   ))}
                 </div>
-                <p className="scp-note">
-                  {lightHeaderPresets.length} light bars total (white, pastel, ice). More bar, menu, and CTA colors: Page Builder →
-                  click the header → <strong>Site header &amp; colors</strong> ({Object.keys(HEADER_DESIGNS).length} full designs).
-                </p>
               </section>
+
+              <SiteContentHeaderColors settings={settings} onPatch={(p) => setSettings(p)} />
 
               {customUploadedLogo && (
                 <section className="scp-section-card">
@@ -516,36 +506,21 @@ export default function SiteContentPanel({
               />
             )}
             {tab === "brand" && (
-              <div className="scp-brand-preview">
-                <p className="scp-brand-preview__label">Header preview</p>
+              <div className="scp-brand-preview scp-brand-preview--live">
+                <p className="scp-brand-preview__label">Live header preview</p>
                 <div
-                  className="scp-brand-preview__header"
-                  style={{
-                    "--header-logo-filter": headerPreviewTheme.cssVars["--header-logo-filter"],
-                  }}
+                  className="scp-header-live-stage"
+                  style={{ background: previewBgForHomePath("/", settings) }}
                 >
-                  <AnimatedLogo
-                    letter={settings.logoLetter}
-                    animation={settings.logoAnimation}
-                    colorPrimary={settings.logoColorPrimary}
-                    colorAccent={settings.logoColorAccent}
-                    imageUrl={headerPreviewSrc}
-                    alt={settings.logoText}
-                    fullBrand={headerPreviewLogo.hasUpload || hasCustomLogo(settings.logoImage)}
-                    scale={settings.logoScale}
-                    clipWidth={settings.logoClipWidth}
-                    size="lg"
+                  <SiteHeaderBar
+                    settings={settings}
+                    pathname="/"
+                    editorPreview
+                    previewPageId="home"
+                    previewDevice="desktop"
                   />
                 </div>
-                <div className="scp-brand-preview__meta">
-                  {!headerPreviewLogo.hasUpload && (
-                    <>
-                      <strong>{settings.logoText}</strong>
-                      <small>TECHNOLOGIES</small>
-                    </>
-                  )}
-                  <p>{settings.tagline}</p>
-                </div>
+                <p className="scp-brand-preview__tagline">{settings.tagline}</p>
               </div>
             )}
             {tab === "contact" && (
