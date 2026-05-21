@@ -14,11 +14,14 @@ const jsx = readFileSync(join(root, "src/components/layout/Header.jsx"), "utf8")
 const requiredCss = [
   '"logo toggle"',
   "position: fixed",
+  "max-height: 0",
   ".site-header__nav.is-open .site-header__dropdown.is-open .site-header__menu",
-  ".site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu",
   "@media (min-width: 1101px) and (hover: hover)",
   ".site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__dropdown.is-open .site-header__menu--editor",
 ];
+
+assert.ok(jsx.includes("HOME_NAV_CHILDREN"), "Header.jsx should list agency homepages");
+assert.ok(jsx.includes("SERVICE_NAV_CHILDREN"), "Header.jsx should list all service pages");
 
 for (const needle of requiredCss) {
   assert.ok(css.includes(needle), `Header.css missing: ${needle.slice(0, 60)}…`);

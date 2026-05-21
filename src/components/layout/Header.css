@@ -495,11 +495,6 @@
   border-radius: 10px;
 }
 
-.site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu--editor,
-.site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu--editor {
-  display: none !important;
-}
-
 .site-header--editor-preview.site-header--editor-mobile .site-header__nav.is-open .site-header__menu--editor button,
 .site-header--editor-preview.site-header--editor-tablet .site-header__nav.is-open .site-header__menu--editor button {
   color: rgba(255, 255, 255, 0.92) !important;
@@ -1000,31 +995,43 @@
 
   .site-header__dropdown .site-header__menu {
     position: static;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.15rem;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     transform: none;
     box-shadow: none;
     background: rgba(0, 0, 0, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
     border-radius: 12px;
-    margin: 0.35rem 0 0.65rem;
-    padding: 0.4rem;
-    display: none;
+    margin: 0;
+    padding: 0 0.4rem;
+    transition:
+      max-height 0.3s ease,
+      opacity 0.2s ease,
+      margin 0.2s ease,
+      padding 0.2s ease,
+      border-color 0.2s ease,
+      visibility 0.2s ease;
   }
 
   .site-header__nav.is-open .site-header__dropdown.is-open .site-header__menu {
-    display: flex;
-    gap: 0.15rem;
+    max-height: min(52vh, 420px);
+    overflow-y: auto;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    margin: 0.35rem 0 0.65rem;
+    padding: 0.4rem;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .site-header__nav.is-open .site-header__dropdown.is-open > .site-header__link i {
     transform: rotate(180deg);
-  }
-
-  /* Never show submenus until the row is tapped (.is-open) */
-  .site-header__nav.is-open .site-header__dropdown:not(.is-open) .site-header__menu {
-    display: none !important;
   }
 
   .site-header__nav.is-open .site-header__menu a {
