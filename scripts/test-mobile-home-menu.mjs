@@ -38,20 +38,22 @@ try {
   await page.goto(`${base}/home/digital-agency`, { waitUntil: "networkidle", timeout: 30000 });
   await page.locator(".site-header__toggle").click();
 
-  const homeToggle = page.locator(".site-header__home-toggle");
-  await assert.ok(await homeToggle.isVisible(), "Home row must be visible in drawer");
+  const homeHeading = page.locator(".site-header__home-heading");
+  await assert.ok(await homeHeading.isVisible(), "Home heading visible in drawer");
+  await assert.equal(await homeHeading.textContent(), "Home");
 
-  const webAgencyBefore = page.locator(".site-header__home-links >> text=Web Agency");
-  await assert.equal(await webAgencyBefore.count(), 0, "Agency links hidden until Home tap");
+  const homeLinks = page.locator(".site-header__home-links");
+  await assert.ok(await homeLinks.isVisible(), "Home agency links always visible");
+  await assert.ok(await page.locator(".site-header__home-links >> text=IT Solutions (Default)").isVisible());
+  await assert.ok(await page.locator(".site-header__home-links >> text=Web Agency").isVisible());
+  await assert.ok(await page.locator(".site-header__home-links >> text=Digital Agency").isVisible());
 
-  await homeToggle.click();
-  await assert.ok(await page.locator(".site-header__home-links").isVisible(), "Home links panel visible");
-  await assert.ok(await webAgencyBefore.isVisible(), "Web Agency link under Home");
-
-  const boxHome = await homeToggle.boundingBox();
-  const boxLink = await page.locator(".site-header__home-links >> text=Digital Agency").boundingBox();
-  assert.ok(boxHome && boxLink, "bounding boxes");
-  assert.ok(boxLink.y > boxHome.y, "Agency links must render BELOW Home row");
+  const boxHome = await homeHeading.boundingBox();
+  const boxFirst = await page.locator(".site-header__home-links >> text=IT Solutions (Default)").boundingBox();
+  const boxAbout = await page.locator(".site-header__nav >> text=About").boundingBox();
+  assert.ok(boxHome && boxFirst && boxAbout, "bounding boxes");
+  assert.ok(boxFirst.y > boxHome.y, "Agency links below Home heading");
+  assert.ok(boxAbout.y > boxFirst.y, "About below Home section");
 
   await page.locator(".site-header__nav >> text=Services").click();
   await page.waitForURL(/\/services\/?$/);

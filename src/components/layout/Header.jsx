@@ -83,6 +83,7 @@ export function SiteHeaderBar({
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const navRef = useRef(null);
+  const homeBlockRef = useRef(null);
   const mobileDrawer = !editorPreview || previewDevice !== "desktop";
   const [scrolled, setScrolled] = useState(false);
   const [logoBroken, setLogoBroken] = useState(false);
@@ -221,55 +222,40 @@ export function SiteHeaderBar({
     setOpenDropdown((current) => (current === label ? null : label));
   };
 
-  /** Phone/tablet drawer — Home row + links stacked below (no absolute dropdown) */
-  const renderMobileHomeSection = () => {
-    const homeOpen = openDropdown === "Home";
-    return (
-      <div className={`site-header__home-block${homeOpen ? " is-open" : ""}`}>
-        <button
-          type="button"
-          className={`site-header__link site-header__home-toggle${isNavItemActive(pathname, { children: HOME_NAV_CHILDREN }) ? " active" : ""}`}
-          aria-expanded={homeOpen}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleDropdown("Home");
-          }}
-        >
-          Home <i className="fa-solid fa-chevron-down" aria-hidden="true" />
-        </button>
-        {homeOpen && (
-          <div className="site-header__home-links">
-            {HOME_NAV_CHILDREN.map((child) =>
-              editorPreview ? (
-                <button
-                  key={child.to}
-                  type="button"
-                  className={pathMatchesNav(pathname, child.to) ? "active" : ""}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNavEditor(e, child.to);
-                    setOpenDropdown(null);
-                    setOpen(false);
-                  }}
-                >
-                  {child.label}
-                </button>
-              ) : (
-                <NavLink
-                  key={child.to}
-                  to={child.to}
-                  className={({ isActive }) => (isActive ? "active" : "")}
-                  onClick={closeMobileNav}
-                >
-                  {child.label}
-                </NavLink>
-              ),
-            )}
-          </div>
+  /** Phone/tablet drawer — Home label + agency links always stacked below (no accordion scroll bugs) */
+  const renderMobileHomeSection = () => (
+    <div ref={homeBlockRef} className="site-header__home-block is-open">
+      <div className="site-header__home-heading">Home</div>
+      <div className="site-header__home-links">
+        {HOME_NAV_CHILDREN.map((child) =>
+          editorPreview ? (
+            <button
+              key={child.to}
+              type="button"
+              className={pathMatchesNav(pathname, child.to) ? "active" : ""}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavEditor(e, child.to);
+                setOpenDropdown(null);
+                setOpen(false);
+              }}
+            >
+              {child.label}
+            </button>
+          ) : (
+            <NavLink
+              key={child.to}
+              to={child.to}
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={closeMobileNav}
+            >
+              {child.label}
+            </NavLink>
+          ),
         )}
       </div>
-    );
-  };
+    </div>
+  );
 
   const renderNavItem = (item) => {
     if (item.children) {
