@@ -154,10 +154,7 @@ export function SiteHeaderBar({
   useEffect(() => {
     if (!open) return;
     if (navRef.current) navRef.current.scrollTop = 0;
-    if (editorPreview) return;
-    const activeSection = nav.find((item) => item.children?.length && isNavItemActive(pathname, item));
-    setOpenDropdown(activeSection?.label ?? null);
-  }, [open, pathname, editorPreview]);
+  }, [open]);
 
   useEffect(() => {
     if (editorPreview || !open) {
@@ -296,12 +293,15 @@ export function SiteHeaderBar({
               </div>
             )
           ) : (
-            <div className="site-header__menu" role="menu">
+            <div className="site-header__menu site-header__submenu" role="menu">
               {item.children.map((child) => (
                 <NavLink
                   key={child.to}
                   to={child.to}
                   role="menuitem"
+                  className={({ isActive }) =>
+                    `site-header__submenu-link${isActive ? " active" : ""}`
+                  }
                   onClick={closeMobileNav}
                 >
                   {child.label}
