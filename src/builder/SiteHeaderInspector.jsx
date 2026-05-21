@@ -272,9 +272,15 @@ export default function SiteHeaderInspector({
           hint="PNG/SVG with transparent background. Saves automatically after upload."
           value={settings.logoImage || ""}
           onChange={(url) => {
-            const next = { ...settings, logoImage: url };
-            patch({ logoImage: url });
-            if (url.startsWith("/uploads/")) onSaveSettings?.(next);
+            if (!url) {
+              patch({ logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg" });
+              return;
+            }
+            const logoPatch = url.startsWith("/uploads/")
+              ? logoSettingsAfterUpload(url, settings)
+              : { logoImage: url };
+            patch(logoPatch);
+            if (url.startsWith("/uploads/")) onSaveSettings?.({ ...settings, ...logoPatch });
           }}
         />
         <div className="field">

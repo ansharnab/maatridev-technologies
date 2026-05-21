@@ -3,7 +3,7 @@ import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
 import { logoSettingsAfterUpload } from "../utils/logoSettings";
 import { services as defaultServices } from "../data/siteData";
-import { getDefaultSiteContent } from "../utils/mergeSiteData";
+import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
 import AnimatedLogo from "../components/AnimatedLogo";
 import ImageField from "./ImageField";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
@@ -31,9 +31,10 @@ function Field({ label, children }) {
 
 function normalizeContent(data) {
   const defaults = getDefaultSiteContent();
+  const merged = mergeSiteContent(data);
   return {
     pages: data?.pages || {},
-    settings: { ...defaults.settings, ...(data?.settings || {}) },
+    settings: merged.settings,
     site: {
       founders: data?.site?.founders?.length ? data.site.founders : defaults.site.founders,
       services: defaultServices.map((s) => {
@@ -84,10 +85,10 @@ export default function SiteContentPanel({
     if (!isControlled) load();
   }, [isControlled]);
 
-  const save = async () => {
+  const save = async (payload) => {
     setSaving(true);
     setStatus("");
-    const next = { ...content };
+    const next = payload ?? content;
     try {
       const res = await axios.put("/api/content", next, { headers: authHeaders() });
       const saved = res.data?.content ? normalizeContent(res.data.content) : next;
@@ -119,9 +120,14 @@ export default function SiteContentPanel({
 
   const setSettings = (patch) => setContent((c) => ({ ...c, settings: { ...c.settings, ...patch } }));
 
-  const saveLogoUrl = async (url) => {
+  const persistLogoUpload = async (url) => {
     if (!url.startsWith("/uploads/")) return;
-    const next = { ...content, settings: { ...content.settings, logoImage: url } };
+    const settingsPatch = logoSettingsAfterUpload(url, content.settings || {});
+    const next = {
+      ...content,
+      settings: { ...(content.settings || {}), ...settingsPatch },
+    };
+    setContent(next);
     await save(next);
   };
   const setFounders = (founders) => setContent((c) => ({ ...c, site: { ...c.site, founders } }));
@@ -150,7 +156,7 @@ export default function SiteContentPanel({
           <h2>Site Content</h2>
           <p>Edit logo, founders, service cards, and contact details used across the whole website.</p>
         </div>
-        <button type="button" className="ve-btn ve-btn--primary" onClick={save} disabled={saving}>
+        <button type="button" className="ve-btn ve-btn--primary" onClick={() => save()} disabled={saving}>
           {saving ? "Saving…" : "Save site content"}
         </button>
         {status && <span className="ve-status">{status}</span>}
@@ -224,8 +230,15 @@ export default function SiteContentPanel({
                 hint="Use a PNG or SVG with a transparent background (full lockup). Default: /logo-maatridev.svg. On dark heroes, /logo-maatridev-hero.svg is used automatically."
                 value={settings.logoImage || ""}
                 onChange={(url) => {
-                  setSettings({ logoImage: url });
-                  if (url.startsWith("/uploads/")) void saveLogoUrl(url);
+                  if (!url) {
+                    setSettings({ logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg" });
+                    return;
+                  }
+                  const patch = url.startsWith("/uploads/")
+                    ? logoSettingsAfterUpload(url, settings)
+                    : { logoImage: url };
+                  setSettings(patch);
+                  if (url.startsWith("/uploads/")) void persistLogoUpload(url);
                 }}
                 onError={(msg) => setStatus(msg)}
               />
