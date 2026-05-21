@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import HeaderDesignGrid, { headerDesignCount } from "./HeaderDesignGrid";
 import ImageField from "./ImageField";
 import { logoSettingsAfterUpload } from "../utils/logoSettings";
 import { PREVIEW_NAV } from "./previewNav";
 import {
-  HEADER_DESIGNS,
   HEADER_LIGHT_DESIGN_IDS,
   HEADER_SIZES,
   HEADER_THEME_PRESETS,
@@ -175,20 +175,17 @@ export default function SiteHeaderInspector({
         </div>
 
         <p className="ve-inspector__label">
-          All header designs ({Object.keys(HEADER_DESIGNS).length} gradients &amp; colors)
+          All bar + button designs ({headerDesignCount()} gradients &amp; colors)
         </p>
-        <div className="ve-header-design-grid">
-          {Object.values(HEADER_DESIGNS).map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              className={`ve-header-design-card${designId === d.id ? " is-active" : ""}`}
-              onClick={() => patch(applyHeaderDesignPreset(d.id))}
-            >
-              <span className="ve-header-design-card__swatch" style={{ background: d.swatch }} />
-              <span className="ve-header-design-card__label">{d.label}</span>
-            </button>
-          ))}
+        <p className="ve-inspector__scroll-hint" style={{ marginTop: "-0.25rem" }}>
+          Bar stripe + button pill — same as Site Content → Brand &amp; Logo.
+        </p>
+        <div className="ve-header-design-grid-wrap">
+          <HeaderDesignGrid
+            activeId={designId}
+            onSelect={(id) => patch(applyHeaderDesignPreset(id))}
+            maxHeight={280}
+          />
         </div>
 
         <p className="ve-inspector__label">Header size</p>

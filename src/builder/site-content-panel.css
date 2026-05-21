@@ -391,6 +391,63 @@
   box-shadow: 0 0 0 2px rgba(0, 124, 195, 0.2);
 }
 
+.scp-header-design-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0.35rem;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.scp-header-design-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.scp-header-design-card:hover {
+  border-color: #94a3b8;
+}
+
+.scp-header-design-card.is-active {
+  border-color: #007cc3;
+  box-shadow: 0 0 0 2px rgba(0, 124, 195, 0.25);
+}
+
+.scp-header-design-card__bar {
+  display: block;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.scp-header-design-card__cta {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.scp-header-design-card__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #334155;
+}
+
 .scp-theme-chip__swatch {
   width: 22px;
   height: 22px;

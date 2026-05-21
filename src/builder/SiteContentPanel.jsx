@@ -15,6 +15,7 @@ import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
 import { SiteHeaderBar } from "../components/layout/Header";
 import ImageField from "./ImageField";
+import HeaderDesignGrid, { headerDesignCount } from "./HeaderDesignGrid";
 import SiteContentHeaderColors from "./SiteContentHeaderColors";
 import { previewBgForHomePath } from "./homeAgencyNav";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
@@ -346,6 +347,18 @@ export default function SiteContentPanel({
                     </button>
                   ))}
                 </div>
+
+                <p className="scp-sub-label">
+                  All bar + button designs ({headerDesignCount()} gradients &amp; colors)
+                </p>
+                <p className="scp-header-themes__intro">
+                  Top stripe = header bar. Small pill = <strong>Book Appointment</strong> button. Each design updates
+                  menu, bar, and button together.
+                </p>
+                <HeaderDesignGrid
+                  activeId={settings.headerDesign || "glass"}
+                  onSelect={(id) => setSettings(applyHeaderDesignPreset(id))}
+                />
               </section>
 
               <SiteContentHeaderColors settings={settings} onPatch={(p) => setSettings(p)} />
