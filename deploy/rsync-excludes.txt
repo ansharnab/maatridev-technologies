@@ -1,0 +1,13 @@
+# Local-only paths — never rsync to EC2 (production keeps its own copy)
+# See deploy/ec2-push.sh
+
+# Secrets & environment (server has its own .env)
+.env
+.env.local
+.env.*.local
+
+# CMS + contact messages + media alt metadata (edit via live /admin on server)
+server/data/
+
+# Production uploads (logos, images) — do not overwrite with local dev files
+public/uploads/

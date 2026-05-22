@@ -16,17 +16,32 @@ HOST="${DEPLOY_SSH_USER}@${DEPLOY_SSH_HOST}"
 APP="${DEPLOY_REMOTE_APP_PATH}"
 LIVE="${PUBLIC_URL:-${LIVE_URL:-}}"
 
+ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+EXCLUDES="${SCRIPT_DIR}/rsync-excludes.txt"
+
+echo "Syncing code to EC2 (local CMS/uploads/.env are NOT sent)..."
 rsync -avz --delete \
   -e "ssh -i \"$KEY\" -o StrictHostKeyChecking=no" \
+  --exclude-from "${EXCLUDES}" \
   --exclude node_modules \
   --exclude dist \
   --exclude .git \
   --exclude .DS_Store \
-  "$(cd "${SCRIPT_DIR}/.." && pwd)/" \
+  --filter 'protect server/data/' \
+  --filter 'protect public/uploads/' \
+  --filter 'protect .env' \
+  "${ROOT}/" \
   "${HOST}:${APP}/"
 
 ssh -i "$KEY" -o StrictHostKeyChecking=no "$HOST" "bash ${APP}/deploy/ec2-setup.sh"
 
+echo ""
+echo "Kept on server (unchanged by this push):"
+echo "  - server/data/content.json  (live site content)"
+echo "  - server/data/contacts.json"
+echo "  - public/uploads/           (live media)"
+echo "  - .env                      (server secrets)"
+echo ""
 if [[ -n "$LIVE" ]]; then
   echo "Live: ${LIVE%/}/"
 else
