@@ -14,14 +14,18 @@
     "start": "node server/index.js",
     "production": "npm run build && npm start",
     "push-live-content": "node scripts/push-live-content.js",
-    "test:header": "node scripts/test-header-theme.mjs"
+    "test:header": "node scripts/test-header-theme.mjs",
+    "test:header:mobile": "node scripts/test-mobile-header-css.mjs",
+    "test:nav": "node scripts/test-nav-structure.mjs",
+    "test:nav:browser": "node scripts/test-mobile-home-menu.mjs",
+    "test:admin": "node scripts/test-admin-panel.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@measured/puck": "^0.20.2",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "@measured/puck": "^0.20.2",
     "multer": "^1.4.5-lts.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -32,6 +36,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
     "concurrently": "^9.1.2",
+    "playwright": "^1.60.0",
     "vite": "^6.3.5"
   }
 }

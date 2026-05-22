@@ -17,8 +17,22 @@ import SiteHeaderInspector from "./SiteHeaderInspector";
 import StyledSectionWrap from "./StyledSectionWrap";
 import { VeEditScope } from "./VeInlineEdit";
 import { defaultStyleForType, normalizeSection } from "./editorTheme";
+import {
+  PAGE_HEADER_LOGO_KEYS,
+  mergePageHeaderSettings,
+  pageUsesCustomHeader,
+} from "../utils/pageHeaderSettings";
+import EditorHistoryToolbar from "./EditorHistoryToolbar";
+import {
+  canRedoHistory,
+  canUndoHistory,
+  popRedo,
+  popUndo,
+  pushEditorHistory,
+} from "./editorHistory";
 import "../pages/HomePage.css";
 import "./visual-editor.css";
+import "./site-content-panel.css";
 import "./styled-section.css";
 
 const EDITOR_MODES = [
@@ -102,11 +116,61 @@ export default function VisualEditor() {
   const [chromeSelected, setChromeSelected] = useState(false);
   const [chromeFocus, setChromeFocus] = useState(null);
   const [headerPreviewPath, setHeaderPreviewPath] = useState(PREVIEW_PAGE_PATH.services);
+  const [pageHeaderSettings, setPageHeaderSettings] = useState({});
   const [isDragging, setIsDragging] = useState(false);
   const deviceSwitchTimer = useRef(null);
   const savedSnapshot = useRef("");
+  const historyStacks = useRef({ past: [], future: [] });
+  const applyingHistory = useRef(false);
+  const [historyTick, setHistoryTick] = useState(0);
 
   const markDirty = useCallback(() => setDirty(true), []);
+
+  const getEditorSnapshot = useCallback(
+    () => ({
+      sections,
+      enabled,
+      pageHeaderSettings,
+      settings: { ...(content.settings || {}) },
+    }),
+    [sections, enabled, pageHeaderSettings, content.settings],
+  );
+
+  const applyEditorSnapshot = useCallback((snap) => {
+    applyingHistory.current = true;
+    setSections(snap.sections || []);
+    setEnabled(Boolean(snap.enabled));
+    setPageHeaderSettings(snap.pageHeaderSettings || {});
+    setContent((c) => ({ ...c, settings: { ...(snap.settings || {}) } }));
+    applyingHistory.current = false;
+    setHistoryTick((t) => t + 1);
+  }, []);
+
+  const recordHistory = useCallback(() => {
+    if (applyingHistory.current) return;
+    pushEditorHistory(historyStacks.current, getEditorSnapshot);
+    setHistoryTick((t) => t + 1);
+  }, [getEditorSnapshot]);
+
+  const undoEditor = useCallback(() => {
+    const snap = popUndo(historyStacks.current, getEditorSnapshot);
+    if (!snap) return;
+    applyEditorSnapshot(snap);
+    markDirty();
+  }, [getEditorSnapshot, applyEditorSnapshot, markDirty]);
+
+  const redoEditor = useCallback(() => {
+    const snap = popRedo(historyStacks.current, getEditorSnapshot);
+    if (!snap) return;
+    applyEditorSnapshot(snap);
+    markDirty();
+  }, [getEditorSnapshot, applyEditorSnapshot, markDirty]);
+
+  const pickLogoPatch = (patch) =>
+    PAGE_HEADER_LOGO_KEYS.reduce((acc, key) => {
+      if (patch[key] !== undefined) acc[key] = patch[key];
+      return acc;
+    }, {});
 
   const loadPage = useCallback((id, allContent, opts = {}) => {
     const { selectFirstSection = false, previewPath: agencyPath } = opts;
@@ -124,8 +188,10 @@ export default function VisualEditor() {
     if (id === "home" && agencyPath) {
       nextSections = sectionsWithHomeAgency(nextSections, agencyPath);
     }
+    const nextHeader = page?.headerSettings || {};
     setSections(nextSections);
     setEnabled(nextEnabled);
+    setPageHeaderSettings(nextHeader);
     setChromeSelected(false);
     setChromeFocus(null);
     if (selectFirstSection) {
@@ -134,7 +200,13 @@ export default function VisualEditor() {
       setSelectedId(null);
     }
     setDirty(false);
-    savedSnapshot.current = JSON.stringify({ sections: nextSections, enabled: nextEnabled });
+    historyStacks.current = { past: [], future: [] };
+    setHistoryTick((t) => t + 1);
+    savedSnapshot.current = JSON.stringify({
+      sections: nextSections,
+      enabled: nextEnabled,
+      headerSettings: nextHeader,
+    });
   }, []);
 
   useEffect(() => {
@@ -203,7 +275,7 @@ export default function VisualEditor() {
     wysiwyg: page.wysiwyg ? { ...page.wysiwyg, enabled: false } : undefined,
   });
 
-  const persist = async (nextSections, nextEnabled) => {
+  const persist = async (nextSections, nextEnabled, headerOverrides = pageHeaderSettings) => {
     setSaving(true);
     setStatus("");
     let base = content;
@@ -213,26 +285,49 @@ export default function VisualEditor() {
     } catch {
       /* use in-memory content */
     }
+    const pageBase = content.pages?.[pageId] || base.pages?.[pageId] || {};
+    const pagePayload = cleanLegacyPage({
+      ...pageBase,
+      sections: { enabled: nextEnabled, items: nextSections },
+    });
+    if (pageUsesCustomHeader(headerOverrides)) {
+      pagePayload.headerSettings = headerOverrides;
+    } else if (pagePayload.headerSettings) {
+      delete pagePayload.headerSettings;
+    }
+    const logoPatch = {
+      ...pickLogoPatch(content.settings || {}),
+      ...pickLogoPatch(headerOverrides),
+    };
     const next = {
       ...base,
-      settings: { ...(base.settings || {}), ...(content.settings || {}) },
+      settings: {
+        ...(base.settings || {}),
+        ...(content.settings || {}),
+        ...logoPatch,
+      },
       pages: {
         ...(base.pages || {}),
         ...(content.pages || {}),
-        [pageId]: cleanLegacyPage({
-          ...(content.pages?.[pageId] || base.pages?.[pageId] || {}),
-          sections: { enabled: nextEnabled, items: nextSections },
-        }),
+        [pageId]: pagePayload,
       },
     };
     try {
       await axios.put("/api/content", next, { headers: authHeaders() });
       setContent(next);
-      const msg = nextEnabled ? "Published — live site updated." : "Saved as draft.";
+      const msg = nextEnabled
+        ? "Published — live site updated. Hard-refresh (Ctrl+F5) to see logo size."
+        : "Saved draft — logo & header saved site-wide. Hard-refresh live site (Ctrl+F5).";
       setStatus(msg);
       setToast({ message: msg, type: "success" });
       setDirty(false);
-      savedSnapshot.current = JSON.stringify({ sections: nextSections, enabled: nextEnabled });
+      historyStacks.current = { past: [], future: [] };
+      setHistoryTick((t) => t + 1);
+      savedSnapshot.current = JSON.stringify({
+        sections: nextSections,
+        enabled: nextEnabled,
+        headerSettings: headerOverrides || {},
+      });
     } catch {
       const msg = "Save failed. Is the API running on port 3001?";
       setStatus(msg);
@@ -250,6 +345,7 @@ export default function VisualEditor() {
 
   const resetTemplate = () => {
     if (!window.confirm("Reset this page to the default template? Unsaved edits will be lost.")) return;
+    recordHistory();
     const defaults = getDefaultSections(pageId);
     setSections(defaults);
     setSelectedId(null);
@@ -283,11 +379,13 @@ export default function VisualEditor() {
   const selected = sections.find((s) => s.id === selectedId);
 
   const updateSection = (updated) => {
+    recordHistory();
     setSections((list) => list.map((s) => (s.id === updated.id ? normalizeSection(updated) : s)));
     markDirty();
   };
 
   const patchSectionProp = (sectionId, key, value) => {
+    recordHistory();
     setSections((list) =>
       list.map((s) =>
         s.id === sectionId ? { ...s, props: { ...s.props, [key]: value } } : s
@@ -297,6 +395,7 @@ export default function VisualEditor() {
   };
 
   const updateSectionStyle = (sectionId, style) => {
+    recordHistory();
     setSections((list) =>
       list.map((s) => (s.id === sectionId ? { ...s, style } : s))
     );
@@ -312,6 +411,7 @@ export default function VisualEditor() {
     setSelectedId(null);
     setChromeSelected(true);
     setChromeFocus(focus);
+    document.querySelector(".site-header--editor-preview.site-header--menu-open .site-header__toggle.is-active")?.click();
   };
 
   const navigateFromHeader = (id, path) => {
@@ -331,9 +431,30 @@ export default function VisualEditor() {
   };
 
   const updateSettings = (settings) => {
+    recordHistory();
     setContent((c) => ({ ...c, settings }));
     markDirty();
   };
+
+  const updatePageHeaderSettings = (patch) => {
+    recordHistory();
+    setPageHeaderSettings((prev) => ({ ...prev, ...patch }));
+    const logoPatch = pickLogoPatch(patch);
+    if (Object.keys(logoPatch).length) {
+      setContent((c) => ({ ...c, settings: { ...(c.settings || {}), ...logoPatch } }));
+    }
+    markDirty();
+  };
+
+  const clearPageHeaderSettings = () => {
+    recordHistory();
+    setPageHeaderSettings({});
+    markDirty();
+  };
+
+  const siteSettings = content.settings || {};
+  const effectiveHeaderSettings = mergePageHeaderSettings(siteSettings, pageHeaderSettings);
+  const pageHeaderCustom = pageUsesCustomHeader(pageHeaderSettings);
 
   const saveSiteSettings = async (settingsOverride) => {
     setSaving(true);
@@ -381,15 +502,32 @@ export default function VisualEditor() {
       if (e.key === "Escape") {
         setSelectedId(null);
         setChromeSelected(false);
+        return;
+      }
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const tag = e.target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select" || e.target?.isContentEditable) return;
+      if (e.key === "z" || e.key === "Z") {
+        e.preventDefault();
+        if (e.shiftKey) redoEditor();
+        else undoEditor();
+      } else if (e.key === "y" || e.key === "Y") {
+        e.preventDefault();
+        redoEditor();
+      } else if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        if (!saving) save();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [undoEditor, redoEditor, saving, save]);
 
   const duplicateSection = (id) => {
     const src = sections.find((s) => s.id === id);
     if (!src) return;
+    recordHistory();
     const copy = { ...src, id: newId(), props: { ...src.props }, style: { ...src.style } };
     const idx = sections.findIndex((s) => s.id === id);
     const next = [...sections];
@@ -401,6 +539,7 @@ export default function VisualEditor() {
 
   const deleteSection = (id) => {
     if (!window.confirm("Remove this section?")) return;
+    recordHistory();
     setSections((list) => list.filter((s) => s.id !== id));
     if (selectedId === id) setSelectedId(null);
     markDirty();
@@ -410,6 +549,7 @@ export default function VisualEditor() {
     const idx = sections.findIndex((s) => s.id === id);
     const next = idx + dir;
     if (next < 0 || next >= sections.length) return;
+    recordHistory();
     const list = [...sections];
     const [item] = list.splice(idx, 1);
     list.splice(next, 0, item);
@@ -429,6 +569,7 @@ export default function VisualEditor() {
     if (to !== "sidebar" && to !== "canvas") return;
     if (source.index === destination.index && from === to) return;
 
+    recordHistory();
     const list = [...sections];
     const [item] = list.splice(source.index, 1);
     list.splice(destination.index, 0, item);
@@ -439,6 +580,7 @@ export default function VisualEditor() {
   const addSection = () => {
     const def = SECTION_TYPES[addType];
     if (!def) return;
+    recordHistory();
     const item = {
       id: newId(),
       type: addType,
@@ -454,6 +596,9 @@ export default function VisualEditor() {
 
   const previewPath = headerPreviewPath || PREVIEW_PAGE_PATH[pageId] || "/";
   const activeDevice = PREVIEW_DEVICES.find((d) => d.id === previewDevice) || PREVIEW_DEVICES[0];
+  void historyTick;
+  const canUndo = canUndoHistory(historyStacks.current.past);
+  const canRedo = canRedoHistory(historyStacks.current.future);
 
   const openSiteContent = (tab = "brand") => {
     const sec = selected;
@@ -489,8 +634,30 @@ export default function VisualEditor() {
         <SiteContentPanel
           initialTab={siteTab}
           content={content}
-          setContent={setContent}
-          onSaved={(saved) => setContent(saved)}
+          setContent={(next) => {
+            if (typeof next === "function") {
+              setContent((c) => {
+                const merged = next(c || { pages: {}, settings: {}, site: {} });
+                markDirty();
+                return {
+                  pages: merged?.pages ?? c?.pages ?? {},
+                  settings: merged?.settings ?? c?.settings ?? {},
+                  site: merged?.site ?? c?.site,
+                };
+              });
+            } else {
+              setContent({
+                pages: next?.pages ?? content?.pages ?? {},
+                settings: next?.settings ?? content?.settings ?? {},
+                site: next?.site ?? content?.site,
+              });
+              markDirty();
+            }
+          }}
+          onSaved={(saved) => {
+            setContent(saved);
+            setDirty(false);
+          }}
         />
       </div>
     );
@@ -532,16 +699,9 @@ export default function VisualEditor() {
           <button type="button" className="ve-btn" onClick={resetTemplate}>Reset template</button>
           <button type="button" className="ve-btn" onClick={useBuiltInPages} disabled={saving}>Use built-in site</button>
           <a href={previewPath} target="_blank" rel="noreferrer" className="ve-btn">Preview live</a>
-          <button type="button" className="ve-btn" onClick={save} disabled={saving}>Save draft</button>
           <button type="button" className="ve-btn ve-btn--primary" onClick={publish} disabled={saving}>
-            Publish
+            Publish live
           </button>
-          {dirty && (
-            <span className="ve-status ve-status--dirty" title="Click Save draft or Publish to keep your work">
-              Unsaved — click Save draft
-            </span>
-          )}
-          {status && !dirty && <span className="ve-status">{status}</span>}
         </div>
       </header>
 
@@ -631,11 +791,14 @@ export default function VisualEditor() {
           >
             <EditorHeaderPreview
               device={previewDevice}
-              settings={content.settings || {}}
+              settings={effectiveHeaderSettings}
               currentPageId={pageId}
+              pageHeaderCustom={pageHeaderCustom}
               previewPathname={headerPreviewPath}
               isSelected={chromeSelected}
+              chromeFocus={chromeFocus}
               onSelect={selectChrome}
+              onLogoPatch={updatePageHeaderSettings}
               onNavigatePage={navigateFromHeader}
             />
             <p className="ve-canvas-hint">
@@ -715,12 +878,17 @@ export default function VisualEditor() {
 
         {chromeSelected ? (
           <SiteHeaderInspector
-            settings={content.settings || {}}
+            scope="page"
+            pageLabel={PAGE_OPTIONS.find((p) => p.id === pageId)?.label || pageId}
+            siteSettings={siteSettings}
+            settings={effectiveHeaderSettings}
+            pageHeaderCustom={pageHeaderCustom}
+            onClearPageHeader={clearPageHeaderSettings}
             focusField={chromeFocus}
             currentPageId={pageId}
             onNavigatePage={navigateFromHeader}
-            onChange={updateSettings}
-            onSaveSettings={saveSiteSettings}
+            onChange={updatePageHeaderSettings}
+            onSaveSettings={() => persist(sections, enabled, pageHeaderSettings)}
             saving={saving}
             onOpenSiteContent={openSiteContent}
           />

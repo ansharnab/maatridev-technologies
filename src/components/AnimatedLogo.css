@@ -25,8 +25,8 @@
   width: auto;
   max-width: min(var(--logo-clip-width, 280px), 58vw);
   height: calc(var(--logo-full-height, 64px) * var(--logo-scale, 1));
-  max-height: 72px;
-  overflow: hidden;
+  max-height: calc(var(--logo-full-height, 64px) * var(--logo-scale, 1) + 8px);
+  overflow: visible;
   line-height: 0;
   vertical-align: middle;
 }
@@ -37,7 +37,7 @@
   width: auto;
   height: 100%;
   max-width: min(var(--logo-clip-width, 280px), 58vw);
-  max-height: 100%;
+  max-height: none;
   object-fit: contain;
   object-position: left center;
   border-radius: 0;
@@ -45,6 +45,11 @@
   box-shadow: none !important;
   transform: none;
   transition: filter 0.2s ease;
+}
+
+.animated-logo--image .animated-logo__img,
+.animated-logo--image .animated-logo__video {
+  filter: var(--header-logo-filter, none);
 }
 
 .site-header__brand--full-logo:hover .animated-logo--full-brand .animated-logo__img,

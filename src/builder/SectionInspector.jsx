@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { SECTION_TYPES } from "./sectionRegistry";
-import { DEFAULT_SECTION_STYLE, PADDING_OPTIONS, THEME_PRESETS } from "./editorTheme";
+import { GradientPresetGrid } from "./GradientPresetPanel";
+import { DEFAULT_SECTION_STYLE, LEGACY_THEME_PRESETS, PADDING_OPTIONS, THEME_PRESETS } from "./editorTheme";
+import { BUTTON_CLICK_PRESETS, EXTRA_GRADIENT_PRESETS } from "../utils/gradientPresets";
 
 function ColorField({ label, value, onChange }) {
   return (
@@ -107,9 +109,9 @@ export default function SectionInspector({
               for the standard look. Header bar colors are edited by clicking the logo in the preview.
             </p>
           )}
-          <p className="ve-inspector__label">Theme presets</p>
+          <p className="ve-inspector__label">Basic themes (7)</p>
           <div className="ve-inspector__themes">
-            {THEME_PRESETS.map((preset) => (
+            {LEGACY_THEME_PRESETS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
@@ -123,7 +125,50 @@ export default function SectionInspector({
             ))}
           </div>
 
-          <p className="ve-inspector__label">Colors</p>
+          <p className="ve-inspector__label">Gradient colors (+{EXTRA_GRADIENT_PRESETS.length}) — click to apply</p>
+          <div className="ve-inspector__gradient-wrap">
+            <GradientPresetGrid
+              presets={EXTRA_GRADIENT_PRESETS}
+              activeId={style.theme}
+              columns={2}
+              showHint={false}
+              onSelect={(p) =>
+                applyTheme({
+                  id: p.id,
+                  label: p.label,
+                  swatch: p.swatch,
+                  style: {
+                    background: p.background,
+                    textColor: p.textColor,
+                    headingColor: p.headingColor,
+                    accentColor: p.accentColor,
+                  },
+                })
+              }
+            />
+          </div>
+
+          <p className="ve-inspector__label">Button / click color</p>
+          <div className="ve-inspector__chips ve-inspector__chips--buttons">
+            {BUTTON_CLICK_PRESETS.slice(0, 12).map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={style.accentColor === p.bg ? "is-active" : ""}
+                title={p.label}
+                onClick={() => updateStyle({ accentColor: p.bg })}
+                style={{
+                  background: p.bg,
+                  color: p.color,
+                  border: p.border ? `1px solid ${p.border}` : undefined,
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <p className="ve-inspector__label">Fine-tune colors</p>
           {section.type === "pageHero" && (
             <div className="ve-inspector__chips" style={{ marginBottom: "0.5rem" }}>
               <button

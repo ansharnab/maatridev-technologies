@@ -56,6 +56,7 @@ export function useSiteContent() {
     loading,
     settings,
     merged,
+    rawSettings: content?.settings,
     getPageBlocks,
     getPageSections,
     getPuckPage,

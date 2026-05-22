@@ -1,3 +1,5 @@
+import { arcticFrostThemeExtras } from "./arcticFrostPresets";
+import { resolveHeaderLogoFilter } from "./logoImageFilters";
 import { resolveLogoUrls } from "./logoSettings";
 
 /** Header design presets + CSS variables for live site and page builder preview */
@@ -50,14 +52,14 @@ export const HEADER_DESIGNS = {
   light: {
     id: "light",
     label: "Light bar",
-    swatch: "#ffffff",
-    barBackground: "rgba(255, 255, 255, 0.96)",
-    barScrolled: "rgba(255, 255, 255, 0.98)",
-    navOnDark: "#1a2b3c",
-    navOnLight: "#1a2b3c",
+    swatch: "linear-gradient(135deg, #ffffff, #f1f5f9)",
+    barBackground: "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#1e293b",
+    navOnLight: "#0f172a",
     ctaBg: "#007cc3",
     ctaColor: "#ffffff",
-    border: "rgba(0, 60, 100, 0.08)",
+    border: "rgba(148, 163, 184, 0.25)",
   },
   ocean: {
     id: "ocean",
@@ -158,14 +160,14 @@ export const HEADER_DESIGNS = {
   arctic: {
     id: "arctic",
     label: "Arctic ice",
-    swatch: "linear-gradient(90deg, #e0f2fe, #7dd3fc)",
-    barBackground: "linear-gradient(90deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)",
+    swatch: "linear-gradient(135deg, #e0f2fe, #38bdf8, #7dd3fc)",
+    barBackground: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #bae6fd 75%, #7dd3fc 100%)",
     barScrolled: "#ffffff",
-    navOnDark: "#0c4a6e",
+    navOnDark: "#075985",
     navOnLight: "#0c4a6e",
     ctaBg: "#0284c7",
     ctaColor: "#ffffff",
-    border: "rgba(2, 132, 199, 0.2)",
+    border: "rgba(56, 189, 248, 0.28)",
   },
   copper: {
     id: "copper",
@@ -350,7 +352,7 @@ export const HEADER_DESIGNS = {
   },
   mobileMenu: {
     id: "mobileMenu",
-    label: "Mobile menu navy",
+    label: "Navy drawer menu",
     swatch: "linear-gradient(165deg, #0f2844, #0a1628)",
     barBackground: "linear-gradient(165deg, #0f2844 0%, #0a1628 55%, #0c2238 100%)",
     barScrolled: "rgba(255, 255, 255, 0.94)",
@@ -363,14 +365,14 @@ export const HEADER_DESIGNS = {
   cloudInner: {
     id: "cloudInner",
     label: "Inner page cloud",
-    swatch: "linear-gradient(180deg, #f0f9ff, #e2e8f0)",
-    barBackground: "linear-gradient(180deg, #f8fafc 0%, #f0f4f8 100%)",
+    swatch: "linear-gradient(160deg, #f0f9ff, #e2e8f0, #cbd5e1)",
+    barBackground: "linear-gradient(165deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%)",
     barScrolled: "#ffffff",
-    navOnDark: "#1a2b3c",
-    navOnLight: "#1a2b3c",
+    navOnDark: "#1e293b",
+    navOnLight: "#0f172a",
     ctaBg: "#007cc3",
     ctaColor: "#ffffff",
-    border: "rgba(0, 124, 195, 0.12)",
+    border: "rgba(100, 116, 139, 0.18)",
   },
   scheduleBlue: {
     id: "scheduleBlue",
@@ -423,16 +425,470 @@ export const HEADER_DESIGNS = {
   mistLight: {
     id: "mistLight",
     label: "Mist light bar",
-    swatch: "#f4f7fb",
-    barBackground: "rgba(244, 247, 251, 0.98)",
+    swatch: "linear-gradient(135deg, #f8fafc, #e2e8f0)",
+    barBackground: "linear-gradient(180deg, rgba(248, 250, 252, 0.99) 0%, rgba(241, 245, 249, 0.97) 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#334155",
+    navOnLight: "#1e293b",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(148, 163, 184, 0.2)",
+  },
+  cream: {
+    id: "cream",
+    label: "Cream white",
+    swatch: "#fffbeb",
+    barBackground: "linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#78350f",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(120, 53, 15, 0.12)",
+  },
+  linen: {
+    id: "linen",
+    label: "Linen off-white",
+    swatch: "#fafaf9",
+    barBackground: "rgba(250, 250, 249, 0.98)",
+    barScrolled: "#ffffff",
+    navOnDark: "#334155",
+    navOnLight: "#0f172a",
+    ctaBg: "#0ea5e9",
+    ctaColor: "#ffffff",
+    border: "rgba(15, 23, 42, 0.08)",
+  },
+  snow: {
+    id: "snow",
+    label: "Pure snow white",
+    swatch: "#ffffff",
+    barBackground: "#ffffff",
+    barScrolled: "#ffffff",
+    navOnDark: "#0f172a",
+    navOnLight: "#0f172a",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(15, 23, 42, 0.08)",
+  },
+  skyWash: {
+    id: "skyWash",
+    label: "Sky wash blue",
+    swatch: "#eff6ff",
+    barBackground: "linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#1e3a8a",
+    navOnLight: "#1e3a8a",
+    ctaBg: "#2563eb",
+    ctaColor: "#ffffff",
+    border: "rgba(37, 99, 235, 0.15)",
+  },
+  pearl: {
+    id: "pearl",
+    label: "Pearl (MD mist)",
+    swatch: "#f4f8fc",
+    barBackground: "rgba(244, 248, 252, 0.98)",
     barScrolled: "#ffffff",
     navOnDark: "#1a2b3c",
     navOnLight: "#1a2b3c",
-    ctaBg: "#00b8a9",
+    ctaBg: "#007cc3",
     ctaColor: "#ffffff",
     border: "rgba(0, 124, 195, 0.1)",
   },
+  sage: {
+    id: "sage",
+    label: "Sage mint",
+    swatch: "#ecfdf5",
+    barBackground: "linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#065f46",
+    navOnLight: "#065f46",
+    ctaBg: "#059669",
+    ctaColor: "#ffffff",
+    border: "rgba(5, 150, 105, 0.15)",
+  },
+  blush: {
+    id: "blush",
+    label: "Blush pink",
+    swatch: "#fdf2f8",
+    barBackground: "linear-gradient(90deg, #fdf2f8 0%, #fce7f3 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#9d174d",
+    navOnLight: "#9d174d",
+    ctaBg: "#db2777",
+    ctaColor: "#ffffff",
+    border: "rgba(219, 39, 119, 0.12)",
+  },
+  sand: {
+    id: "sand",
+    label: "Warm sand",
+    swatch: "#fef9c3",
+    barBackground: "linear-gradient(90deg, #fefce8 0%, #fef9c3 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#854d0e",
+    navOnLight: "#854d0e",
+    ctaBg: "#d97706",
+    ctaColor: "#ffffff",
+    border: "rgba(133, 77, 14, 0.12)",
+  },
+  mintFrost: {
+    id: "mintFrost",
+    label: "Mint frost",
+    swatch: "#f0fdfa",
+    barBackground: "linear-gradient(90deg, #f0fdfa 0%, #ccfbf1 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#115e59",
+    navOnLight: "#115e59",
+    ctaBg: "#0d9488",
+    ctaColor: "#ffffff",
+    border: "rgba(13, 148, 136, 0.15)",
+  },
+  roseMist: {
+    id: "roseMist",
+    label: "Rose mist",
+    swatch: "#fff1f2",
+    barBackground: "linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#9f1239",
+    navOnLight: "#9f1239",
+    ctaBg: "#e11d48",
+    ctaColor: "#ffffff",
+    border: "rgba(225, 29, 72, 0.12)",
+  },
+  warmIvory: {
+    id: "warmIvory",
+    label: "Warm ivory",
+    swatch: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+    barBackground: "linear-gradient(135deg, #fffbeb 0%, #fff7ed 45%, #ffedd5 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#7c2d12",
+    navOnLight: "#9a3412",
+    ctaBg: "#ea580c",
+    ctaColor: "#ffffff",
+    border: "rgba(251, 146, 60, 0.22)",
+  },
+  aurora: {
+    id: "aurora",
+    label: "Aurora pastel",
+    swatch: "linear-gradient(135deg, #e0e7ff, #fce7f3, #cffafe)",
+    barBackground: "linear-gradient(125deg, #eef2ff 0%, #fae8ff 42%, #ecfeff 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#4338ca",
+    navOnLight: "#5b21b6",
+    ctaBg: "#6366f1",
+    ctaColor: "#ffffff",
+    border: "rgba(99, 102, 241, 0.2)",
+  },
+  champagne: {
+    id: "champagne",
+    label: "Champagne gold",
+    swatch: "linear-gradient(135deg, #fef9c3, #fde68a, #fcd34d)",
+    barBackground: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#78350f",
+    navOnLight: "#92400e",
+    ctaBg: "#b45309",
+    ctaColor: "#fffbeb",
+    border: "rgba(245, 158, 11, 0.28)",
+  },
+  lagoon: {
+    id: "lagoon",
+    label: "Lagoon turquoise",
+    swatch: "linear-gradient(135deg, #ccfbf1, #5eead4, #2dd4bf)",
+    barBackground: "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 45%, #99f6e4 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#0f766e",
+    navOnLight: "#115e59",
+    ctaBg: "#14b8a6",
+    ctaColor: "#ffffff",
+    border: "rgba(20, 184, 166, 0.25)",
+  },
+  /* Left light → right blue / navy (horizontal fades) */
+  fadeWhiteNavy: {
+    id: "fadeWhiteNavy",
+    label: "White → navy",
+    swatch: "linear-gradient(90deg, #ffffff 0%, #0a1628 100%)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f8fafc 12%, #cbd5e1 28%, #64748b 48%, #1e3a5c 68%, #0f2844 82%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.96)",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(255, 255, 255, 0.15)",
+    brandTextOnDark: "#0f172a",
+    brandSubOnDark: "rgba(15, 23, 42, 0.72)",
+  },
+  fadeMistBlue: {
+    id: "fadeMistBlue",
+    label: "Mist → Infosys blue",
+    swatch: "linear-gradient(90deg, #f4f7fb, #007cc3)",
+    barBackground:
+      "linear-gradient(90deg, #f8fafc 0%, #f1f5f9 15%, #e2e8f0 30%, #93c5fd 52%, #38bdf8 68%, #007cc3 82%, #006aa8 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#0f172a",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 124, 195, 0.2)",
+    brandTextOnDark: "#1e293b",
+    brandSubOnDark: "rgba(30, 41, 59, 0.75)",
+  },
+  fadePearlPacific: {
+    id: "fadePearlPacific",
+    label: "Pearl → pacific",
+    swatch: "linear-gradient(90deg, #f4f8fc, #003d5c)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f4f8fc 14%, #e0f2fe 32%, #7dd3fc 50%, #0284c7 70%, #004d73 88%, #003d5c 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.94)",
+    navOnDark: "#ffffff",
+    navOnLight: "#003d5c",
+    ctaBg: "#0099ff",
+    ctaColor: "#ffffff",
+    border: "rgba(56, 189, 248, 0.25)",
+    brandTextOnDark: "#0a1628",
+    brandSubOnDark: "rgba(10, 22, 40, 0.7)",
+  },
+  fadeIceCorporate: {
+    id: "fadeIceCorporate",
+    label: "Ice → corporate blue",
+    swatch: "linear-gradient(90deg, #f0f9ff, #003366)",
+    barBackground:
+      "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 18%, #bae6fd 36%, #60a5fa 54%, #2563eb 72%, #1e40af 86%, #003366 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(37, 99, 235, 0.22)",
+    brandTextOnDark: "#0c4a6e",
+    brandSubOnDark: "rgba(12, 74, 110, 0.75)",
+  },
+  fadeCloudDeep: {
+    id: "fadeCloudDeep",
+    label: "Cloud → deep blue",
+    swatch: "linear-gradient(90deg, #f8fafc, #1a3a5c)",
+    barBackground:
+      "linear-gradient(90deg, #fafafa 0%, #f8fafc 12%, #f1f5f9 24%, #94a3b8 42%, #3b82f6 58%, #1d4ed8 74%, #1e3a5c 90%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.95)",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#38bdf8",
+    ctaColor: "#0f172a",
+    border: "rgba(59, 130, 246, 0.28)",
+    brandTextOnDark: "#334155",
+    brandSubOnDark: "rgba(51, 65, 85, 0.72)",
+  },
+  fadeLinenIndigo: {
+    id: "fadeLinenIndigo",
+    label: "Linen → indigo",
+    swatch: "linear-gradient(90deg, #fafaf9, #1a3a5c)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #fafaf9 14%, #f5f5f4 28%, #a8a29e 44%, #6366f1 62%, #4338ca 78%, #312e81 92%, #1a3a5c 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#312e81",
+    ctaBg: "#6366f1",
+    ctaColor: "#ffffff",
+    border: "rgba(99, 102, 241, 0.25)",
+    brandTextOnDark: "#44403c",
+    brandSubOnDark: "rgba(68, 64, 60, 0.75)",
+  },
+  fadeSnowTeal: {
+    id: "fadeSnowTeal",
+    label: "Snow → teal navy",
+    swatch: "linear-gradient(90deg, #ffffff, #004d73)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #f8fafc 10%, #ecfeff 26%, #67e8f9 44%, #06b6d4 58%, #007cc3 72%, #004d73 88%, #0a1628 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.96)",
+    navOnDark: "#ffffff",
+    navOnLight: "#0a1628",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(6, 182, 212, 0.3)",
+    brandTextOnDark: "#0f172a",
+    brandSubOnDark: "rgba(15, 23, 42, 0.7)",
+  },
+  fadeCreamCorp: {
+    id: "fadeCreamCorp",
+    label: "Cream → corp navy",
+    swatch: "linear-gradient(90deg, #fffbeb, #003366)",
+    barBackground:
+      "linear-gradient(90deg, #fffbeb 0%, #fef3c7 14%, #fde68a 28%, #fcd34d 42%, #60a5fa 58%, #007cc3 74%, #003d5c 90%, #003366 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#003366",
+    ctaBg: "#007cc3",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 124, 195, 0.22)",
+    brandTextOnDark: "#78350f",
+    brandSubOnDark: "rgba(120, 53, 15, 0.72)",
+  },
+  fadeArcticMidnight: {
+    id: "fadeArcticMidnight",
+    label: "Arctic → midnight",
+    swatch: "linear-gradient(90deg, #e0f2fe, #0f172a)",
+    barBackground:
+      "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 16%, #bae6fd 32%, #38bdf8 48%, #0ea5e9 62%, #0369a1 76%, #1e3a8a 88%, #0f172a 100%)",
+    barScrolled: "rgba(255, 255, 255, 0.94)",
+    navOnDark: "#ffffff",
+    navOnLight: "#0f172a",
+    ctaBg: "#0ea5e9",
+    ctaColor: "#ffffff",
+    border: "rgba(14, 165, 233, 0.28)",
+    brandTextOnDark: "#075985",
+    brandSubOnDark: "rgba(7, 89, 133, 0.75)",
+  },
+  fadeSoftSkyNavy: {
+    id: "fadeSoftSkyNavy",
+    label: "Soft sky → navy",
+    swatch: "linear-gradient(90deg, #eff6ff, #0a1628)",
+    barBackground:
+      "linear-gradient(90deg, #ffffff 0%, #eff6ff 14%, #dbeafe 30%, #93c5fd 48%, #3b82f6 64%, #1d4ed8 78%, #1e3a8a 90%, #0a1628 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#1a2b3c",
+    ctaBg: "#2563eb",
+    ctaColor: "#ffffff",
+    border: "rgba(59, 130, 246, 0.22)",
+    brandTextOnDark: "#1e40af",
+    brandSubOnDark: "rgba(30, 64, 175, 0.7)",
+  },
+  fadeMistTealDeep: {
+    id: "fadeMistTealDeep",
+    label: "Mist → teal deep",
+    swatch: "linear-gradient(90deg, #f4f7fb, #003d5c)",
+    barBackground:
+      "linear-gradient(90deg, #f8fafc 0%, #f4f7fb 12%, #e2e8f0 24%, #99f6e4 40%, #2dd4bf 56%, #00b8a9 70%, #007cc3 82%, #003d5c 100%)",
+    barScrolled: "#ffffff",
+    navOnDark: "#ffffff",
+    navOnLight: "#003d5c",
+    ctaBg: "#00b8a9",
+    ctaColor: "#ffffff",
+    border: "rgba(0, 184, 169, 0.25)",
+    brandTextOnDark: "#1a2b3c",
+    brandSubOnDark: "rgba(26, 43, 60, 0.72)",
+  },
 };
+
+const LIGHT_BAR_BG_HINTS = [
+  "#fff",
+  "ffffff",
+  "f8fafc",
+  "f4f7fb",
+  "f4f8fc",
+  "f0f9ff",
+  "eff6ff",
+  "fafaf9",
+  "fffbeb",
+  "fef3c7",
+  "e0f2fe",
+  "bae6fd",
+  "ecfdf5",
+  "fdf2f8",
+  "fef9c3",
+  "fefce8",
+  "f0fdfa",
+  "fff1f2",
+  "fff7ed",
+  "ffedd5",
+  "mist",
+  "cream",
+  "linen",
+  "snow",
+  "pearl",
+  "sage",
+  "blush",
+  "sand",
+  "arctic",
+  "cloud",
+  "aurora",
+  "lagoon",
+  "champagne",
+  "eef2ff",
+  "fae8ff",
+  "ecfeff",
+  "fde68a",
+  "99f6e4",
+];
+
+function navIsDarkOnLightBar(navOnDark = "") {
+  const n = String(navOnDark).trim().toLowerCase();
+  if (!n || n === "#ffffff" || n === "#fff" || n === "white") return false;
+  if (n.includes("255, 255, 255") || n.includes("244, 248, 252") || n.includes("248, 250, 252")) {
+    return false;
+  }
+  return true;
+}
+
+function barBackgroundIsLight(barBackground = "") {
+  const b = String(barBackground).toLowerCase();
+  return LIGHT_BAR_BG_HINTS.some((hint) => b.includes(hint));
+}
+
+/** Light bar = pale background + dark menu text (for colored logos) */
+export function isLightHeaderDesign(design) {
+  if (!design) return false;
+  return navIsDarkOnLightBar(design.navOnDark) && barBackgroundIsLight(design.barBackground);
+}
+
+const LIGHT_HEADER_DISPLAY_ORDER = [
+  "aurora",
+  "lagoon",
+  "champagne",
+  "arctic",
+  "light",
+  "snow",
+  "pearl",
+  "mistLight",
+  "cloudInner",
+  "skyWash",
+  "sage",
+  "mintFrost",
+  "blush",
+  "roseMist",
+  "linen",
+  "cream",
+  "sand",
+  "warmIvory",
+];
+
+/** All light header designs in HEADER_DESIGNS (not a fixed count) */
+export const HEADER_LIGHT_DESIGN_IDS = [
+  ...LIGHT_HEADER_DISPLAY_ORDER.filter((id) => isLightHeaderDesign(HEADER_DESIGNS[id])),
+  ...Object.values(HEADER_DESIGNS)
+    .filter((d) => isLightHeaderDesign(d) && !LIGHT_HEADER_DISPLAY_ORDER.includes(d.id))
+    .map((d) => d.id)
+    .sort((a, b) => a.localeCompare(b)),
+];
+
+/** Light left → blue/navy right (menu white on dark side; dark brand text on logo) */
+export const HEADER_FADE_LIGHT_TO_BLUE_IDS = [
+  "fadeWhiteNavy",
+  "fadeMistBlue",
+  "fadePearlPacific",
+  "fadeIceCorporate",
+  "fadeCloudDeep",
+  "fadeLinenIndigo",
+  "fadeSnowTeal",
+  "fadeCreamCorp",
+  "fadeArcticMidnight",
+  "fadeSoftSkyNavy",
+  "fadeMistTealDeep",
+];
+
+export const HEADER_DARK_QUICK_IDS = ["glass", "maatridevHome", "solid", "infosysTeal", "maatridevPage"];
+
+export function headerQuickPresets(ids) {
+  return ids.map((id) => {
+    const d = HEADER_DESIGNS[id];
+    return {
+      id,
+      label: d?.label || id,
+      swatch: d?.swatch,
+      patch: () => applyHeaderDesignPreset(id),
+    };
+  });
+}
 
 /** One-click combos matching live site screenshots */
 export const HEADER_THEME_PRESETS = [
@@ -476,6 +932,62 @@ export const HEADER_THEME_PRESETS = [
   { id: "cyber-bar", label: "Cyber cyan", patch: () => applyHeaderDesignPreset("cyber") },
   { id: "rose-bar", label: "Rose wine", patch: () => applyHeaderDesignPreset("rose") },
   { id: "arctic-bar", label: "Arctic ice", patch: () => applyHeaderDesignPreset("arctic") },
+  {
+    id: "arctic-frost-hero",
+    label: "★ Arctic frost hero",
+    description: "Icy home hero + matching light header",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-arctic-frost"),
+    }),
+  },
+  {
+    id: "arctic-frost-light-hero",
+    label: "★ Arctic frost light",
+    description: "White ice hero — dark nav text on pale bar",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-arctic-frost-light"),
+    }),
+  },
+  {
+    id: "arctic-frost-deep-hero",
+    label: "★ Arctic frost deep",
+    description: "Deep navy ice hero + glacier accents",
+    patch: () => ({
+      ...applyHeaderDesignPreset("fadeArcticMidnight"),
+      ...arcticFrostThemeExtras("g-arctic-frost-deep"),
+    }),
+  },
+  {
+    id: "polar-glacier-hero",
+    label: "★ Polar glacier",
+    patch: () => ({
+      ...applyHeaderDesignPreset("fadeSnowTeal"),
+      ...arcticFrostThemeExtras("g-polar-glacier"),
+    }),
+  },
+  {
+    id: "icy-dawn-hero",
+    label: "★ Icy dawn",
+    patch: () => ({
+      ...applyHeaderDesignPreset("arctic"),
+      ...arcticFrostThemeExtras("g-icy-dawn"),
+    }),
+  },
+  {
+    id: "silver-frost-hero",
+    label: "Silver frost",
+    patch: () => ({
+      ...applyHeaderDesignPreset("mistLight"),
+      ...arcticFrostThemeExtras("g-arctic-silver"),
+    }),
+  },
+  { id: "light-bar", label: "Light white bar", patch: () => applyHeaderDesignPreset("light") },
+  { id: "snow-bar", label: "Snow white", patch: () => applyHeaderDesignPreset("snow") },
+  { id: "cloud-bar", label: "Cloud inner", patch: () => applyHeaderDesignPreset("cloudInner") },
+  { id: "sage-bar", label: "Sage mint", patch: () => applyHeaderDesignPreset("sage") },
+  { id: "pearl-bar", label: "Pearl mist", patch: () => applyHeaderDesignPreset("pearl") },
   { id: "copper-bar", label: "Copper bronze", patch: () => applyHeaderDesignPreset("copper") },
   { id: "slate-bar", label: "Slate pro", patch: () => applyHeaderDesignPreset("slate") },
   { id: "md-home", label: "★ Live IT hero", patch: () => applyHeaderDesignPreset("maatridevHome") },
@@ -492,27 +1004,60 @@ export const HEADER_THEME_PRESETS = [
   { id: "md-consult", label: "Consultancy", patch: () => applyHeaderDesignPreset("consultancy") },
   { id: "md-engage", label: "Engagement bar", patch: () => applyHeaderDesignPreset("engagementBar") },
   { id: "md-active", label: "Teal active nav", patch: () => applyHeaderDesignPreset("activeTeal") },
-  { id: "md-mobile", label: "Mobile menu navy", patch: () => applyHeaderDesignPreset("mobileMenu") },
+  { id: "md-mobile", label: "Navy drawer menu", patch: () => applyHeaderDesignPreset("mobileMenu") },
   { id: "md-cloud", label: "Inner cloud", patch: () => applyHeaderDesignPreset("cloudInner") },
   { id: "md-schedule", label: "Schedule blue", patch: () => applyHeaderDesignPreset("scheduleBlue") },
   { id: "md-soft", label: "Soft glass", patch: () => applyHeaderDesignPreset("softGlass") },
   { id: "md-indigo", label: "Corporate indigo", patch: () => applyHeaderDesignPreset("indigoCorp") },
   { id: "md-spark", label: "Innovation spark", patch: () => applyHeaderDesignPreset("innovationSpark") },
   { id: "md-mist", label: "Mist light", patch: () => applyHeaderDesignPreset("mistLight") },
+  { id: "fade-mist-blue", label: "Fade mist → blue", patch: () => applyHeaderDesignPreset("fadeMistBlue") },
+  { id: "fade-white-navy", label: "Fade white → navy", patch: () => applyHeaderDesignPreset("fadeWhiteNavy") },
+  { id: "fade-pearl", label: "Fade pearl → pacific", patch: () => applyHeaderDesignPreset("fadePearlPacific") },
+  { id: "fade-arctic", label: "Fade arctic → midnight", patch: () => applyHeaderDesignPreset("fadeArcticMidnight") },
 ];
+
+function darkenHex(hex, amount = 0.12) {
+  const h = String(hex).replace("#", "");
+  if (h.length !== 6) return hex;
+  const r = Math.max(0, Math.floor(parseInt(h.slice(0, 2), 16) * (1 - amount)));
+  const g = Math.max(0, Math.floor(parseInt(h.slice(2, 4), 16) * (1 - amount)));
+  const b = Math.max(0, Math.floor(parseInt(h.slice(4, 6), 16) * (1 - amount)));
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+/** Only appointment button colors — header bar unchanged */
+export function applyHeaderCtaPreset(designId) {
+  const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
+  const raw = String(d.ctaBg || "").trim();
+  const hex = raw.match(/#[0-9A-Fa-f]{6}/i)?.[0];
+  const bg = hex || raw || "#007cc3";
+  return {
+    headerCtaPresetId: d.id,
+    headerCtaBg: bg,
+    headerCtaColor: d.ctaColor || "#ffffff",
+    headerCtaBorderColor: hex || bg,
+    headerCtaHoverBg: hex ? darkenHex(hex) : "#006aa8",
+  };
+}
 
 export function applyHeaderDesignPreset(designId) {
   const d = HEADER_DESIGNS[designId] || HEADER_DESIGNS.glass;
-  return {
+  const cta = applyHeaderCtaPreset(designId);
+  const patch = {
     headerDesign: d.id,
     headerBarBackground: d.barBackground,
     headerBarOverHero: d.barBackground,
     headerBarScrolled: d.barScrolled,
     headerNavOnDark: d.navOnDark,
     headerNavOnLight: d.navOnLight,
-    headerCtaBg: d.ctaBg,
-    headerCtaColor: d.ctaColor,
+    ...cta,
   };
+  if (d.brandTextOnDark) {
+    patch.headerBrandTextOnDark = d.brandTextOnDark;
+    patch.headerBrandSubtextOnDark = d.brandSubOnDark || "rgba(255, 255, 255, 0.88)";
+  }
+  return patch;
 }
 
 export function previewContextFromPath(pathname = "/") {
@@ -589,6 +1134,9 @@ export function resolveHeaderTheme(settings = {}, opts = {}) {
       "--header-nav-hover-bg": settings.headerNavHoverBg || "rgba(255, 255, 255, 0.12)",
       "--header-brand-on-dark": settings.headerBrandTextOnDark || "#ffffff",
       "--header-brand-sub-on-dark": settings.headerBrandSubtextOnDark || "rgba(255, 255, 255, 0.88)",
+      "--header-brand-on-light": settings.headerBrandTextOnLight || settings.headerNavOnLight || "#1a2b3c",
+      "--header-brand-sub-on-light":
+        settings.headerBrandSubtextOnLight || "rgba(26, 43, 60, 0.72)",
       "--header-border": settings.headerBarBorderColor || design.border,
       "--header-bar-shadow": settings.headerBarShadowColor || "rgba(0, 40, 80, 0.08)",
       "--header-dropdown-bg": settings.headerDropdownBg || "rgba(255, 255, 255, 0.96)",
@@ -601,7 +1149,7 @@ export function resolveHeaderTheme(settings = {}, opts = {}) {
       "--header-toggle-bg": settings.headerToggleBg || "rgba(255, 255, 255, 0.1)",
       "--header-toggle-border": settings.headerToggleBorderColor || "rgba(255, 255, 255, 0.25)",
       "--header-toggle-icon": settings.headerToggleIconColor || "#ffffff",
-      "--header-logo-filter": settings.headerLogoWordmarkFilter || "none",
+      "--header-logo-filter": resolveHeaderLogoFilter(settings),
       "--header-logo-primary": settings.logoColorPrimary || "#007cc3",
       "--header-logo-accent": settings.logoColorAccent || "#00b8a9",
       "--logo-scale": settings.logoScale ?? 1,

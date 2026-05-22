@@ -1,11 +1,35 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import EditorHistoryToolbar from "./EditorHistoryToolbar";
+import {
+  canRedoHistory,
+  canUndoHistory,
+  popRedo,
+  popUndo,
+  pushEditorHistory,
+} from "./editorHistory";
 import axios from "axios";
 import { fetchSiteContent, saveSiteContent } from "../admin/api";
-import { logoSettingsAfterUpload } from "../utils/logoSettings";
+import {
+  HEADER_DARK_QUICK_IDS,
+  HEADER_DESIGNS,
+  HEADER_FADE_LIGHT_TO_BLUE_IDS,
+  HEADER_LIGHT_DESIGN_IDS,
+  applyHeaderCtaPreset,
+  applyHeaderDesignPreset,
+  headerQuickPresets,
+} from "../utils/headerTheme";
+import { LOGO_IMAGE_FILTER_PRESETS } from "../utils/logoImageFilters";
+import { isBuiltInLogo, logoSettingsAfterUpload } from "../utils/logoSettings";
+import { hasCustomLogo } from "../utils/mediaType";
 import { services as defaultServices } from "../data/siteData";
 import { getDefaultSiteContent, mergeSiteContent } from "../utils/mergeSiteData";
-import AnimatedLogo from "../components/AnimatedLogo";
+import { SiteHeaderBar } from "../components/layout/Header";
 import ImageField from "./ImageField";
+import HeaderButtonColorPanel from "./HeaderButtonColorPanel";
+import HeaderDesignGrid, { headerDesignCount } from "./HeaderDesignGrid";
+import GradientPresetPanel from "./GradientPresetPanel";
+import SiteContentHeaderColors from "./SiteContentHeaderColors";
+import { previewBgForHomePath } from "./homeAgencyNav";
 import { FoundersBlock, ServicesGridBlock } from "./sections/SectionParts";
 import "./site-content-panel.css";
 
@@ -62,6 +86,11 @@ export default function SiteContentPanel({
   const [localContent, setLocalContent] = useState({ pages: {}, settings: {}, site: {} });
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const historyStacks = useRef({ past: [], future: [] });
+  const applyingHistory = useRef(false);
+  const [historyTick, setHistoryTick] = useState(0);
+  const [contentDirty, setContentDirty] = useState(false);
+  const [appliedFlash, setAppliedFlash] = useState(0);
 
   const isControlled = Boolean(setControlledContent);
   const content = isControlled ? controlledContent : localContent;
@@ -85,6 +114,52 @@ export default function SiteContentPanel({
     if (!isControlled) load();
   }, [isControlled]);
 
+  const getSnapshot = useCallback(
+    () => ({
+      pages: content.pages || {},
+      settings: { ...(content.settings || {}) },
+      site: {
+        founders: content.site?.founders || [],
+        services: content.site?.services || [],
+      },
+    }),
+    [content],
+  );
+
+  const applySnapshot = useCallback(
+    (snap) => {
+      applyingHistory.current = true;
+      setContent({
+        pages: snap.pages || {},
+        settings: { ...(snap.settings || {}) },
+        site: snap.site || { founders: [], services: [] },
+      });
+      applyingHistory.current = false;
+      setHistoryTick((t) => t + 1);
+    },
+    [setContent],
+  );
+
+  const recordHistory = useCallback(() => {
+    if (applyingHistory.current) return;
+    pushEditorHistory(historyStacks.current, getSnapshot);
+    setHistoryTick((t) => t + 1);
+  }, [getSnapshot]);
+
+  const undoContent = useCallback(() => {
+    const snap = popUndo(historyStacks.current, getSnapshot);
+    if (!snap) return;
+    applySnapshot(snap);
+    setStatus("Undone — click Save site content to keep changes on the live site.");
+  }, [getSnapshot, applySnapshot]);
+
+  const redoContent = useCallback(() => {
+    const snap = popRedo(historyStacks.current, getSnapshot);
+    if (!snap) return;
+    applySnapshot(snap);
+    setStatus("Redone — click Save site content to keep changes on the live site.");
+  }, [getSnapshot, applySnapshot]);
+
   const save = async (payload) => {
     setSaving(true);
     setStatus("");
@@ -94,6 +169,9 @@ export default function SiteContentPanel({
       const saved = res.data?.content ? normalizeContent(res.data.content) : next;
       setContent(saved);
       onSaved?.(saved);
+      historyStacks.current = { past: [], future: [] };
+      setHistoryTick((t) => t + 1);
+      setContentDirty(false);
       const logo = saved.settings?.logoImage;
       if (logo && /\.(mp4|webm)/i.test(logo)) {
         setStatus(`Saved. Logo video: ${logo} — open that URL in a new tab to confirm it plays, then hard-refresh the homepage.`);
@@ -118,28 +196,89 @@ export default function SiteContentPanel({
     }
   };
 
-  const setSettings = (patch) => setContent((c) => ({ ...c, settings: { ...c.settings, ...patch } }));
+  useEffect(() => {
+    const onKey = (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const tag = e.target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select" || e.target?.isContentEditable) return;
+      if (e.key === "z" || e.key === "Z") {
+        e.preventDefault();
+        if (e.shiftKey) redoContent();
+        else undoContent();
+      } else if (e.key === "y" || e.key === "Y") {
+        e.preventDefault();
+        redoContent();
+      } else if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        if (!saving) save();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undoContent, redoContent, saving]);
 
-  const persistLogoUpload = async (url) => {
-    if (!url.startsWith("/uploads/")) return;
-    const settingsPatch = logoSettingsAfterUpload(url, content.settings || {});
+  const patchSettings = (patch, appliedLabel = "") => {
+    if (!patch || typeof patch !== "object") return;
+    recordHistory();
+    setContentDirty(true);
+    setContent((prev) => {
+      const base = prev || content || { pages: {}, settings: {}, site: {} };
+      return {
+        ...base,
+        settings: { ...(base.settings || {}), ...patch },
+      };
+    });
+    setAppliedFlash((n) => n + 1);
+    const label =
+      appliedLabel ||
+      (patch.headerDesign ? `Header: ${patch.headerDesign}` : "") ||
+      (patch.headerGradientPresetId ? `Gradient: ${patch.headerGradientPresetId}` : "");
+    if (label) {
+      setStatus(`Applied “${label}” — check preview on the right → then Save site content.`);
+    } else if (patch.headerCtaBg) {
+      setStatus(`Button color updated — Save site content at the top.`);
+    }
+  };
+
+  const setSettings = (patch, label) => patchSettings(patch, label);
+
+  const applyLogoChange = async (url) => {
+    recordHistory();
+    const base = content.settings || {};
+    const settingsPatch = !url
+      ? { logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg", logoUpdatedAt: undefined }
+      : url.startsWith("/uploads/")
+        ? logoSettingsAfterUpload(url, base)
+        : { logoImage: url, logoUpdatedAt: Date.now() };
     const next = {
       ...content,
-      settings: { ...(content.settings || {}), ...settingsPatch },
+      settings: { ...base, ...settingsPatch },
     };
     setContent(next);
-    await save(next);
+    if (!url || url.startsWith("/uploads/")) await save(next);
   };
-  const setFounders = (founders) => setContent((c) => ({ ...c, site: { ...c.site, founders } }));
-  const setServices = (services) => setContent((c) => ({ ...c, site: { ...c.site, services } }));
+
+  const setFounders = (founders) => {
+    recordHistory();
+    setContentDirty(true);
+    setContent((c) => ({ ...c, site: { ...c.site, founders } }));
+  };
+  const setServices = (services) => {
+    recordHistory();
+    setContentDirty(true);
+    setContent((c) => ({ ...c, site: { ...c.site, services } }));
+  };
 
   const updateFounder = (index, patch) => {
+    recordHistory();
     const next = [...(content.site?.founders || [])];
     next[index] = { ...next[index], ...patch };
     setFounders(next);
   };
 
   const updateService = (index, patch) => {
+    recordHistory();
     const next = [...(content.site?.services || [])];
     next[index] = { ...next[index], ...patch };
     setServices(next);
@@ -148,18 +287,34 @@ export default function SiteContentPanel({
   const founders = content.site?.founders || [];
   const services = content.site?.services || [];
   const settings = content.settings || {};
+  const lightHeaderPresets = headerQuickPresets(HEADER_LIGHT_DESIGN_IDS);
+  const fadeLightBluePresets = headerQuickPresets(HEADER_FADE_LIGHT_TO_BLUE_IDS);
+  const darkHeaderPresets = headerQuickPresets(HEADER_DARK_QUICK_IDS);
+  const customUploadedLogo =
+    hasCustomLogo(settings.logoImage) && !isBuiltInLogo(settings.logoImage);
+
+  void historyTick;
+  const canUndo = canUndoHistory(historyStacks.current.past);
+  const canRedo = canRedoHistory(historyStacks.current.future);
 
   return (
     <div className="scp-root">
+      <EditorHistoryToolbar
+        saving={saving}
+        dirty={contentDirty}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onSave={() => save()}
+        onUndo={undoContent}
+        onRedo={redoContent}
+        saveLabel="Save site content"
+        status={status}
+      />
       <header className="scp-head">
         <div>
           <h2>Site Content</h2>
-          <p>Edit logo, founders, service cards, and contact details used across the whole website.</p>
+          <p>Edit logo, founders, service cards, and contact — Ctrl+Z undo · Ctrl+S save</p>
         </div>
-        <button type="button" className="ve-btn ve-btn--primary" onClick={() => save()} disabled={saving}>
-          {saving ? "Saving…" : "Save site content"}
-        </button>
-        {status && <span className="ve-status">{status}</span>}
       </header>
 
       <div className="scp-tabs">
@@ -180,85 +335,218 @@ export default function SiteContentPanel({
           {tab === "brand" && (
             <>
               <h3>Brand & Logo</h3>
-              <Field label="Site name">
-                <input value={settings.siteName || ""} onChange={(e) => setSettings({ siteName: e.target.value })} />
-              </Field>
-              <Field label="Logo text (next to icon)">
-                <input value={settings.logoText || ""} onChange={(e) => setSettings({ logoText: e.target.value })} />
-              </Field>
-              <Field label="Logo letter (if no image)">
-                <input
-                  maxLength={2}
-                  value={settings.logoLetter || "M"}
-                  onChange={(e) => setSettings({ logoLetter: e.target.value })}
-                />
-              </Field>
-              <Field label="Logo animation">
-                <select
-                  value={settings.logoAnimation || "gradient"}
-                  onChange={(e) => setSettings({ logoAnimation: e.target.value })}
-                >
-                  <option value="gradient">Gradient shift</option>
-                  <option value="pulse">Pulse</option>
-                  <option value="glow">Glow</option>
-                  <option value="orbit">Orbit ring</option>
-                  <option value="none">Static (no motion)</option>
-                </select>
-              </Field>
-              <div className="scp-row-2">
-                <Field label="Primary color">
-                  <input
-                    type="color"
-                    value={settings.logoColorPrimary || "#007cc3"}
-                    onChange={(e) => setSettings({ logoColorPrimary: e.target.value })}
-                  />
-                </Field>
-                <Field label="Accent color">
-                  <input
-                    type="color"
-                    value={settings.logoColorAccent || "#00b8a9"}
-                    onChange={(e) => setSettings({ logoColorAccent: e.target.value })}
-                  />
-                </Field>
-              </div>
-              <p className="scp-note scp-note--warn">
-                Uploads save automatically. If you paste a URL manually, click <strong>Save site content</strong> above.
+              <p className="scp-note scp-note--page-header">
+                <i className="fa-solid fa-file-lines" aria-hidden="true" /> Per-page header, button, and logo colors: open{" "}
+                <strong>Pages</strong> in the builder, click the header in the preview, pick a theme, then Save draft or Publish.
               </p>
-              <ImageField
-                allowVideo
-                label="Logo image or video (optional)"
-                hint="Use a PNG or SVG with a transparent background (full lockup). Default: /logo-maatridev.svg. On dark heroes, /logo-maatridev-hero.svg is used automatically."
-                value={settings.logoImage || ""}
-                onChange={(url) => {
-                  if (!url) {
-                    setSettings({ logoImage: "", logoImageOnDark: "/logo-maatridev-hero.svg" });
-                    return;
-                  }
-                  const patch = url.startsWith("/uploads/")
-                    ? logoSettingsAfterUpload(url, settings)
-                    : { logoImage: url };
-                  setSettings(patch);
-                  if (url.startsWith("/uploads/")) void persistLogoUpload(url);
-                }}
-                onError={(msg) => setStatus(msg)}
-              />
-              <div className="scp-logo-quick">
+
+              <section className="scp-logo-card">
+                <div className="scp-logo-card__head">
+                  <h4>Logo file</h4>
+                  <p>PNG, SVG, or MP4 on transparent background. Uploads save automatically.</p>
+                </div>
+                <ImageField
+                  allowVideo
+                  variant="logo"
+                  previewVersion={settings.logoUpdatedAt}
+                  label=""
+                  hint="Recommended: wide lockup (logo + name). On dark headers we use the same file unless you set a separate dark logo later."
+                  value={settings.logoImage || ""}
+                  onChange={(url) => {
+                    setStatus("");
+                    if (!url || url.startsWith("/uploads/")) {
+                      void applyLogoChange(url);
+                    } else {
+                      setSettings({ logoImage: url });
+                    }
+                  }}
+                  onError={(msg) => setStatus(msg)}
+                />
+                {settings.logoImage && (
+                  <p className="scp-logo-card__path">
+                    <span>Current:</span> <code>{settings.logoImage}</code>
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="ve-btn ve-btn--small scp-logo-card__reset"
+                  onClick={() => void applyLogoChange("")}
+                >
+                  Remove custom logo (use default M)
+                </button>
                 <button
                   type="button"
                   className="ve-btn ve-btn--small"
-                  onClick={() =>
-                    setSettings({
-                      logoImage: "/logo-maatridev.svg",
-                      logoImageOnDark: "/logo-maatridev-hero.svg",
-                      logoText: "MaatriDev",
-                      siteName: "MaatriDev Technologies",
-                    })
-                  }
+                  onClick={() => {
+                    const next = {
+                      ...content,
+                      settings: {
+                        ...settings,
+                        logoImage: "/logo-maatridev.svg",
+                        logoImageOnDark: "/logo-maatridev-hero.svg",
+                        logoText: "MaatriDev",
+                        siteName: "MaatriDev Technologies",
+                        logoUpdatedAt: undefined,
+                      },
+                    };
+                    setContent(next);
+                    void save(next);
+                  }}
                 >
-                  Use default MaatriDev logo
+                  Restore built-in MaatriDev SVG
                 </button>
-              </div>
-              {settings.logoImage && (
+              </section>
+
+              <section className="scp-section-card">
+                <h4>Brand text</h4>
+                <Field label="Site name">
+                  <input value={settings.siteName || ""} onChange={(e) => setSettings({ siteName: e.target.value })} />
+                </Field>
+                <Field label="Logo text (shown when no image)">
+                  <input value={settings.logoText || ""} onChange={(e) => setSettings({ logoText: e.target.value })} />
+                </Field>
+                <Field label="Tagline">
+                  <input value={settings.tagline || ""} onChange={(e) => setSettings({ tagline: e.target.value })} />
+                </Field>
+              </section>
+
+              <section className="scp-section-card">
+                <h4>Animated M icon (fallback)</h4>
+                <Field label="Logo letter">
+                  <input
+                    maxLength={2}
+                    value={settings.logoLetter || "M"}
+                    onChange={(e) => setSettings({ logoLetter: e.target.value })}
+                  />
+                </Field>
+                <Field label="Animation">
+                  <select
+                    value={settings.logoAnimation || "gradient"}
+                    onChange={(e) => setSettings({ logoAnimation: e.target.value })}
+                  >
+                    <option value="gradient">Gradient shift</option>
+                    <option value="pulse">Pulse</option>
+                    <option value="glow">Glow</option>
+                    <option value="orbit">Orbit ring</option>
+                    <option value="none">Static</option>
+                  </select>
+                </Field>
+                <div className="scp-row-2">
+                  <Field label="Primary color">
+                    <input
+                      type="color"
+                      value={settings.logoColorPrimary || "#007cc3"}
+                      onChange={(e) => setSettings({ logoColorPrimary: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Accent color">
+                    <input
+                      type="color"
+                      value={settings.logoColorAccent || "#00b8a9"}
+                      onChange={(e) => setSettings({ logoColorAccent: e.target.value })}
+                    />
+                  </Field>
+                </div>
+              </section>
+
+              <GradientPresetPanel settings={settings} onPatch={(patch, label) => patchSettings(patch, label)} />
+
+              <HeaderButtonColorPanel settings={settings} onPatch={patchSettings} />
+
+              <section className="scp-section-card scp-header-themes">
+                <h4>Header bar colors</h4>
+                <p className="scp-header-themes__intro">
+                  Light bars use dark menu text — pair with <strong>Original</strong> or <strong>Darker</strong> logo tone.
+                  Dark bars often need <strong>White</strong> or <strong>Brighter</strong> logo tone.
+                </p>
+                <p className="scp-sub-label">Light headers ({lightHeaderPresets.length})</p>
+                <div className="scp-theme-chips">
+                  {lightHeaderPresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="scp-sub-label">Light left → blue/dark right ({fadeLightBluePresets.length})</p>
+                <p className="scp-header-themes__intro scp-header-themes__intro--tight">
+                  Logo side stays light; menu links sit on the blue side (white text).
+                </p>
+                <div className="scp-theme-chips">
+                  {fadeLightBluePresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <p className="scp-sub-label">Dark headers</p>
+                <div className="scp-theme-chips">
+                  {darkHeaderPresets.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`scp-theme-chip${settings.headerDesign === p.id ? " is-active" : ""}`}
+                      title={p.label}
+                      onClick={() => setSettings(applyHeaderDesignPreset(p.id), p.label)}
+                    >
+                      <span className="scp-theme-chip__swatch" style={{ background: p.swatch }} />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <p className="scp-sub-label">
+                  All designs ({headerDesignCount()} gradients &amp; colors)
+                </p>
+                <HeaderDesignGrid
+                  activeBarId={settings.headerDesign || "glass"}
+                  activeCtaId={settings.headerCtaPresetId || settings.headerDesign || ""}
+                  onSelectBar={(id) => {
+                    const d = HEADER_DESIGNS[id];
+                    setSettings(applyHeaderDesignPreset(id), d?.label || id);
+                  }}
+                  onSelectCta={(id) => setSettings(applyHeaderCtaPreset(id), "Button color")}
+                />
+              </section>
+
+              <SiteContentHeaderColors settings={settings} onPatch={(p, label) => setSettings(p, label)} />
+
+              {customUploadedLogo && (
+                <section className="scp-section-card">
+                  <h4>Uploaded logo tone</h4>
+                  <p className="scp-header-themes__intro">
+                    Adjust how your PNG/SVG looks on the header (does not edit the file). Animated M icon colors are below.
+                  </p>
+                  <div className="scp-logo-filter-chips">
+                    {LOGO_IMAGE_FILTER_PRESETS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`scp-logo-filter-chip${(settings.logoImageFilter || "none") === p.id ? " is-active" : ""}`}
+                        onClick={() => setSettings({ logoImageFilter: p.id })}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {customUploadedLogo && (
                 <>
                   <Field label={`Logo size (${settings.logoScale ?? 1}×)`}>
                     <input
@@ -286,9 +574,9 @@ export default function SiteContentPanel({
                   </p>
                 </>
               )}
-              <Field label="Tagline">
-                <input value={settings.tagline || ""} onChange={(e) => setSettings({ tagline: e.target.value })} />
-              </Field>
+              <p className="scp-note">
+                Pasted a custom URL? Click <strong>Save site content</strong> at the top.
+              </p>
             </>
           )}
 
@@ -393,31 +681,22 @@ export default function SiteContentPanel({
               />
             )}
             {tab === "brand" && (
-              <div className="scp-brand-preview">
-                <p className="scp-brand-preview__label">Header preview</p>
-                <div className="scp-brand-preview__header">
-                  <AnimatedLogo
-                  letter={settings.logoLetter}
-                  animation={settings.logoAnimation}
-                  colorPrimary={settings.logoColorPrimary}
-                  colorAccent={settings.logoColorAccent}
-                  imageUrl={settings.logoImage}
-                  alt={settings.logoText}
-                  fullBrand={Boolean(settings.logoImage)}
-                  scale={settings.logoScale}
-                  clipWidth={settings.logoClipWidth}
-                  size="lg"
-                />
+              <div className="scp-brand-preview scp-brand-preview--live">
+                <p className="scp-brand-preview__label">Live header preview</p>
+                <div
+                  className={`scp-header-live-stage${appliedFlash ? " scp-header-live-stage--flash" : ""}`}
+                  style={{ background: previewBgForHomePath("/", settings) }}
+                >
+                  <SiteHeaderBar
+                    key={`hdr-${appliedFlash}-${settings.headerDesign}-${settings.headerCtaBg}-${settings.headerGradientPresetId}-${settings.homeHeroGradient || ""}`}
+                    settings={settings}
+                    pathname="/"
+                    editorPreview
+                    previewPageId="home"
+                    previewDevice="desktop"
+                  />
                 </div>
-                <div className="scp-brand-preview__meta">
-                  {!settings.logoImage && (
-                    <>
-                      <strong>{settings.logoText}</strong>
-                      <small>TECHNOLOGIES</small>
-                    </>
-                  )}
-                  <p>{settings.tagline}</p>
-                </div>
+                <p className="scp-brand-preview__tagline">{settings.tagline}</p>
               </div>
             )}
             {tab === "contact" && (

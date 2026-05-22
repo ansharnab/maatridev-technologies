@@ -15,7 +15,16 @@ function uploadErrorMessage(err) {
   return err.response.data?.error || `Upload failed (error ${err.response.status}).`;
 }
 
-export default function ImageField({ label, value = "", onChange, hint, allowVideo = false, onError }) {
+export default function ImageField({
+  label,
+  value = "",
+  onChange,
+  hint,
+  allowVideo = false,
+  variant = "default",
+  previewVersion,
+  onError,
+}) {
   const [media, setMedia] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [openLib, setOpenLib] = useState(false);
@@ -63,17 +72,28 @@ export default function ImageField({ label, value = "", onChange, hint, allowVid
     e.target.value = "";
   };
 
+  const previewSrc =
+    value && value.includes("/uploads/") && previewVersion
+      ? `${value}${value.includes("?") ? "&" : "?"}v=${previewVersion}`
+      : value;
+
   return (
-    <div className="image-field">
-      <label>{label}</label>
+    <div className={`image-field${variant === "logo" ? " image-field--logo" : ""}`}>
+      {label ? <label>{label}</label> : null}
       {hint && <p className="image-field__hint">{hint}</p>}
       {error && <p className="image-field__error">{error}</p>}
       {value && (
-        <div className={`image-field__preview${allowVideo && value ? " image-field__preview--logo" : ""}`}>
+        <div
+          className={`image-field__preview${variant === "logo" && value ? " image-field__preview--logo" : ""}`}
+        >
           {isVideoUrl(value) ? (
-            <video src={value} muted loop playsInline autoPlay />
+            <video src={previewSrc} muted loop playsInline autoPlay />
           ) : (
-            <img src={value} alt="" onError={() => report(`Cannot load image at ${value}. Check the path or upload again.`)} />
+            <img
+              src={previewSrc}
+              alt=""
+              onError={() => report(`Cannot load image at ${value}. Check the path or upload again.`)}
+            />
           )}
           <button type="button" className="ve-btn ve-btn--small" onClick={() => onChange("")}>
             Remove
