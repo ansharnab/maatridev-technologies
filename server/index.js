@@ -310,6 +310,23 @@ app.get("/api/contact", requireAuth, (_, res) => {
 });
 
 const DIST_DIR = path.join(__dirname, "..", "dist");
+const PUBLIC_FAVICON = path.join(__dirname, "..", "public", "favicon.svg");
+
+function resolveFaviconPath() {
+  const distFav = path.join(DIST_DIR, "favicon.svg");
+  if (!fs.existsSync(PUBLIC_FAVICON)) return fs.existsSync(distFav) ? distFav : null;
+  if (!fs.existsSync(distFav)) return PUBLIC_FAVICON;
+  return fs.statSync(PUBLIC_FAVICON).mtimeMs >= fs.statSync(distFav).mtimeMs ? PUBLIC_FAVICON : distFav;
+}
+
+app.get("/favicon.svg", (req, res, next) => {
+  const file = resolveFaviconPath();
+  if (!file) return next();
+  res.setHeader("Cache-Control", "no-store, must-revalidate");
+  res.type("image/svg+xml");
+  res.sendFile(file);
+});
+
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR));
   app.get("*", (req, res, next) => {

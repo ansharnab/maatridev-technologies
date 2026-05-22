@@ -3,8 +3,8 @@
   "settings": {
     "siteName": "MaatriDev Technologies",
     "logoText": "MaatriDev",
-    "logoImage": "/logo-maatridev.svg",
-    "logoImageOnDark": "/logo-maatridev-hero.svg",
+    "logoImage": "/uploads/1779354676430-91212a7f.png",
+    "logoImageOnDark": "/uploads/1779354676430-91212a7f.png",
     "logoLetter": "M",
     "logoAnimation": "gradient",
     "logoColorPrimary": "#007cc3",
@@ -31,7 +31,8 @@
     "homeHeroTheme": "it",
     "homeHeroGradient": "",
     "logoScale": 1,
-    "logoClipWidth": 300
+    "logoClipWidth": 300,
+    "logoUpdatedAt": 1779354676444
   },
   "site": {
     "founders": [
