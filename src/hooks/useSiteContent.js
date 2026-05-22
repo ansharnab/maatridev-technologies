@@ -48,7 +48,10 @@ export function useSiteContent() {
     return w;
   };
 
-  const merged = useMemo(() => mergeSiteContent(content), [content]);
+  const merged = useMemo(
+    () => mergeSiteContent(content, { deferLogoDefaults: loading }),
+    [content, loading]
+  );
   const settings = merged.settings;
 
   return {

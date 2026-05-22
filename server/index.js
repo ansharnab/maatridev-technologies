@@ -41,11 +41,14 @@ function normalizeBrandSettings(settings = {}) {
     s.logoImageOnDark = BRAND_DEFAULTS.logoImageOnDark;
   }
   const custom = String(s.logoImage || "").trim() && !s.logoImage.includes("logo-maatridev");
-  if (custom && (!String(s.logoImageOnDark || "").trim() || s.logoImageOnDark.includes("logo-maatridev-hero"))) {
+  if (custom) {
     s.logoImageOnDark = s.logoImage;
+  } else if (!String(s.logoImageOnDark || "").trim() || s.logoImageOnDark.includes("logo-maatridev-hero")) {
+    s.logoImageOnDark = BRAND_DEFAULTS.logoImageOnDark;
   }
   return s;
 }
+
 
 function sanitizePages(pages = {}) {
   if (!pages || typeof pages !== "object") return {};
@@ -98,6 +101,11 @@ function repairContentFile() {
 const MEDIA_DIR = path.join(DATA_DIR, "media");
 const UPLOADS_DIR = path.join(__dirname, "..", "public", "uploads");
 const CONTACT_FILE = path.join(DATA_DIR, "contacts.json");
+const MEDIA_META_FILE = path.join(DATA_DIR, "media-meta.json");
+const SITE_URL = String(process.env.PUBLIC_URL || process.env.LIVE_URL || "https://maatridev.com").replace(
+  /\/$/,
+  "",
+);
 
 const ENV_FILE = path.join(__dirname, "..", ".env");
 
@@ -245,6 +253,7 @@ function mergeContent(existing, incoming) {
       ? {
           founders: body.site.founders ?? base.site?.founders,
           services: body.site.services ?? base.site?.services,
+          blog: body.site.blog ?? base.site?.blog,
         }
       : base.site,
   };
@@ -257,25 +266,54 @@ app.put("/api/content", requireAuth, (req, res) => {
   res.json({ ok: true, content: merged });
 });
 
+function readMediaMeta() {
+  return readJson(MEDIA_META_FILE, {});
+}
+
+function writeMediaMeta(data) {
+  writeJson(MEDIA_META_FILE, data && typeof data === "object" ? data : {});
+}
+
 app.get("/api/media", (_, res) => {
+  const meta = readMediaMeta();
   const files = fs.existsSync(UPLOADS_DIR) ? fs.readdirSync(UPLOADS_DIR) : [];
   res.json(
     files.map((name) => ({
       id: name,
       name,
       url: `/uploads/${name}`,
+      alt: meta[name]?.alt || "",
       type: /\.(mp4|webm)$/i.test(name) ? "video" : "image",
-    }))
+    })),
   );
 });
 
+app.patch("/api/media/:id/alt", requireAuth, (req, res) => {
+  const id = req.params.id;
+  const filePath = path.join(UPLOADS_DIR, id);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Not found" });
+  const meta = readMediaMeta();
+  meta[id] = { alt: String(req.body?.alt || "").trim() };
+  writeMediaMeta(meta);
+  res.json({ ok: true, id, alt: meta[id].alt });
+});
+
 app.post("/api/media/upload", requireAuth, upload.array("files", 20), (req, res) => {
-  const items = (req.files || []).map((f) => ({
-    id: f.filename,
-    name: f.originalname,
-    url: `/uploads/${f.filename}`,
-    type: /\.(mp4|webm)$/i.test(f.filename) ? "video" : "image",
-  }));
+  const meta = readMediaMeta();
+  const defaultAlt = String(req.body?.defaultAlt || "").trim();
+  const items = (req.files || []).map((f) => {
+    if (defaultAlt && !meta[f.filename]?.alt) {
+      meta[f.filename] = { alt: defaultAlt };
+    }
+    return {
+      id: f.filename,
+      name: f.originalname,
+      url: `/uploads/${f.filename}`,
+      alt: meta[f.filename]?.alt || "",
+      type: /\.(mp4|webm)$/i.test(f.filename) ? "video" : "image",
+    };
+  });
+  writeMediaMeta(meta);
   res.json({ items });
 });
 
@@ -319,6 +357,60 @@ function resolveFaviconPath() {
   return fs.statSync(PUBLIC_FAVICON).mtimeMs >= fs.statSync(distFav).mtimeMs ? PUBLIC_FAVICON : distFav;
 }
 
+function buildSitemapXml() {
+  const staticPaths = [
+    "/",
+    "/about",
+    "/services",
+    "/contact",
+    "/projects",
+    "/team",
+    "/blog",
+    "/pricing",
+    "/faq",
+    "/appointment",
+  ];
+  const serviceIds = [
+    "software",
+    "ai",
+    "cloud",
+    "integration",
+    "web",
+    "creative",
+    "blockchain",
+    "events",
+  ];
+  const content = readJson(CONTENT_FILE, { site: {} });
+  const blogSlugs = (content.site?.blog || [])
+    .map((p) => p.slug)
+    .filter(Boolean);
+  if (!blogSlugs.length) {
+    blogSlugs.push(
+      "scaling-llms-enterprise-data-pipelines",
+      "digital-transformation-2026",
+      "building-crm-teams-actually-use",
+    );
+  }
+  const urls = [
+    ...staticPaths.map((p) => ({ loc: `${SITE_URL}${p}`, priority: p === "/" ? "1.0" : "0.8" })),
+    ...serviceIds.map((id) => ({ loc: `${SITE_URL}/services/${id}`, priority: "0.7" })),
+    ...[1, 2, 3, 4].map((id) => ({ loc: `${SITE_URL}/projects/${id}`, priority: "0.6" })),
+    ...blogSlugs.map((slug) => ({ loc: `${SITE_URL}/blog/${slug}`, priority: "0.7" })),
+  ];
+  const body = urls
+    .map(
+      (u) =>
+        `  <url><loc>${u.loc}</loc><changefreq>weekly</changefreq><priority>${u.priority}</priority></url>`,
+    )
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+}
+
+app.get("/sitemap.xml", (_, res) => {
+  res.type("application/xml");
+  res.send(buildSitemapXml());
+});
+
 app.get("/favicon.svg", (req, res, next) => {
   const file = resolveFaviconPath();
   if (!file) return next();
@@ -327,10 +419,22 @@ app.get("/favicon.svg", (req, res, next) => {
   res.sendFile(file);
 });
 
+const PUBLIC_DIR_ROOT = path.join(__dirname, "..", "public");
+if (fs.existsSync(PUBLIC_DIR_ROOT)) {
+  app.use(express.static(PUBLIC_DIR_ROOT));
+}
+
 if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR));
   app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) return next();
+    if (
+      req.path.startsWith("/api") ||
+      req.path.startsWith("/uploads") ||
+      req.path === "/sitemap.xml" ||
+      req.path === "/robots.txt"
+    ) {
+      return next();
+    }
     res.sendFile(path.join(DIST_DIR, "index.html"));
   });
 }

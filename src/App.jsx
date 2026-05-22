@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ShopProvider } from "./context/ShopContext";
 import { SiteDataProvider } from "./context/SiteDataContext";
+import SeoRoute from "./components/SeoRoute";
 import MainLayout from "./components/layout/MainLayout";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <ShopProvider>
       <SiteDataProvider>
+      <SeoRoute />
       <Routes>
         <Route path="/admin/*" element={<AdminApp />} />
         <Route element={<MainLayout />}>
@@ -44,7 +46,7 @@ export default function App() {
           <Route path="pricing" element={<PricingPage />} />
           <Route path="blog" element={<BlogPage layout="grid" />} />
           <Route path="blog/list" element={<BlogPage layout="list" />} />
-          <Route path="blog/:id" element={<BlogDetailPage />} />
+          <Route path="blog/:slugOrId" element={<BlogDetailPage />} />
           <Route path="shop" element={<Navigate to="/services" replace />} />
           <Route path="shop/:id" element={<Navigate to="/services" replace />} />
           <Route path="cart" element={<Navigate to="/pricing" replace />} />

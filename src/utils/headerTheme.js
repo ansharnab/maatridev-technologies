@@ -1098,10 +1098,9 @@ export function resolveHeaderTheme(settings = {}, opts = {}) {
     glassBg = previewContext === "home" || previewContext === "pageHero" ? barOverHero : barBg;
   } else if (scrolled) {
     glassBg = barLight;
-  } else if (previewContext === "home" || previewContext === "pageHero") {
-    glassBg = barOverHero;
   } else {
-    glassBg = barBg;
+    /* Top of page: same translucent strip as home (hero shows through) */
+    glassBg = "rgba(10, 22, 40, 0.2)";
   }
 
   const navColor =

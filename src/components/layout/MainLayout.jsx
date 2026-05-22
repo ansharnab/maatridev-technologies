@@ -53,7 +53,7 @@ export default function MainLayout() {
           <div className="preloader__spinner" />
         </div>
       )}
-      <Header settings={headerSettings} />
+      <Header settings={headerSettings} contentLoading={loading} />
       <main className="site-main">
         {customSections ? (
           <PageSectionsView sections={customSections} />

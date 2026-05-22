@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api": { target: apiTarget, changeOrigin: true },
         "/uploads": { target: apiTarget, changeOrigin: true },
+        "/sitemap.xml": { target: apiTarget, changeOrigin: true },
       },
     },
   };

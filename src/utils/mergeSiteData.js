@@ -3,7 +3,9 @@ import {
   services as defaultServices,
   projects as defaultProjects,
   team as defaultTeam,
+  blogPosts as defaultBlogPosts,
 } from "../data/siteData";
+import { normalizeBlogPost } from "./seo";
 import { getHeaderColorDefaults } from "./headerColorFields";
 
 const DEFAULT_SETTINGS = {
@@ -41,6 +43,12 @@ const DEFAULT_SETTINGS = {
   headerCtaPresetId: "glass",
   homeHeroTheme: "it",
   homeHeroGradient: "",
+  seo: {
+    title: "",
+    description: "",
+    ogImage: "",
+    keywords: "MaatriDev, IT services, software development, AI, cloud, digital agency India",
+  },
 };
 
 const DEFAULT_FOUNDERS = defaultFounders.map((f) => ({
@@ -76,8 +84,10 @@ export function getDefaultSiteContent() {
   };
 }
 
-function normalizeBrandSettings(settings) {
-  const s = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+function normalizeBrandSettings(settings, options = {}) {
+  const { deferLogoDefaults = false } = options;
+  const raw = settings || {};
+  const s = { ...DEFAULT_SETTINGS, ...raw };
   const name = `${s.logoText || ""} ${s.siteName || ""}`.toLowerCase();
   if (name.includes("saumya")) {
     return {
@@ -89,19 +99,27 @@ function normalizeBrandSettings(settings) {
       logoLetter: "M",
     };
   }
+  const hasSavedLogo = Boolean(raw.logoImage?.trim());
+  if (deferLogoDefaults && !hasSavedLogo) {
+    s.logoImage = "";
+    s.logoImageOnDark = "";
+    return s;
+  }
   if (!s.logoImage?.trim()) {
     s.logoImage = DEFAULT_SETTINGS.logoImage;
     s.logoImageOnDark = DEFAULT_SETTINGS.logoImageOnDark;
   }
   const custom = s.logoImage?.trim() && !s.logoImage.includes("logo-maatridev");
-  if (custom && (!s.logoImageOnDark?.trim() || s.logoImageOnDark.includes("logo-maatridev-hero"))) {
+  if (custom) {
     s.logoImageOnDark = s.logoImage;
+  } else if (!s.logoImageOnDark?.trim() || s.logoImageOnDark.includes("logo-maatridev-hero")) {
+    s.logoImageOnDark = DEFAULT_SETTINGS.logoImageOnDark;
   }
   return s;
 }
 
-export function mergeSiteContent(content) {
-  const settings = normalizeBrandSettings(content?.settings);
+export function mergeSiteContent(content, options = {}) {
+  const settings = normalizeBrandSettings(content?.settings, options);
   const site = content?.site || {};
   const founders = mergeFounders(site.founders);
   const services = defaultServices
@@ -118,11 +136,25 @@ export function mergeSiteContent(content) {
     ...defaultTeam.filter((m) => !founderNames.has(m.name)),
   ];
 
+  const blog = mergeBlog(site.blog);
+
   return {
     settings,
     founders,
     services,
     projects: defaultProjects,
     team,
+    blog,
   };
+}
+
+function mergeBlog(overrides) {
+  if (!overrides?.length) return defaultBlogPosts.map((p) => normalizeBlogPost(p));
+  return overrides.map((p, i) =>
+    normalizeBlogPost({
+      ...defaultBlogPosts[i],
+      ...p,
+      id: p.id ?? defaultBlogPosts[i]?.id ?? i + 1,
+    }),
+  );
 }

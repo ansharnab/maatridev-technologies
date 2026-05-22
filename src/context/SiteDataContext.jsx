@@ -6,7 +6,10 @@ const SiteDataContext = createContext(null);
 
 export function SiteDataProvider({ children }) {
   const { content, loading, settings: rawSettings, ...rest } = useSiteContent();
-  const merged = useMemo(() => mergeSiteContent(content), [content]);
+  const merged = useMemo(
+    () => mergeSiteContent(content, { deferLogoDefaults: loading }),
+    [content, loading]
+  );
 
   const value = useMemo(
     () => ({
@@ -18,6 +21,7 @@ export function SiteDataProvider({ children }) {
       services: merged.services,
       projects: merged.projects,
       team: merged.team,
+      blog: merged.blog,
     }),
     [rest, content, loading, merged]
   );

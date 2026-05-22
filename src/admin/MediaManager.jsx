@@ -8,6 +8,7 @@ function authHeaders() {
 export default function MediaManager() {
   const [media, setMedia] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadAlt, setUploadAlt] = useState("");
 
   const load = () => axios.get("/api/media").then((r) => setMedia(r.data));
 
@@ -20,14 +21,23 @@ export default function MediaManager() {
     if (!files?.length) return;
     const fd = new FormData();
     [...files].forEach((f) => fd.append("files", f));
+    if (uploadAlt.trim()) fd.append("defaultAlt", uploadAlt.trim());
     setUploading(true);
     try {
-      await axios.post("/api/media/upload", fd, { headers: { ...authHeaders(), "Content-Type": "multipart/form-data" } });
+      await axios.post("/api/media/upload", fd, {
+        headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },
+      });
       load();
+      setUploadAlt("");
     } finally {
       setUploading(false);
       e.target.value = "";
     }
+  };
+
+  const saveAlt = async (id, alt) => {
+    await axios.patch(`/api/media/${encodeURIComponent(id)}/alt`, { alt }, { headers: authHeaders() });
+    setMedia((list) => list.map((m) => (m.id === id ? { ...m, alt } : m)));
   };
 
   const handleDelete = async (id) => {
@@ -45,17 +55,40 @@ export default function MediaManager() {
           <input type="file" multiple accept="image/*,video/*" hidden onChange={handleUpload} />
         </label>
       </div>
-      <p className="admin-hint">Upload, edit usage via page builder, or delete logos, banners, and videos.</p>
+      <p className="admin-hint">
+        Add alt text for accessibility and image SEO. Alt is saved per file and used when you pick images in the
+        builder.
+      </p>
+      <div className="form-group" style={{ maxWidth: 420, marginBottom: "1rem" }}>
+        <label>Default alt for next upload (optional)</label>
+        <input
+          value={uploadAlt}
+          onChange={(e) => setUploadAlt(e.target.value)}
+          placeholder="e.g. MaatriDev team at work"
+        />
+      </div>
       <div className="media-grid">
         {media.map((m) => (
           <article key={m.id} className="media-item">
             {m.type === "video" ? (
               <video src={m.url} controls />
             ) : (
-              <img src={m.url} alt={m.name} />
+              <img src={m.url} alt={m.alt || m.name} />
             )}
             <div className="media-item__meta">
               <span title={m.name}>{m.name}</span>
+              <label className="media-item__alt">
+                Alt text
+                <input
+                  type="text"
+                  defaultValue={m.alt || ""}
+                  placeholder="Describe image for SEO & accessibility"
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v !== (m.alt || "")) saveAlt(m.id, v);
+                  }}
+                />
+              </label>
               <button type="button" className="btn btn--ghost" onClick={() => navigator.clipboard.writeText(m.url)}>
                 Copy URL
               </button>

@@ -10,10 +10,17 @@ export function isBuiltInLogo(url = "") {
 
 /** Resolve which logo URL to show (dark heroes were still using the built-in file). */
 export function resolveLogoUrls(settings = {}, preferDark = false) {
-  const primary = String(settings.logoImage || "").trim() || DEFAULT_LOGO;
+  const primaryRaw = String(settings.logoImage || "").trim();
+  if (!primaryRaw) {
+    return { primary: "", onDark: "", display: "", hasUpload: false };
+  }
+  const primary = primaryRaw;
   let onDark = String(settings.logoImageOnDark || "").trim();
 
-  if (hasCustomLogo(primary) && isBuiltInLogo(onDark)) {
+  if (hasCustomLogo(primary) && !isBuiltInLogo(primary)) {
+    // Main logo upload applies to dark heroes too (avoids stale logoImageOnDark showing old file)
+    onDark = primary;
+  } else if (isBuiltInLogo(onDark)) {
     onDark = primary;
   }
   if (!onDark) onDark = DEFAULT_LOGO_DARK;
@@ -26,15 +33,12 @@ export function resolveLogoUrls(settings = {}, preferDark = false) {
   };
 }
 
-/** Keep uploaded logo on both light and dark headers unless user set a custom on-dark file. */
+/** Site Content / media upload: one file updates header logo on light and dark backgrounds. */
 export function logoSettingsAfterUpload(url, settings = {}) {
-  const patch = {
+  void settings;
+  return {
     logoImage: url,
+    logoImageOnDark: url,
     logoUpdatedAt: Date.now(),
   };
-  const onDark = String(settings.logoImageOnDark || "").trim();
-  if (!onDark || isBuiltInLogo(onDark)) {
-    patch.logoImageOnDark = url;
-  }
-  return patch;
 }

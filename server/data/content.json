@@ -3,8 +3,8 @@
   "settings": {
     "siteName": "MaatriDev Technologies",
     "logoText": "MaatriDev",
-    "logoImage": "/uploads/1779354676430-91212a7f.png",
-    "logoImageOnDark": "/uploads/1779354676430-91212a7f.png",
+    "logoImage": "/uploads/1779424304758-94032600.svg",
+    "logoImageOnDark": "/uploads/1779424304758-94032600.svg",
     "logoLetter": "M",
     "logoAnimation": "gradient",
     "logoColorPrimary": "#007cc3",
@@ -32,7 +32,26 @@
     "homeHeroGradient": "",
     "logoScale": 1,
     "logoClipWidth": 300,
-    "logoUpdatedAt": 1779354676444
+    "logoUpdatedAt": 1779424304765,
+    "headerBarBorderColor": "rgba(255, 255, 255, 0.12)",
+    "headerBarShadowColor": "rgba(0, 40, 80, 0.08)",
+    "headerNavHoverColor": "#ffffff",
+    "headerDropdownBg": "rgba(255, 255, 255, 0.96)",
+    "headerDropdownText": "#1a2b3c",
+    "headerDropdownHoverBg": "#f4f7fb",
+    "headerBrandSubtextOnDark": "rgba(255, 255, 255, 0.88)",
+    "headerBrandTextOnLight": "#1a2b3c",
+    "headerBrandSubtextOnLight": "rgba(26, 43, 60, 0.72)",
+    "logoImageFilter": "none",
+    "headerLogoWordmarkFilter": "none",
+    "headerCtaHoverBg": "#006aa8",
+    "headerCtaBorderColor": "#007cc3",
+    "headerToggleBg": "rgba(255, 255, 255, 0.1)",
+    "headerToggleBorderColor": "rgba(255, 255, 255, 0.25)",
+    "headerToggleIconColor": "#ffffff",
+    "headerPreviewHomeBg": "linear-gradient(125deg, #0a1628, #003d5c, #004d73)",
+    "headerPreviewPageBg": "linear-gradient(135deg, #007cc3, #003d5c)",
+    "headerCtaPresetId": "glass"
   },
   "site": {
     "founders": [
@@ -40,7 +59,7 @@
         "name": "Akshansh Arnab",
         "role": "Co-Founder & Technology Lead",
         "bio": "Leading software engineering, systems integration, and enterprise delivery programs for clients across industries.",
-        "image": "https://images.unsplash.com/photo-1507003211169?w=400&h=500&fit=crop&facepad=2",
+        "image": "/uploads/1779427096587-923e14c3.jpeg",
         "phone": "+91 98765 43210",
         "email": "akshansh@maatridev.com",
         "linkedin": ""
@@ -49,7 +68,7 @@
         "name": "Swetav Savarn",
         "role": "Co-Founder & Strategy Lead",
         "bio": "Driving product vision, client partnerships, and scalable service delivery across IT and creative domains.",
-        "image": "https://images.unsplash.com/photo-1506794778202?w=400&h=500&fit=crop&facepad=2",
+        "image": "/uploads/1779427102306-b441d40b.jpeg",
         "phone": "+91 98765 43211",
         "email": "swetav@maatridev.com",
         "linkedin": ""

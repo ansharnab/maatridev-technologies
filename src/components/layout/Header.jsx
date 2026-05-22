@@ -93,6 +93,7 @@ export function SiteHeaderBar({
   settings = {},
   pathname = "/",
   editorPreview = false,
+  contentLoading = false,
   previewPageId = "home",
   previewDevice = "desktop",
   isSelected = false,
@@ -105,7 +106,10 @@ export function SiteHeaderBar({
   const [openDropdown, setOpenDropdown] = useState(null);
   const navRef = useRef(null);
   const homeBlockRef = useRef(null);
-  const mobileDrawer = !editorPreview || previewDevice !== "desktop";
+  const [compactNav, setCompactNav] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 1100px)").matches;
+  });
   const [scrolled, setScrolled] = useState(false);
   const [logoBroken, setLogoBroken] = useState(false);
   const [logoFallback, setLogoFallback] = useState(false);
@@ -113,10 +117,14 @@ export function SiteHeaderBar({
   const onHero = isHeroRoute(pathname);
   const onPageHero = isPageHeroRoute(pathname);
   const previewContext = previewContextFromPath(pathname);
-  const lightNav = onHero || onPageHero;
+  /** Live site: same glass header as home on every page */
+  const unifiedHeroHeader = !editorPreview;
+  const lightNav = unifiedHeroHeader || onHero || onPageHero;
   const onDarkBackdrop = editorPreview
     ? previewContext !== "inner"
-    : (onHero && !scrolled) || (onPageHero && !scrolled);
+    : unifiedHeroHeader
+      ? !scrolled
+      : (onHero && !scrolled) || (onPageHero && !scrolled);
 
   const theme = resolveHeaderTheme(settings, {
     editorPreview,
@@ -134,6 +142,7 @@ export function SiteHeaderBar({
   const hideBrandText = logos.hasUpload && fullLogoActive && Boolean(theme.logoSrc);
 
   const logoSrc = logoFallback ? theme.logoSrc : logoBroken ? "" : theme.logoSrc;
+  const logoPending = contentLoading && !logoSrc;
 
   const closeMobileNav = () => {
     setOpenDropdown(null);
@@ -147,6 +156,19 @@ export function SiteHeaderBar({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [editorPreview]);
+
+  /* Live site: desktop = inline menu + CTA column; ≤1100px = drawer (was always drawer before) */
+  useEffect(() => {
+    if (editorPreview) {
+      setCompactNav(previewDevice !== "desktop");
+      return undefined;
+    }
+    const mq = window.matchMedia("(max-width: 1100px)");
+    const sync = () => setCompactNav(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [editorPreview, previewDevice]);
 
   useEffect(() => {
     setLogoBroken(false);
@@ -209,14 +231,15 @@ export function SiteHeaderBar({
     editorPreview ? `site-header--editor-${previewDevice}` : "",
     editorPreview ? `site-header--editor-ctx-${previewContext}` : "",
     editorPreview && isSelected ? "site-header--editor-selected" : "",
-    onHero && !editorPreview ? "site-header--hero" : "",
-    !onHero && !editorPreview ? "site-header--inner" : "",
+    (unifiedHeroHeader || onHero) && !editorPreview ? "site-header--hero" : "",
+    !unifiedHeroHeader && !onHero && !editorPreview ? "site-header--inner" : "",
     lightNav && !editorPreview ? "site-header--light-nav" : "",
     editorPreview && (onHero || onPageHero) ? "site-header--editor-light-nav" : "",
     onDarkBackdrop ? "site-header--on-dark" : "site-header--on-light",
     fullLogoActive && onDarkBackdrop ? "site-header--logo-light" : "",
     scrolled && !editorPreview ? "site-header--scrolled" : "",
     open ? "site-header--menu-open" : "",
+    compactNav ? "site-header--compact-nav" : "site-header--desktop-nav",
     `site-header--design-${settings.headerDesign || "glass"}`,
     `site-header--size-${settings.headerSize || "default"}`,
   ]
@@ -268,8 +291,7 @@ export function SiteHeaderBar({
         </button>
         <div
           className={`site-header__home-links${homeOpen ? " is-open" : ""}`}
-          hidden={!homeOpen}
-          inert={!homeOpen}
+          aria-hidden={!homeOpen}
         >
             {HOME_NAV_CHILDREN.map((child) =>
               editorPreview ? (
@@ -312,7 +334,7 @@ export function SiteHeaderBar({
           className={`site-header__dropdown${menuOpen ? " is-open" : ""}`}
           onClick={(e) => (editorPreview || menuOpen) && e.stopPropagation()}
         >
-          {editorPreview && !mobileDrawer ? (
+          {editorPreview && !compactNav ? (
             <div className={`site-header__link site-header__link--split${active ? " active" : ""}`}>
               <button
                 type="button"
@@ -365,7 +387,7 @@ export function SiteHeaderBar({
                       e.stopPropagation();
                       handleNavEditor(e, child.to);
                       setOpenDropdown(null);
-                      if (mobileDrawer) setOpen(false);
+                      if (compactNav) setOpen(false);
                     }}
                   >
                     {child.label}
@@ -395,7 +417,7 @@ export function SiteHeaderBar({
     }
 
     if (editorPreview) {
-      const active = mobileDrawer
+      const active = compactNav
         ? mobileDrawerLinkActive(pathname, item, open)
         : isNavItemActive(pathname, item);
       const pageId = item.to ? routeToEditorPage(item.to) : null;
@@ -411,7 +433,7 @@ export function SiteHeaderBar({
       );
     }
 
-    const topActive = mobileDrawerLinkActive(pathname, item, open);
+    const topActive = compactNav ? mobileDrawerLinkActive(pathname, item, open) : isTopLevelNavActive(pathname, item);
     return (
       <NavLink
         key={item.to}
@@ -432,6 +454,7 @@ export function SiteHeaderBar({
         colorPrimary={settings.logoColorPrimary}
         colorAccent={settings.logoColorAccent}
         imageUrl={logoSrc}
+        showLetterFallback={!contentLoading}
         alt={`${logo} Technologies`}
         size={previewDevice === "mobile" ? "sm" : "md"}
         fullBrand={fullLogoActive && Boolean(logoSrc)}
@@ -445,7 +468,7 @@ export function SiteHeaderBar({
           setLogoBroken(true);
         }}
       />
-      {!hideBrandText && (!fullLogoActive || !logoSrc) && (
+      {!logoPending && !hideBrandText && (!fullLogoActive || !logoSrc) && (
         <span className="site-header__brand-text">
           <strong>{logo}</strong>
           <small>Technologies</small>
@@ -460,6 +483,8 @@ export function SiteHeaderBar({
       e.target.closest(
         [
           ".site-header__brand",
+          ".site-header__col--brand",
+          ".site-header__col--cta",
           ".site-header__cta",
           ".site-header__link",
           ".site-header__link-label",
@@ -490,6 +515,26 @@ export function SiteHeaderBar({
     setOpenDropdown((cur) => (cur === label ? null : label));
   };
 
+  const renderCta = (className = "btn btn--primary site-header__cta") => {
+    const label = settings.headerCtaLabel || "Book Appointment";
+    if (editorPreview) {
+      return (
+        <button type="button" className={className} onClick={handleCtaClick}>
+          {label}
+        </button>
+      );
+    }
+    return (
+      <Link
+        to={settings.headerCtaLink || "/appointment"}
+        className={className}
+        onClick={closeMobileNav}
+      >
+        {label}
+      </Link>
+    );
+  };
+
   return (
     <header
       className={headerClass}
@@ -511,28 +556,30 @@ export function SiteHeaderBar({
         />
       )}
       <div className="container site-header__inner">
-        {editorPreview ? (
-          <button
-            type="button"
-            className={`site-header__brand site-header__brand--editor${fullLogoActive ? " site-header__brand--full-logo" : ""}${isSelected ? " site-header__brand--editor-active" : ""}`}
-            onClick={handleBrandClick}
-            title="Click to edit header & logo size"
-          >
-            {brandInner}
-            <LogoEditorOverlay
-              visible={isSelected}
-              emphasized={editorFocus === "brand"}
-              hasFullLogo={fullLogoActive && Boolean(logoSrc)}
-              scale={settings.logoScale}
-              clipWidth={settings.logoClipWidth}
-              onPatch={onLogoPatch}
-            />
-          </button>
-        ) : (
-          <Link to="/" className={`site-header__brand${fullLogoActive ? " site-header__brand--full-logo" : ""}`}>
-            {brandInner}
-          </Link>
-        )}
+        <div className="site-header__col site-header__col--brand">
+          {editorPreview ? (
+            <button
+              type="button"
+              className={`site-header__brand site-header__brand--editor${fullLogoActive ? " site-header__brand--full-logo" : ""}${isSelected ? " site-header__brand--editor-active" : ""}`}
+              onClick={handleBrandClick}
+              title="Click to edit header & logo size"
+            >
+              {brandInner}
+              <LogoEditorOverlay
+                visible={isSelected}
+                emphasized={editorFocus === "brand"}
+                hasFullLogo={fullLogoActive && Boolean(logoSrc)}
+                scale={settings.logoScale}
+                clipWidth={settings.logoClipWidth}
+                onPatch={onLogoPatch}
+              />
+            </button>
+          ) : (
+            <Link to="/" className={`site-header__brand${fullLogoActive ? " site-header__brand--full-logo" : ""}`}>
+              {brandInner}
+            </Link>
+          )}
+        </div>
 
         <button
           type="button"
@@ -555,46 +602,25 @@ export function SiteHeaderBar({
           <span />
         </button>
 
-        <nav ref={navRef} className={`site-header__nav ${open ? "is-open" : ""}`}>
-          {mobileDrawer ? (
+        <nav ref={navRef} className={`site-header__col site-header__col--nav site-header__nav ${open ? "is-open" : ""}`}>
+          {compactNav ? (
             <>
               {renderMobileHomeSection()}
               <div className="site-header__nav-body">
                 {nav.filter((item) => item.label !== "Home").map((item) => renderNavItem(item))}
-                {editorPreview ? (
-                  <button type="button" className="btn btn--primary site-header__cta" onClick={handleCtaClick}>
-                    {settings.headerCtaLabel || "Book Appointment"}
-                  </button>
-                ) : (
-                  <Link
-                    to={settings.headerCtaLink || "/appointment"}
-                    className="btn btn--primary site-header__cta"
-                    onClick={closeMobileNav}
-                  >
-                    {settings.headerCtaLabel || "Book Appointment"}
-                  </Link>
-                )}
+                {renderCta()}
               </div>
             </>
           ) : (
-            <>
-              {nav.map((item) => renderNavItem(item))}
-              {editorPreview ? (
-                <button type="button" className="btn btn--primary site-header__cta" onClick={handleCtaClick}>
-                  {settings.headerCtaLabel || "Book Appointment"}
-                </button>
-              ) : (
-                <Link
-                  to={settings.headerCtaLink || "/appointment"}
-                  className="btn btn--primary site-header__cta"
-                  onClick={closeMobileNav}
-                >
-                  {settings.headerCtaLabel || "Book Appointment"}
-                </Link>
-              )}
-            </>
+            <div className="site-header__nav-menu">
+              <div className="site-header__nav-links">{nav.map((item) => renderNavItem(item))}</div>
+            </div>
           )}
         </nav>
+
+        {!compactNav && (
+          <div className="site-header__col site-header__col--cta">{renderCta()}</div>
+        )}
       </div>
     </header>
   );

@@ -27,6 +27,7 @@ export default function AnimatedLogo({
   scale = 1,
   clipWidth = 280,
   onMediaError,
+  showLetterFallback = true,
 }) {
   const gradId = useId().replace(/:/g, "");
   const styleClass = STYLES[animation] || STYLES.gradient;
@@ -90,6 +91,22 @@ export default function AnimatedLogo({
           />
         )}
       </span>
+    );
+  }
+
+  if (!showLetterFallback) {
+    return (
+      <span
+        className={[
+          "animated-logo",
+          "animated-logo--empty",
+          `animated-logo--${size}`,
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-hidden="true"
+      />
     );
   }
 

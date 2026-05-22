@@ -5,6 +5,10 @@
   --logo-c2: #00b8a9;
 }
 
+.animated-logo--empty {
+  visibility: hidden;
+}
+
 .animated-logo--sm .animated-logo__svg,
 .animated-logo--sm.animated-logo--image {
   width: 36px;

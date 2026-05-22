@@ -15,14 +15,15 @@
   z-index: 1;
 }
 
-/* Inner pages (no full-screen hero) sit below fixed header */
-.site-main:not(:has(> .hero)) {
-  padding-top: 76px;
+/* Full-bleed heroes sit under the fixed header (home + inner page heroes) */
+.site-main:has(> .hero),
+.site-main:has(> .page-hero) {
+  padding-top: 0;
 }
 
-/* Home hero includes its own top padding for the fixed header */
-.site-main:has(> .hero) {
-  padding-top: 0;
+/* Plain inner pages only — no hero band behind the header */
+.site-main:not(:has(> .hero)):not(:has(> .page-hero)) {
+  padding-top: var(--header-height, 76px);
 }
 
 .site-footer {
