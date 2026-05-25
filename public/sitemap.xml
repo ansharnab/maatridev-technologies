@@ -111,17 +111,44 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://maatridev.com/blog/enhancing-devops-with-ai-automating-incident-management</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://maatridev.com/blog/zero-trust-architecture-the-key-to-cloud-security-in-2026</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://maatridev.com/blog/green-cloud-measuring-your-workloads-carbon-footprint</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://maatridev.com/blog/measuring-your-workloads-carbon-footprint-the-green-cloud</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://maatridev.com/blog/scaling-llms-enterprise-data-pipelines</loc>
+    <lastmod>2026-05-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maatridev.com/blog/digital-transformation-2026</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maatridev.com/blog/building-crm-teams-actually-use</loc>
+    <lastmod>2026-04-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

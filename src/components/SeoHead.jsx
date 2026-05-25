@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 /**
  * SPA head tags — updates on every route change (critical for Google/social crawlers that execute JS).
  */
+const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "";
+
 export default function SeoHead({
   title,
   description = "",
@@ -17,6 +19,17 @@ export default function SeoHead({
 
   return (
     <Helmet>
+      {GA_ID && !noindex ? (
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+      ) : null}
+      {GA_ID && !noindex ? (
+        <script>{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}', { anonymize_ip: true });
+        `}</script>
+      ) : null}
       <title>{title}</title>
       {description ? <meta name="description" content={description} /> : null}
       {keywords ? <meta name="keywords" content={keywords} /> : null}

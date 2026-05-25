@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /home/
 
 Sitemap: https://maatridev.com/sitemap.xml

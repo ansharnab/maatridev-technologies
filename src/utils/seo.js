@@ -37,6 +37,20 @@ function pick(obj, keys) {
 /**
  * Resolve meta for current SPA route (used by SeoHead on every navigation).
  */
+function breadcrumbJsonLd(items = []) {
+  if (!items.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url ? absoluteUrl(item.url) : undefined,
+    })),
+  };
+}
+
 export function resolveSeoMeta({
   pathname = "/",
   settings = {},
@@ -45,6 +59,7 @@ export function resolveSeoMeta({
   service = null,
   project = null,
   teamMember = null,
+  faqs = [],
 } = {}) {
   const siteSeo = settings.seo || {};
   const siteName = settings.siteName || "MaatriDev Technologies";
@@ -112,6 +127,7 @@ export function resolveSeoMeta({
         description: blogPost.metaDescription || blogPost.excerpt,
         image: absoluteAssetUrl(blogPost.image),
         datePublished: blogPost.datePublished,
+        dateModified: blogPost.datePublished,
         author: { "@type": "Person", name: blogPost.author },
         publisher: {
           "@type": "Organization",
@@ -155,6 +171,10 @@ export function resolveSeoMeta({
   const canonical = absoluteUrl(canonicalPath);
   const ogImageAbs = absoluteAssetUrl(ogImage);
 
+  const sameAs = (settings.socialLinks || settings.sameAs || [])
+    .filter(Boolean)
+    .slice(0, 8);
+
   const organization =
     pathname === "/" || pathname.startsWith("/about")
       ? {
@@ -166,9 +186,42 @@ export function resolveSeoMeta({
           email: settings.email,
           telephone: settings.phone,
           address: settings.address,
-          sameAs: [],
+          sameAs,
         }
       : null;
+
+  const faqPage =
+    pathname === "/faq" && faqs?.length
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }
+      : null;
+
+  let breadcrumbs = null;
+  if (blogPost) {
+    breadcrumbs = breadcrumbJsonLd([
+      { name: "Home", url: "/" },
+      { name: "Blog", url: "/blog" },
+      { name: blogPost.title, url: `/blog/${blogPost.slug}` },
+    ]);
+  } else if (service) {
+    breadcrumbs = breadcrumbJsonLd([
+      { name: "Home", url: "/" },
+      { name: "Services", url: "/services" },
+      { name: service.title, url: `/services/${service.id}` },
+    ]);
+  } else if (pathname === "/faq") {
+    breadcrumbs = breadcrumbJsonLd([
+      { name: "Home", url: "/" },
+      { name: "FAQ", url: "/faq" },
+    ]);
+  }
 
   const website =
     pathname === "/"
@@ -182,7 +235,7 @@ export function resolveSeoMeta({
         }
       : null;
 
-  const schemas = [organization, website, jsonLd].filter(Boolean);
+  const schemas = [organization, website, faqPage, breadcrumbs, jsonLd].filter(Boolean);
 
   return {
     title,

@@ -301,6 +301,34 @@
   font-weight: 600;
 }
 
+.blog-admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.blog-admin-list li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 60, 100, 0.12);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.blog-admin-list span {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.blog-admin-list a {
+  font-size: 0.85rem;
+  color: var(--infosys-blue);
+}
+
 .media-item__alt {
   display: flex;
   flex-direction: column;

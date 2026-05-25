@@ -1,0 +1,63 @@
+{
+  "updatedAt": "2026-05-19",
+  "strategy": "quick-win local + service intent first, then competitive terms",
+  "targets": [
+    {
+      "keyword": "software development company India",
+      "intent": "commercial",
+      "priority": "high",
+      "landingPage": "/services/software",
+      "competition": "medium"
+    },
+    {
+      "keyword": "AI development services Mumbai",
+      "intent": "commercial",
+      "priority": "high",
+      "landingPage": "/services/ai",
+      "competition": "medium"
+    },
+    {
+      "keyword": "cloud migration consulting India",
+      "intent": "commercial",
+      "priority": "high",
+      "landingPage": "/services/cloud",
+      "competition": "medium"
+    },
+    {
+      "keyword": "custom CRM development company",
+      "intent": "commercial",
+      "priority": "medium",
+      "landingPage": "/services/software",
+      "competition": "high"
+    },
+    {
+      "keyword": "React Node.js development agency",
+      "intent": "commercial",
+      "priority": "medium",
+      "landingPage": "/services/web",
+      "competition": "high"
+    },
+    {
+      "keyword": "IT consulting firm India",
+      "intent": "commercial",
+      "priority": "medium",
+      "landingPage": "/about",
+      "competition": "high"
+    },
+    {
+      "keyword": "RAG implementation enterprise",
+      "intent": "informational",
+      "priority": "medium",
+      "landingPage": "/blog",
+      "competition": "low"
+    },
+    {
+      "keyword": "Kubernetes cost optimization",
+      "intent": "informational",
+      "priority": "low",
+      "landingPage": "/blog",
+      "competition": "medium"
+    }
+  ],
+  "rankingNotes": []
+}

@@ -38,6 +38,7 @@ ssh -i "$KEY" -o StrictHostKeyChecking=no "$HOST" "bash ${APP}/deploy/ec2-setup.
 echo ""
 echo "Kept on server (unchanged by this push):"
 echo "  - server/data/content.json  (live site content)"
+echo "  - server/data/blogs.json    (daily auto-blog posts)"
 echo "  - server/data/contacts.json"
 echo "  - public/uploads/           (live media)"
 echo "  - .env                      (server secrets)"

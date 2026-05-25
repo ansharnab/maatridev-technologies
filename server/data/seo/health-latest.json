@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-05-23T08:31:51.366Z",
+  "siteUrl": "https://maatridev.com",
+  "score": 95,
+  "grade": "A",
+  "issues": [],
+  "warnings": [
+    {
+      "id": "meta_thin",
+      "message": "2 post(s) missing strong metaTitle/metaDescription",
+      "slugs": [
+        "digital-transformation-2026",
+        "building-crm-teams-actually-use"
+      ]
+    }
+  ],
+  "passed": [
+    "robots.txt includes sitemap",
+    "sitemap.xml has 29 URLs",
+    "7 blog posts in store"
+  ],
+  "postCount": 7
+}

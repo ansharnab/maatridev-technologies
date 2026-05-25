@@ -50,6 +50,7 @@ export const ROUTE_SEO = {
     title: "Blog (List) | MaatriDev Technologies",
     description: DEFAULT_SITE_SEO.description,
     canonicalPath: "/blog",
+    noindex: true,
   },
   "/pricing": {
     title: "Engagement & Pricing | MaatriDev Technologies",

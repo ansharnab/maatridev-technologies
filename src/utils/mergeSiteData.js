@@ -149,12 +149,6 @@ export function mergeSiteContent(content, options = {}) {
 }
 
 function mergeBlog(overrides) {
-  if (!overrides?.length) return defaultBlogPosts.map((p) => normalizeBlogPost(p));
-  return overrides.map((p, i) =>
-    normalizeBlogPost({
-      ...defaultBlogPosts[i],
-      ...p,
-      id: p.id ?? defaultBlogPosts[i]?.id ?? i + 1,
-    }),
-  );
+  const source = overrides?.length ? overrides : defaultBlogPosts;
+  return source.map((p, i) => normalizeBlogPost({ ...p, id: p.id ?? i + 1 }));
 }

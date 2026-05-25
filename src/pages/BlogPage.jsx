@@ -32,7 +32,8 @@ export default function BlogPage({ layout = "grid" }) {
                 <img src={post.image} alt={post.imageAlt || post.title} />
                 <div className="card__body">
                   <p className="blog-meta">
-                    {post.date} · {post.category}
+                    {post.date}
+                    {post.readingMinutes ? ` · ${post.readingMinutes} min read` : ""} · {post.category}
                   </p>
                   <h3>{post.title}</h3>
                   <p>{post.excerpt}</p>

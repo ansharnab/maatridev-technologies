@@ -6,6 +6,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
+import { listBlogPosts } from "./blogStore.js";
+import { generateDailyBlog } from "./blogGenerator.js";
+import { buildSitemapXml, collectSitemapUrls, getSiteUrl } from "./seo/sitemap.js";
+import { buildRssXml } from "./seo/rss.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "data");
@@ -240,7 +244,22 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 app.get("/api/content", (_, res) => {
-  res.json(normalizeContent(readJson(CONTENT_FILE, { pages: {}, settings: {} })));
+  const c = normalizeContent(readJson(CONTENT_FILE, { pages: {}, settings: {} }));
+  c.site = { ...(c.site || {}), blog: listBlogPosts() };
+  res.json(c);
+});
+
+app.get("/api/blogs", (_, res) => {
+  res.json(listBlogPosts());
+});
+
+app.post("/api/blogs/generate", requireAuth, async (req, res) => {
+  try {
+    const result = await generateDailyBlog({ force: Boolean(req.body?.force) });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Blog generation failed" });
+  }
 });
 
 function mergeContent(existing, incoming) {
@@ -357,58 +376,25 @@ function resolveFaviconPath() {
   return fs.statSync(PUBLIC_FAVICON).mtimeMs >= fs.statSync(distFav).mtimeMs ? PUBLIC_FAVICON : distFav;
 }
 
-function buildSitemapXml() {
-  const staticPaths = [
-    "/",
-    "/about",
-    "/services",
-    "/contact",
-    "/projects",
-    "/team",
-    "/blog",
-    "/pricing",
-    "/faq",
-    "/appointment",
-  ];
-  const serviceIds = [
-    "software",
-    "ai",
-    "cloud",
-    "integration",
-    "web",
-    "creative",
-    "blockchain",
-    "events",
-  ];
-  const content = readJson(CONTENT_FILE, { site: {} });
-  const blogSlugs = (content.site?.blog || [])
-    .map((p) => p.slug)
-    .filter(Boolean);
-  if (!blogSlugs.length) {
-    blogSlugs.push(
-      "scaling-llms-enterprise-data-pipelines",
-      "digital-transformation-2026",
-      "building-crm-teams-actually-use",
-    );
-  }
-  const urls = [
-    ...staticPaths.map((p) => ({ loc: `${SITE_URL}${p}`, priority: p === "/" ? "1.0" : "0.8" })),
-    ...serviceIds.map((id) => ({ loc: `${SITE_URL}/services/${id}`, priority: "0.7" })),
-    ...[1, 2, 3, 4].map((id) => ({ loc: `${SITE_URL}/projects/${id}`, priority: "0.6" })),
-    ...blogSlugs.map((slug) => ({ loc: `${SITE_URL}/blog/${slug}`, priority: "0.7" })),
-  ];
-  const body = urls
-    .map(
-      (u) =>
-        `  <url><loc>${u.loc}</loc><changefreq>weekly</changefreq><priority>${u.priority}</priority></url>`,
-    )
-    .join("\n");
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
-}
+const SITE_URL_SEO = getSiteUrl(process.env);
 
 app.get("/sitemap.xml", (_, res) => {
+  const urls = collectSitemapUrls({
+    siteUrl: SITE_URL_SEO,
+    blogPosts: listBlogPosts(),
+  });
   res.type("application/xml");
-  res.send(buildSitemapXml());
+  res.send(buildSitemapXml(urls));
+});
+
+app.get("/feed.xml", (_, res) => {
+  res.type("application/rss+xml");
+  res.send(
+    buildRssXml(listBlogPosts(), {
+      siteUrl: SITE_URL_SEO,
+      siteName: BRAND_DEFAULTS.siteName,
+    }),
+  );
 });
 
 app.get("/favicon.svg", (req, res, next) => {
@@ -431,6 +417,7 @@ if (fs.existsSync(DIST_DIR)) {
       req.path.startsWith("/api") ||
       req.path.startsWith("/uploads") ||
       req.path === "/sitemap.xml" ||
+      req.path === "/feed.xml" ||
       req.path === "/robots.txt"
     ) {
       return next();

@@ -5,12 +5,14 @@ import MediaManager from "./MediaManager";
 import VisualEditor from "../builder/VisualEditor";
 import SettingsPanel from "./SettingsPanel";
 import SeoPanel from "./SeoPanel";
+import BlogPanel from "./BlogPanel";
 import AdminErrorBoundary from "./AdminErrorBoundary";
 import "./admin.css";
 
 const TABS = [
   { id: "builder", label: "Page Builder", icon: "fa-wand-magic-sparkles" },
   { id: "media", label: "Media", icon: "fa-images" },
+  { id: "blog", label: "Blog", icon: "fa-newspaper" },
   { id: "seo", label: "SEO", icon: "fa-magnifying-glass-chart" },
   { id: "settings", label: "Settings", icon: "fa-gear" },
   { id: "contacts", label: "Messages", icon: "fa-envelope" },
@@ -84,6 +86,7 @@ export default function AdminDashboard({ onLogout }) {
           </AdminErrorBoundary>
         )}
         {tab === "media" && <MediaManager />}
+        {tab === "blog" && <BlogPanel />}
         {tab === "seo" && <SeoPanel content={content} onUpdate={setContent} />}
         {tab === "settings" && <SettingsPanel content={content} onUpdate={setContent} />}
         {tab === "contacts" && (

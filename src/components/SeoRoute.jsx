@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useLocation, useParams, Navigate } from "react-router-dom";
 import { useSiteData } from "../context/SiteDataContext";
+import { faqs } from "../data/siteData";
 import { findBlogPost, resolveSeoMeta } from "../utils/seo";
 import SeoHead from "./SeoHead";
 
@@ -54,6 +55,7 @@ export default function SeoRoute() {
         service,
         project,
         teamMember,
+        faqs: pathname === "/faq" ? faqs : [],
       }),
     [pathname, settings, content, blogPost, service, project, teamMember],
   );
