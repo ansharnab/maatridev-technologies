@@ -17,6 +17,7 @@ Autonomous, white-hat SEO automation for [maatridev.com](https://maatridev.com).
 | **Bing/Google/Yandex** sitemap ping | Daily | `ping-discovery.mjs` |
 | **RSS PubSubHubbub** ping | Daily | feed.xml |
 | **LinkedIn/X draft** file | Each new post | `social-drafts/{slug}.md` |
+| **LinkedIn draft email** | Each new post (cron) | Gmail SMTP → `SEO_NOTIFY_EMAIL` |
 | PageSpeed / CWV audit | Tuesdays | `GOOGLE_PSI_API_KEY` |
 | Competitor sitemap watch | Thursdays | `competitor-watch.mjs` |
 | Sitemap + IndexNow | After each post | `run-after-publish.mjs` |

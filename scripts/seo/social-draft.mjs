@@ -3,41 +3,63 @@ import path from "path";
 import { initSeoEnv, seoDataDir, getSiteUrl } from "./config.mjs";
 import { seoLog } from "./logger.mjs";
 
-/**
- * Ready-to-post LinkedIn copy for each new blog (manual paste = safe, no spam API).
- */
-export function writeSocialDraft(post) {
+/** LinkedIn + X copy for a blog post */
+export function buildSocialDraftContent(post) {
   if (!post?.slug) return null;
-  initSeoEnv();
   const siteUrl = getSiteUrl();
   const url = `${siteUrl}/blog/${post.slug}`;
-  const dir = path.join(seoDataDir(), "social-drafts");
-  fs.mkdirSync(dir, { recursive: true });
+  const title = post.title || "Blog post";
+
+  const imageUrl = String(post.image || "").trim();
+  const imageLine = imageUrl
+    ? `\nHero image (attach to LinkedIn post): ${imageUrl}`
+    : "";
 
   const linkedin = `New on the MaatriDev blog 👇
 
-${post.title}
+${title}
 
 ${post.excerpt || ""}
 
-Read more: ${url}
+Read more: ${url}${imageLine}
 
 #AI #Cloud #SoftwareDevelopment #DevOps #MaatriDev #TechIndia
 
 ---
-Copy-paste to LinkedIn company page. Add 1 relevant image from the blog hero if you have it.`;
+Copy-paste to LinkedIn. Use the hero image URL below (or the image in this email).`;
 
-  const twitter = `${(post.title || "").slice(0, 200)}
+  const twitter = `${title.slice(0, 200)}
 
 ${url}
 
 #AI #cloud #devops #software`;
 
+  const markdown = `# Social drafts — ${title}\n\n## LinkedIn\n\n${linkedin}\n\n## X (Twitter)\n\n${twitter}\n`;
+
+  return {
+    title,
+    url,
+    linkedin,
+    twitter,
+    markdown,
+    imageUrl,
+    imageAlt: post.imageAlt || title,
+  };
+}
+
+/**
+ * Save draft to server/data/seo/social-drafts/{slug}.md
+ */
+export function writeSocialDraft(post) {
+  if (!post?.slug) return null;
+  initSeoEnv();
+  const content = buildSocialDraftContent(post);
+  if (!content) return null;
+
+  const dir = path.join(seoDataDir(), "social-drafts");
+  fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${post.slug}.md`);
-  fs.writeFileSync(
-    file,
-    `# Social drafts — ${post.title}\n\n## LinkedIn\n\n${linkedin}\n\n## X (Twitter)\n\n${twitter}\n`,
-  );
+  fs.writeFileSync(file, content.markdown);
   seoLog(`Social draft → ${file}`);
   return file;
 }

@@ -6,6 +6,7 @@ import { submitIndexNow } from "./indexnow.mjs";
 import { syncWebRoot } from "./sync-web-root.mjs";
 import { pingDiscovery } from "./ping-discovery.mjs";
 import { writeSocialDraft } from "./social-draft.mjs";
+import { sendSocialDraftEmail } from "./send-social-email.mjs";
 import { addRetroactiveLinksToRecentPosts } from "../../server/seo/retroactiveLinks.js";
 
 /**
@@ -29,6 +30,12 @@ export async function runAfterPublish({ post } = {}) {
   }
 
   writeSocialDraft(post);
+
+  try {
+    await sendSocialDraftEmail(post);
+  } catch (err) {
+    seoLog(`Social email failed: ${err.message}`, "error");
+  }
 
   try {
     await pingDiscovery();
